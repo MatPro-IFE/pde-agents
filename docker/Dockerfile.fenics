@@ -1,0 +1,45 @@
+# FEniCSx (DOLFINx) Simulation Runner
+# Base: official dolfinx image with full FEniCS stack
+# Adds: Python HTTP server for agent-controlled job execution
+
+FROM dolfinx/dolfinx:stable
+
+LABEL maintainer="pde-agents"
+LABEL description="FEniCSx simulation runner with HTTP API"
+
+# ── System deps ───────────────────────────────────────────────────────────────
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl git vim \
+    && rm -rf /var/lib/apt/lists/*
+
+# ── Python deps ───────────────────────────────────────────────────────────────
+RUN pip install --no-cache-dir \
+    fastapi==0.115.0 \
+    uvicorn[standard]==0.32.0 \
+    sqlalchemy==2.0.36 \
+    psycopg2-binary==2.9.10 \
+    redis==5.2.1 \
+    minio==7.2.11 \
+    numpy==1.26.4 \
+    scipy==1.14.1 \
+    matplotlib==3.9.3 \
+    pyvista==0.44.2 \
+    meshio==5.3.5 \
+    mlflow==2.18.0 \
+    pyyaml==6.0.2 \
+    httpx==0.28.1 \
+    python-dotenv==1.0.1
+
+# ── Copy application code ──────────────────────────────────────────────────────
+WORKDIR /workspace
+COPY simulations/ /workspace/simulations/
+COPY database/ /workspace/database/
+COPY docker/fenics_runner_api.py /workspace/fenics_runner_api.py
+
+# ── Expose ports ──────────────────────────────────────────────────────────────
+EXPOSE 8080
+# Simulation job API
+EXPOSE 8888
+# JupyterLab
+
+CMD ["uvicorn", "fenics_runner_api:app", "--host", "0.0.0.0", "--port", "8080"]

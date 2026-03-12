@@ -1,0 +1,34 @@
+# PDE Dashboard Container
+# Runs: Plotly Dash visualization dashboard
+
+FROM python:3.11-slim
+
+LABEL description="PDE Agents: Plotly Dash visualization dashboard"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir \
+    dash==2.18.2 \
+    dash-bootstrap-components==1.6.0 \
+    plotly==5.24.1 \
+    pandas==2.2.3 \
+    numpy==1.26.4 \
+    scipy==1.13.1 \
+    sqlalchemy==2.0.36 \
+    psycopg2-binary==2.9.10 \
+    requests==2.32.3 \
+    python-dotenv==1.0.1
+
+COPY visualization/ /app/visualization/
+COPY database/      /app/database/
+
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+
+EXPOSE 8050
+
+CMD ["python", "/app/visualization/dashboard.py"]

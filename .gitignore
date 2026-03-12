@@ -1,0 +1,64 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Secrets / local config
+.env
+*.key
+*.pem
+*.crt
+secrets/
+
+# Simulation results & data (large binary, not versioned)
+results/
+meshes/*.msh
+meshes/*.xdmf
+meshes/*.h5
+*.npy
+*.xdmf
+*.h5
+
+# MLflow artifacts
+mlflow_data/
+
+# Notebooks checkpoints
+.ipynb_checkpoints/
+notebooks/*.ipynb
+
+# Docker volumes (created at runtime)
+postgres_data/
+neo4j_data/
+redis_data/
+minio_data/
+ollama_models/
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary scripts used during development
+/tmp/

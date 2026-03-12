@@ -1,0 +1,29 @@
+# PDE Agents Container
+# Runs: SimulationAgent, AnalyticsAgent, DatabaseAgent + FastAPI orchestrator
+
+FROM python:3.11-slim
+
+LABEL description="PDE Agents: LangGraph-based multi-agent system"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc g++ curl git \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy source code
+COPY agents/         /app/agents/
+COPY tools/          /app/tools/
+COPY orchestrator/   /app/orchestrator/
+COPY database/       /app/database/
+COPY knowledge_graph/ /app/knowledge_graph/
+
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+
+EXPOSE 8000
+
+CMD ["uvicorn", "orchestrator.api:app", "--host", "0.0.0.0", "--port", "8000"]

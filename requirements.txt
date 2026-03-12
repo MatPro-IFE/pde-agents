@@ -1,0 +1,54 @@
+# PDE Agents - Python Dependencies
+# Install with: pip install -r requirements.txt
+
+# ─── LLM & Agent Framework ────────────────────────────────────────────────────
+langchain>=0.3.7
+langchain-core>=0.3.19
+langchain-ollama>=0.2.1
+langgraph>=0.2.50
+langgraph-prebuilt>=0.1.0
+
+# ─── Web Framework ────────────────────────────────────────────────────────────
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+httpx>=0.28.0
+pydantic>=2.10.0
+websockets>=14.1
+
+# ─── Database ─────────────────────────────────────────────────────────────────
+sqlalchemy>=2.0.36
+psycopg2-binary>=2.9.10
+alembic>=1.14.0
+
+# ─── Object Storage ───────────────────────────────────────────────────────────
+minio>=7.2.11
+
+# ─── Knowledge Graph ──────────────────────────────────────────────────────────
+neo4j>=5.26.0
+
+# ─── Message Queue ────────────────────────────────────────────────────────────
+redis>=5.2.1
+celery>=5.4.0
+
+# ─── Scientific Computing ─────────────────────────────────────────────────────
+numpy>=1.26.4
+scipy>=1.14.0
+
+# ─── Visualization (Dashboard) ────────────────────────────────────────────────
+dash>=2.18.0
+dash-bootstrap-components>=1.6.0
+plotly>=5.24.0
+
+# ─── Experiment Tracking ──────────────────────────────────────────────────────
+mlflow>=2.18.0
+
+# ─── Utilities ────────────────────────────────────────────────────────────────
+pyyaml>=6.0.2
+python-dotenv>=1.0.1
+requests>=2.32.0
+rich>=13.9.0
+
+# ─── Development ──────────────────────────────────────────────────────────────
+pytest>=8.3.0
+ipykernel>=6.29.0
+jupyter>=1.1.1
