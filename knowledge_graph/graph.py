@@ -468,6 +468,7 @@ class SimulationKnowledgeGraph:
         """
         Compute a nomic-embed-text vector for this run and store it on the
         Run node so it can be retrieved via the HNSW vector index.
+        Also builds SIMILAR_TO edges to the top-k nearest neighbours.
         Silently no-ops when Ollama is not available.
         """
         try:
@@ -480,8 +481,52 @@ class SimulationKnowledgeGraph:
                     vec=vec,
                 )
                 log.debug("Stored embedding for run %s (%d dims)", run_id, len(vec))
+                # Build SIMILAR_TO edges to nearest neighbours
+                self._build_similar_to_edges(run_id, vec, k=5)
         except Exception as exc:
             log.debug("_embed_and_store_run skipped for %s: %s", run_id, exc)
+
+    def _build_similar_to_edges(
+        self, run_id: str, embedding: list[float], k: int = 5,
+        min_score: float = 0.85,
+    ) -> int:
+        """
+        Create SIMILAR_TO relationships from this run to its k nearest
+        neighbours in the vector index.
+
+        Only edges with cosine similarity ≥ min_score are created to avoid
+        linking completely unrelated runs.  Existing edges are overwritten
+        with the latest score.  Self-loops are excluded.
+
+        Returns the number of edges created/updated.
+        """
+        try:
+            rows = self._run(
+                """
+                CALL db.index.vector.queryNodes(
+                    'run_embedding_index', $k_plus_one, $vec
+                ) YIELD node AS neighbour, score
+                WHERE neighbour.run_id <> $run_id
+                  AND score >= $min_score
+                WITH neighbour, score
+                MATCH (src:Run {run_id: $run_id})
+                MERGE (src)-[rel:SIMILAR_TO]->(neighbour)
+                SET rel.score      = round(score, 4),
+                    rel.updated_at = $ts
+                RETURN count(rel) AS n_edges
+                """,
+                run_id=run_id,
+                k_plus_one=k + 1,      # +1 because the run itself will appear
+                vec=embedding,
+                min_score=min_score,
+                ts=datetime.now(timezone.utc).isoformat(),
+            )
+            n = rows[0]["n_edges"] if rows else 0
+            log.debug("SIMILAR_TO edges for %s: %d created/updated", run_id, n)
+            return n
+        except Exception as exc:
+            log.debug("_build_similar_to_edges failed for %s: %s", run_id, exc)
+            return 0
 
     # ── Similarity search ─────────────────────────────────────────────────────
 
@@ -1034,6 +1079,80 @@ class SimulationKnowledgeGraph:
             "newly_embedded":    newly_embedded,
             "failed":            failed,
             "already_embedded":  already_embedded,
+        }
+
+    def build_all_similar_to_edges(
+        self, k: int = 5, min_score: float = 0.85, batch_size: int = 50
+    ) -> dict:
+        """
+        Backfill SIMILAR_TO edges for all embedded Run nodes.
+
+        Iterates through all Run nodes that have an embedding and calls
+        _build_similar_to_edges() for each.  Safe to run repeatedly —
+        existing edges are updated with the current score.
+
+        Returns summary: {processed, total_edges_created, skipped_no_embedding}.
+        """
+        if not self._available:
+            return {"error": "Neo4j unavailable"}
+
+        rows = self._run(
+            """
+            MATCH (r:Run)
+            WHERE r.embedding IS NOT NULL
+            RETURN r.run_id AS run_id, r.embedding AS embedding
+            LIMIT $limit
+            """,
+            limit=batch_size,
+        )
+
+        total_runs = self._run(
+            "MATCH (r:Run) WHERE r.embedding IS NOT NULL RETURN count(r) AS n"
+        )
+        total_embedded = total_runs[0]["n"] if total_runs else 0
+
+        total_edges = 0
+        processed   = 0
+        offset      = 0
+
+        while True:
+            batch = self._run(
+                """
+                MATCH (r:Run)
+                WHERE r.embedding IS NOT NULL
+                RETURN r.run_id AS run_id, r.embedding AS embedding
+                SKIP $skip LIMIT $limit
+                """,
+                skip=offset,
+                limit=batch_size,
+            )
+            if not batch:
+                break
+            for row in batch:
+                n = self._build_similar_to_edges(
+                    row["run_id"], row["embedding"], k=k, min_score=min_score
+                )
+                total_edges += n
+                processed   += 1
+            offset += batch_size
+            if len(batch) < batch_size:
+                break
+
+        # Count total SIMILAR_TO edges now in graph
+        edge_count = self._run(
+            "MATCH ()-[r:SIMILAR_TO]->() RETURN count(r) AS n"
+        )
+        total_in_graph = edge_count[0]["n"] if edge_count else 0
+
+        log.info(
+            "build_all_similar_to_edges: processed=%d  edges_in_graph=%d",
+            processed, total_in_graph,
+        )
+        return {
+            "total_embedded_runs": total_embedded,
+            "processed":           processed,
+            "total_edges_created": total_edges,
+            "total_similar_to_in_graph": total_in_graph,
         }
 
     def close(self) -> None:
