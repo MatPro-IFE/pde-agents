@@ -563,10 +563,12 @@ def make_header():
             dbc.NavbarBrand("🔬 PDE Agents Dashboard", style={"fontSize": "1.4rem", "fontWeight": "bold"}),
             dbc.Nav([
                 dbc.NavItem(dbc.NavLink("API Docs",      href="#", target="_blank", external_link=True, id="nav-link-docs")),
-                dbc.NavItem(dbc.NavLink("MLflow",       href="#", target="_blank", external_link=True, id="nav-link-mlflow")),
-                dbc.NavItem(dbc.NavLink("MinIO",        href="#", target="_blank", external_link=True, id="nav-link-minio")),
-                dbc.NavItem(dbc.NavLink("Neo4j Browser",href="#", target="_blank", external_link=True,
+                dbc.NavItem(dbc.NavLink("MLflow",        href="#", target="_blank", external_link=True, id="nav-link-mlflow")),
+                dbc.NavItem(dbc.NavLink("MinIO",         href="#", target="_blank", external_link=True, id="nav-link-minio")),
+                dbc.NavItem(dbc.NavLink("Neo4j Browser", href="#", target="_blank", external_link=True,
                     style={"color": "#6fd672"}, id="nav-link-neo4j")),
+                dbc.NavItem(dbc.NavLink("NeoDash 🧠",   href="#", target="_blank", external_link=True,
+                    style={"color": "#b48eff"}, id="nav-link-neodash")),
             ], navbar=True),
         ]),
         color="dark", dark=True, className="mb-3",
@@ -916,6 +918,14 @@ app.layout = dbc.Container([
                              "Using the knowledge graph, find past runs most similar to: "
                              "steel (k=50), 2D, dirichlet+robin BCs, component-scale domain (4cm × 2cm). "
                              "Show the top 5 matches with their outcomes and relevance scores."),
+                            ("📖 Physics references for copper",
+                             "Retrieve the physics references for a copper simulation "
+                             "(k=385, rho=8960, cp=385) with robin BC (convective cooling). "
+                             "What are the validity limits and recommended h coefficients?"),
+                            ("⚙️ Solver guidance",
+                             "What are the recommended mesh resolution, time-step stability criteria, "
+                             "and element degree choices for heat conduction simulations? "
+                             "Use the knowledge graph physics references to answer."),
                         ])
                     ],
 
@@ -1001,7 +1011,89 @@ app.layout = dbc.Container([
                 ], width=9),
             ]),
         ]),
-        # ── Tab 6: Run Explorer ──────────────────────────────────────────────
+        # ── Tab 6: Knowledge Graph ───────────────────────────────────────────
+        dbc.Tab(label="🧠 Knowledge Graph", tab_id="tab-kg", children=[
+            dcc.Store(id="kg-search-results", data=[]),
+            dbc.Row([
+                # ── Left: KG stats + semantic search ───────────────────────
+                dbc.Col([
+                    html.H5("Graph Statistics", className="mt-3 mb-2"),
+                    html.Div(id="kg-stats-cards"),
+
+                    html.Hr(style={"borderColor": "#2a2a3e", "margin": "12px 0"}),
+
+                    html.H5("Semantic Run Search", className="mb-2"),
+                    html.P(
+                        "Describe a simulation in natural language — the KG will "
+                        "find the most similar past runs using vector embeddings.",
+                        className="text-muted mb-2", style={"fontSize": "0.8rem"},
+                    ),
+                    dbc.Textarea(
+                        id="kg-search-input",
+                        placeholder="e.g. 2D steel domain with convective cooling on one side, "
+                                    "component-scale, medium conductor...",
+                        rows=3,
+                        style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
+                               "borderColor": "#2e4a6a", "fontSize": "0.85rem"},
+                    ),
+                    dbc.Button(
+                        "🔍 Find Similar Runs", id="kg-search-btn",
+                        color="primary", className="mt-2 mb-3 w-100",
+                    ),
+                    html.Div(id="kg-search-results-panel"),
+
+                    html.Hr(style={"borderColor": "#2a2a3e", "margin": "12px 0"}),
+
+                    html.H5("Open in NeoDash", className="mb-1"),
+                    html.P(
+                        "NeoDash is an open-source graph exploration tool by Neo4j Labs "
+                        "(Apache 2.0). Launch it to visualize and navigate the full "
+                        "knowledge graph with interactive Cypher-powered dashboards.",
+                        className="text-muted mb-2", style={"fontSize": "0.8rem"},
+                    ),
+                    html.A(
+                        dbc.Button("Launch NeoDash 🚀", color="secondary",
+                                   className="w-100"),
+                        id="kg-neodash-btn",
+                        href="#",
+                        target="_blank",
+                    ),
+                    html.P(
+                        "Note: NeoDash runs on port 5005. "
+                        "Start with: docker compose up neodash",
+                        className="text-muted mt-1",
+                        style={"fontSize": "0.72rem", "opacity": "0.7"},
+                    ),
+                ], width=4, style={"borderRight": "1px solid #2a2a3e",
+                                   "paddingRight": "16px"}),
+
+                # ── Right: Reference browser ────────────────────────────────
+                dbc.Col([
+                    dbc.Row([
+                        dbc.Col(html.H5("Physics Reference Browser",
+                                        className="mt-3 mb-2"), width=8),
+                        dbc.Col(
+                            dbc.Select(
+                                id="kg-ref-type-filter",
+                                options=[
+                                    {"label": "All types", "value": "all"},
+                                    {"label": "📐 Material Properties", "value": "material_property"},
+                                    {"label": "🔲 BC Practice",          "value": "bc_practice"},
+                                    {"label": "⚙️ Solver Guidance",      "value": "solver_guidance"},
+                                    {"label": "🌐 Domain Physics",       "value": "domain_physics"},
+                                ],
+                                value="all",
+                                style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
+                                       "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
+                            ), width=4, className="mt-3",
+                        ),
+                    ]),
+                    html.Div(id="kg-reference-browser",
+                             style={"maxHeight": "680px", "overflowY": "auto"}),
+                ], width=8),
+            ], className="mt-2"),
+        ]),
+        # ── Tab 7: Run Explorer ──────────────────────────────────────────────
         dbc.Tab(label="🔎 Run Explorer", tab_id="tab-explorer", children=[
             dcc.Store(id="explorer-selected-run", data=None),
             dbc.Row([
@@ -1066,32 +1158,26 @@ app.layout = dbc.Container([
 app.clientside_callback(
     """
     function(href) {
-        // Build all external nav-link URLs dynamically from the browser's
-        // actual hostname so links work on any host/IP without hardcoding.
         var host = window.location.hostname;
 
-        // Docs + MLflow go through the nginx subpath proxy on the same port.
         var docs   = '/agents/docs';
         var mlflow = '/mlflow/';
-
-        // MinIO console cannot be subpath-proxied (hardcoded <base href="/">),
-        // so we link directly to its own port.
         var minio  = 'http://' + host + ':9001';
 
-        // Neo4j Browser is accessed directly on port 7474.
-        // The connectURL query parameter pre-fills the Bolt address so the
-        // browser does not default to bolt://localhost:7687 (the user's PC).
-        // Both port 7474 (HTTP UI) and port 7687 (Bolt) must be reachable.
         var boltUrl = encodeURIComponent('bolt://' + host + ':7687');
         var neo4j   = 'http://' + host + ':7474/browser/?connectURL=' + boltUrl;
 
-        return [docs, mlflow, minio, neo4j];
+        // NeoDash runs on port 5005 (open-source Neo4j Labs graph dashboard)
+        var neodash = 'http://' + host + ':5005';
+
+        return [docs, mlflow, minio, neo4j, neodash];
     }
     """,
     Output("nav-link-docs",    "href"),
     Output("nav-link-mlflow",  "href"),
     Output("nav-link-minio",   "href"),
     Output("nav-link-neo4j",   "href"),
+    Output("nav-link-neodash", "href"),
     Input("url", "href"),
 )
 
@@ -1315,6 +1401,65 @@ def show_run_detail(run_id):
                 "whiteSpace": "nowrap"}
     td_value = {"fontSize": "0.8rem"}
 
+    # ── SIMILAR_TO neighbours from KG ────────────────────────────────────────
+    similar_section = []
+    try:
+        kg = _get_kg()
+        if kg:
+            sim_rows = kg._run(
+                """
+                MATCH (src:Run {run_id: $run_id})-[rel:SIMILAR_TO]->(nb:Run)
+                OPTIONAL MATCH (nb)-[:USES_BC_CONFIG]->(b:BCConfig)
+                RETURN nb.run_id    AS run_id,
+                       nb.k         AS k,
+                       nb.t_max     AS t_max,
+                       nb.n_dofs    AS n_dofs,
+                       nb.wall_time AS wall_time,
+                       b.pattern    AS bc_pattern,
+                       rel.score    AS score
+                ORDER BY rel.score DESC LIMIT 5
+                """,
+                run_id=run_id,
+            )
+            if sim_rows:
+                sim_items = []
+                for nb in sim_rows:
+                    score_pct = int((nb.get("score") or 0) * 100)
+                    sim_items.append(html.Tr([
+                        html.Td(html.Span(nb["run_id"][:14],
+                                          style={"fontFamily": "monospace",
+                                                 "fontSize": "0.72rem"})),
+                        html.Td(f"{score_pct}%",
+                                style={"color": "#6fd672", "fontWeight": "600",
+                                       "fontSize": "0.78rem"}),
+                        html.Td(f"k={nb.get('k')}",
+                                style={"fontSize": "0.72rem"}),
+                        html.Td(nb.get("bc_pattern", "–"),
+                                style={"fontSize": "0.7rem", "color": "#aaa"}),
+                        html.Td(f"T={nb.get('t_max', 0):.0f}K" if nb.get("t_max") else "–",
+                                style={"fontSize": "0.72rem"}),
+                    ]))
+                similar_section = [
+                    html.Hr(style={"borderColor": "#2a2a3e", "margin": "6px 0"}),
+                    html.P("🔗 Similar Runs (SIMILAR_TO edges)",
+                           style={"fontSize": "0.72rem", "color": "#b48eff",
+                                  "marginBottom": "4px", "fontWeight": "600"}),
+                    dbc.Table(
+                        [html.Thead(html.Tr([
+                             html.Th("Run ID", style={"fontSize": "0.7rem"}),
+                             html.Th("Score",  style={"fontSize": "0.7rem"}),
+                             html.Th("k",      style={"fontSize": "0.7rem"}),
+                             html.Th("BCs",    style={"fontSize": "0.7rem"}),
+                             html.Th("T_max",  style={"fontSize": "0.7rem"}),
+                         ])),
+                         html.Tbody(sim_items)],
+                        size="sm", bordered=False, dark=True,
+                        style={"marginBottom": 0},
+                    ),
+                ]
+    except Exception:
+        pass
+
     return dbc.Card([
         dbc.CardHeader(
             html.Span(run_id, style={"fontSize": "0.82rem", "fontWeight": "600"}),
@@ -1330,6 +1475,7 @@ def show_run_detail(run_id):
                 size="sm", bordered=False,
                 style={"marginBottom": 0},
             ),
+            *similar_section,
         ], style={"padding": "6px 10px"}),
     ], color="dark", outline=True, className="mt-2")
 
@@ -1491,6 +1637,272 @@ def refresh_system_health(n):
     ])
 
     return html.Div(items + [model_info])
+
+
+# ─── Knowledge Graph tab callbacks ───────────────────────────────────────────
+
+def _get_kg():
+    """Lazy-load the KG singleton for dashboard callbacks."""
+    try:
+        import sys
+        sys.path.insert(0, "/app")
+        from knowledge_graph.graph import get_kg
+        kg = get_kg()
+        return kg if kg.available else None
+    except Exception:
+        return None
+
+
+@app.callback(
+    Output("kg-stats-cards",   "children"),
+    Output("kg-neodash-btn",   "href"),
+    Input("refresh-interval",  "n_intervals"),
+    Input("url",               "href"),
+)
+def refresh_kg_stats(n, href):
+    """Populate KG stats cards and set NeoDash href dynamically."""
+    # Derive host from the dashboard's own URL for NeoDash link
+    neodash_href = "#"
+    if href:
+        try:
+            from urllib.parse import urlparse
+            host = urlparse(href).hostname or "localhost"
+            neodash_href = f"http://{host}:5005"
+        except Exception:
+            pass
+
+    kg = _get_kg()
+    if not kg:
+        return html.P("Knowledge graph unavailable", className="text-danger"), neodash_href
+
+    s = kg.stats()
+
+    # Count SIMILAR_TO edges
+    try:
+        edge_rows = kg._run("MATCH ()-[r:SIMILAR_TO]->() RETURN count(r) AS n")
+        n_edges = edge_rows[0]["n"] if edge_rows else 0
+    except Exception:
+        n_edges = 0
+
+    pct_embedded = (
+        round(s.get("embedded_runs", 0) / max(s.get("total_runs", 1), 1) * 100)
+        if s.get("total_runs") else 0
+    )
+
+    def stat_card(value, label, color, sublabel=""):
+        return dbc.Card(dbc.CardBody([
+            html.H3(str(value), className=f"text-{color} mb-0",
+                    style={"fontWeight": "700"}),
+            html.P(label, className="text-muted mb-0",
+                   style={"fontSize": "0.78rem"}),
+            html.Small(sublabel, className="text-muted",
+                       style={"fontSize": "0.68rem", "opacity": "0.7"}) if sublabel else None,
+        ]), color="dark", outline=True, className="mb-2")
+
+    cards = [
+        stat_card(s.get("total_runs", 0),      "Total Run Nodes",       "info"),
+        stat_card(
+            f"{s.get('embedded_runs', 0)} / {s.get('total_runs', 0)}",
+            "Runs with Embeddings",  "success",
+            f"{pct_embedded}% coverage · nomic-embed-text 768-dim",
+        ),
+        stat_card(n_edges,                      "SIMILAR_TO Edges",      "warning",
+                  "top-5 KNN · cosine ≥ 0.85"),
+        stat_card(s.get("references", 0),       "Reference Nodes",       "secondary",
+                  "curated physics knowledge"),
+        stat_card(s.get("materials", 0),        "Material Nodes",        "light"),
+        stat_card(s.get("bc_configs", 0),       "BCConfig Nodes",        "light"),
+        stat_card(s.get("domains", 0),          "Domain Nodes",          "light"),
+        stat_card(s.get("thermal_classes", 0),  "ThermalClass Nodes",    "light"),
+    ]
+    return html.Div(cards), neodash_href
+
+
+@app.callback(
+    Output("kg-search-results-panel", "children"),
+    Input("kg-search-btn",            "n_clicks"),
+    State("kg-search-input",          "value"),
+    prevent_initial_call=True,
+)
+def kg_semantic_search(n_clicks, query_text):
+    """Run semantic similarity search from free-text query via embeddings."""
+    if not query_text or not query_text.strip():
+        return html.P("Enter a description above and click Search.",
+                      className="text-muted", style={"fontSize": "0.82rem"})
+
+    kg = _get_kg()
+    if not kg:
+        return html.P("Knowledge graph unavailable.", className="text-danger")
+
+    try:
+        from knowledge_graph.embeddings import get_embedder
+        emb = get_embedder()
+        vec = emb.embed_text(query_text.strip())
+        if not vec:
+            return html.P("Embedding unavailable (is nomic-embed-text pulled?)",
+                          className="text-warning")
+
+        rows = kg._run(
+            """
+            CALL db.index.vector.queryNodes('run_embedding_index', 8, $vec)
+            YIELD node AS r, score
+            WHERE r.status = 'success'
+            OPTIONAL MATCH (r)-[:USES_BC_CONFIG]->(b:BCConfig)
+            OPTIONAL MATCH (r)-[:ON_DOMAIN]->(d:Domain)
+            OPTIONAL MATCH (r)-[:USES_MATERIAL]->(m:Material)
+            RETURN r.run_id    AS run_id,
+                   r.k         AS k,
+                   r.dim       AS dim,
+                   r.t_max     AS t_max,
+                   r.wall_time AS wall_time,
+                   r.n_dofs    AS n_dofs,
+                   b.pattern   AS bc_pattern,
+                   d.label     AS domain_label,
+                   m.name      AS material,
+                   round(score, 4) AS score
+            ORDER BY score DESC LIMIT 5
+            """,
+            vec=vec,
+        )
+    except Exception as exc:
+        return html.P(f"Search failed: {exc}", className="text-danger",
+                      style={"fontSize": "0.8rem"})
+
+    if not rows:
+        return html.P("No similar runs found.", className="text-muted")
+
+    items = []
+    for r in rows:
+        score    = r.get("score", 0.0)
+        score_pct = int(score * 100)
+        bar_color = "success" if score_pct >= 95 else "info" if score_pct >= 88 else "warning"
+        items.append(dbc.Card(dbc.CardBody([
+            dbc.Row([
+                dbc.Col([
+                    html.Span(r.get("run_id", "")[:16],
+                              style={"fontFamily": "monospace", "fontWeight": "700",
+                                     "fontSize": "0.8rem", "color": "#00b4d8"}),
+                    html.Br(),
+                    html.Small(
+                        f"k={r.get('k')} · {r.get('dim')}D · {r.get('bc_pattern','')} · "
+                        f"{r.get('domain_label','')} · {r.get('material','')}",
+                        className="text-muted",
+                    ),
+                ], width=9),
+                dbc.Col([
+                    html.Div(f"{score_pct}%",
+                             style={"fontWeight": "700", "fontSize": "1.0rem",
+                                    "color": "#6fd672", "textAlign": "right"}),
+                    html.Small("similarity", className="text-muted",
+                               style={"fontSize": "0.68rem", "float": "right"}),
+                ], width=3),
+            ]),
+            dbc.Progress(value=score_pct, color=bar_color, className="mt-1",
+                         style={"height": "4px"}),
+            html.Small(
+                f"T_max={r.get('t_max', 0):.0f}K  "
+                f"DOFs={r.get('n_dofs', '?')}  "
+                f"wall={r.get('wall_time', 0):.2f}s",
+                className="text-muted",
+                style={"fontSize": "0.72rem"},
+            ),
+        ]), color="dark", outline=True, className="mb-1"))
+
+    return html.Div([
+        html.P(f"Top {len(rows)} semantically similar runs:",
+               className="text-muted mb-1", style={"fontSize": "0.78rem"}),
+        html.Div(items),
+    ])
+
+
+@app.callback(
+    Output("kg-reference-browser", "children"),
+    Input("kg-ref-type-filter",    "value"),
+    Input("refresh-interval",      "n_intervals"),
+)
+def refresh_reference_browser(ref_type, n):
+    """Display all Reference nodes, filtered by type."""
+    kg = _get_kg()
+    if not kg:
+        return html.P("Knowledge graph unavailable.", className="text-danger mt-3")
+
+    cypher = """
+        MATCH (ref:Reference)
+        WHERE $type = 'all' OR ref.type = $type
+        OPTIONAL MATCH (m:Material)-[:HAS_REFERENCE]->(ref)
+        OPTIONAL MATCH (b:BCConfig)-[:HAS_REFERENCE]->(ref)
+        OPTIONAL MATCH (d:Domain)-[:HAS_REFERENCE]->(ref)
+        RETURN ref.ref_id  AS ref_id,
+               ref.type    AS type,
+               ref.subject AS subject,
+               ref.text    AS text,
+               ref.source  AS source,
+               ref.tags    AS tags,
+               collect(DISTINCT m.name)    AS materials,
+               collect(DISTINCT b.pattern) AS bc_patterns,
+               collect(DISTINCT d.label)   AS domains
+        ORDER BY ref.type, ref.subject
+    """
+    try:
+        rows = kg._run(cypher, type=ref_type)
+    except Exception as exc:
+        return html.P(f"Query failed: {exc}", className="text-danger")
+
+    if not rows:
+        return html.P("No references found.", className="text-muted mt-3")
+
+    TYPE_COLORS = {
+        "material_property": ("#1e2a3a", "#00b4d8", "📐"),
+        "bc_practice":       ("#1e2a1e", "#6fd672", "🔲"),
+        "solver_guidance":   ("#2a1e1e", "#ff8c69", "⚙️"),
+        "domain_physics":    ("#1e1a2e", "#b48eff", "🌐"),
+    }
+
+    cards = []
+    for r in rows:
+        bg, color, icon = TYPE_COLORS.get(r["type"], ("#1a1a2e", "#fff", "📌"))
+
+        linked_to = []
+        if r.get("materials"):  linked_to.append("Materials: " + ", ".join(r["materials"]))
+        if r.get("bc_patterns"):linked_to.append("BCs: " + ", ".join(r["bc_patterns"]))
+        if r.get("domains"):    linked_to.append("Domains: " + ", ".join(r["domains"]))
+        linked_str = " · ".join(linked_to) if linked_to else "General (no direct links)"
+
+        tags = r.get("tags") or []
+
+        cards.append(dbc.Card(dbc.CardBody([
+            dbc.Row([
+                dbc.Col(
+                    dbc.Badge(f"{icon} {r['type'].replace('_', ' ').title()}",
+                              color="dark",
+                              style={"backgroundColor": bg, "color": color,
+                                     "border": f"1px solid {color}",
+                                     "fontSize": "0.68rem"}),
+                    width="auto",
+                ),
+                dbc.Col(
+                    html.Small(linked_str, className="text-muted",
+                               style={"fontSize": "0.7rem"}),
+                    className="d-flex align-items-center",
+                ),
+            ], className="mb-1"),
+            html.Strong(r["subject"], style={"fontSize": "0.85rem", "color": color}),
+            html.P(r["text"], className="mb-1 mt-1",
+                   style={"fontSize": "0.8rem", "color": "#c8d8e8", "lineHeight": "1.4"}),
+            html.Small(
+                f"📚 {r['source']}",
+                className="text-muted",
+                style={"fontSize": "0.7rem", "fontStyle": "italic"},
+            ),
+            html.Div([
+                dbc.Badge(tag, color="secondary", className="me-1",
+                          style={"fontSize": "0.62rem", "opacity": "0.7"})
+                for tag in (tags[:6] if tags else [])
+            ], className="mt-1"),
+        ]), color="dark", outline=True, className="mb-2",
+            style={"borderColor": color + "44"}))
+
+    return html.Div(cards)
 
 
 @app.callback(
@@ -1812,8 +2224,16 @@ _QUICK_PROMPTS = [
      "Using the knowledge graph, find past runs most similar to: "
      "steel (k=50), 2D, dirichlet+robin BCs, component-scale domain (4cm × 2cm). "
      "Show the top 5 matches with their outcomes and relevance scores."),
-    # spacers 14-19
-    ("", ""), ("", ""), ("", ""), ("", ""), ("", ""), ("", ""),
+    ("📖 Physics references for copper",
+     "Retrieve the physics references for a copper simulation "
+     "(k=385, rho=8960, cp=385) with robin BC (convective cooling). "
+     "What are the validity limits and recommended h coefficients?"),
+    ("⚙️ Solver guidance",
+     "What are the recommended mesh resolution, time-step stability criteria, "
+     "and element degree choices for heat conduction simulations? "
+     "Use the knowledge graph physics references to answer."),
+    # spacers 16-19
+    ("", ""), ("", ""), ("", ""), ("", ""),
     # ── New Simulations (idx 20-24) → orchestrator ───────────────────────────
     ("🔲 2D steel plate",
      "Run a 2D heat equation on a steel plate 4cm × 2cm. "
@@ -1863,11 +2283,11 @@ def fill_quick_prompt(n_clicks_list, current_agent):
     if not prompt_text:
         return no_update, no_update
     # Route to the most capable agent for each prompt category
-    if idx <= 3:       # list / search queries → database agent
+    if idx <= 3:        # list / search queries → database agent
         agent = "database"
-    elif idx <= 13:    # analysis + knowledge graph queries → analytics agent
+    elif idx <= 15:     # analysis + knowledge graph + reference queries → analytics agent
         agent = "analytics"
-    else:              # new simulation requests → orchestrator
+    else:               # new simulation requests → orchestrator
         agent = "orchestrator"
     return prompt_text, agent
 

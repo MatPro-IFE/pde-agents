@@ -295,3 +295,28 @@ services:
         --default-artifact-root /mlflow/artifacts
         --host 0.0.0.0 --port 5000
         --static-prefix /mlflow
+
+  # ─── NeoDash — open-source KG dashboard (Neo4j Labs, Apache 2.0) ───────────
+  # Provides a no-code graph visualization UI for Neo4j.
+  # Access at http://<host>:5005  (or via the dashboard nav link).
+  # Credentials are read from .env: NEO4J_USER / NEO4J_PASSWORD.
+  neodash:
+    image: neo4jlabs/neodash:latest
+    container_name: pde-neodash
+    restart: unless-stopped
+    networks: [pde-net]
+    ports:
+      - "5005:5005"
+    environment:
+      - ssoEnabled=false
+      - standalone=true
+      - standaloneProtocol=bolt
+      - standaloneHost=${NEO4J_HOST:-neo4j}
+      - standalonePort=7687
+      - standaloneDatabase=neo4j
+      - standaloneDashboardName=PDE Agents KG
+      - standaloneDashboardDatabase=neo4j
+      - standaloneUsername=${NEO4J_USER:-neo4j}
+      - standalonePassword=${NEO4J_PASSWORD:-pde_graph_secret}
+    depends_on:
+      - neo4j
