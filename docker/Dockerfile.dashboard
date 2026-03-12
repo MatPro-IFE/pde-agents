@@ -21,10 +21,12 @@ RUN pip install --no-cache-dir \
     sqlalchemy==2.0.36 \
     psycopg2-binary==2.9.10 \
     requests==2.32.3 \
-    python-dotenv==1.0.1
+    python-dotenv==1.0.1 \
+    neo4j>=5.0                 # KG tab — connects to Neo4j for graph stats
 
-COPY visualization/ /app/visualization/
-COPY database/      /app/database/
+COPY visualization/  /app/visualization/
+COPY database/       /app/database/
+COPY knowledge_graph/ /app/knowledge_graph/
 
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
