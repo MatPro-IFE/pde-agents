@@ -18,6 +18,7 @@ Schema addition
       subject:   str   — the concept being described
       text:      str   — human + LLM readable fact / warning / recommendation
       source:    str   — citation (NIST, ASHRAE, textbook, etc.)
+      url:       str   — direct link to the cited document (empty string if none)
       tags:      list  — searchable keywords
   })
 
@@ -44,6 +45,7 @@ MATERIAL_REFERENCES: list[dict] = [
             "Constant-k simulations at elevated temperature over-predict heat flux."
         ),
         "source": "NIST Thermophysical Properties of Matter (TPRC vol. 2)",
+        "url":    "https://webbook.nist.gov/chemistry/fluid/",
         "tags":   ["copper", "temperature-dependent", "conductivity", "high_conductor"],
         "material_names": ["copper"],
     },
@@ -57,6 +59,7 @@ MATERIAL_REFERENCES: list[dict] = [
             "a standard linear heat equation is no longer valid near melt."
         ),
         "source": "ASM Handbook vol. 2: Properties and Selection — Nonferrous Alloys",
+        "url":    "https://www.asminternational.org/asm-handbook/",
         "tags":   ["copper", "phase_change", "melting", "validity_limit"],
         "material_names": ["copper"],
     },
@@ -73,6 +76,7 @@ MATERIAL_REFERENCES: list[dict] = [
             "conductivity by up to 28%."
         ),
         "source": "EN 1993-1-2 Eurocode 3: Design of steel structures — Fire resistance",
+        "url":    "https://eurocodes.jrc.ec.europa.eu/EN-Eurocodes/eurocode-3-design-steel-structures",
         "tags":   ["steel", "temperature-dependent", "conductivity", "high_temperature"],
         "material_names": ["steel", "carbon_steel"],
     },
@@ -88,6 +92,7 @@ MATERIAL_REFERENCES: list[dict] = [
             "constant cp=500 causes significant error in that temperature range."
         ),
         "source": "EN 1993-1-2 Eurocode 3, clause 3.4.1.2",
+        "url":    "https://eurocodes.jrc.ec.europa.eu/EN-Eurocodes/eurocode-3-design-steel-structures",
         "tags":   ["steel", "specific_heat", "curie_point", "high_temperature"],
         "material_names": ["steel"],
     },
@@ -103,6 +108,7 @@ MATERIAL_REFERENCES: list[dict] = [
             "structural thermal analyses."
         ),
         "source": "NIST TPRC vol. 2 / ASM Handbook vol. 2",
+        "url":    "https://webbook.nist.gov/chemistry/fluid/",
         "tags":   ["aluminium", "temperature-dependent", "conductivity", "high_conductor"],
         "material_names": ["aluminium", "aluminum"],
     },
@@ -118,6 +124,7 @@ MATERIAL_REFERENCES: list[dict] = [
             "Standard value k=1.0 W/(m·K) assumes dry concrete."
         ),
         "source": "ISO 10456:2007 Building materials and products — thermal properties",
+        "url":    "https://www.iso.org/standard/40967.html",
         "tags":   ["concrete", "moisture", "effective_conductivity", "low_conductor"],
         "material_names": ["concrete"],
     },
@@ -134,6 +141,7 @@ MATERIAL_REFERENCES: list[dict] = [
             "water pool or cooling channel. Use effective k or add Boussinesq flow."
         ),
         "source": "Incropera et al., Fundamentals of Heat and Mass Transfer, 7th ed.",
+        "url":    "https://www.wiley.com/en-us/Fundamentals+of+Heat+and+Mass+Transfer%2C+7th+Edition-p-9780470501979",
         "tags":   ["water", "natural_convection", "validity_limit", "thermal_insulator"],
         "material_names": ["water"],
     },
@@ -149,7 +157,8 @@ MATERIAL_REFERENCES: list[dict] = [
             "electronics thermal simulations. Constant-k = 150 is only valid near "
             "ambient temperature."
         ),
-        "source": "Glassbrenner & Slack, Physical Review 134(4A):1058, 1964",
+        "source": "Glassbrenner & Slack, Physical Review 134(4A):A1058, 1964",
+        "url":    "https://journals.aps.org/pr/abstract/10.1103/PhysRev.134.A1058",
         "tags":   ["silicon", "temperature-dependent", "conductivity", "microelectronics"],
         "material_names": ["silicon"],
     },
@@ -170,6 +179,7 @@ BC_REFERENCES: list[dict] = [
             "condition setup. A Robin BC with h < 2 or h > 100 in air is suspect."
         ),
         "source": "Bergman et al., Fundamentals of Heat and Mass Transfer, 7th ed., ch. 9",
+        "url":    "https://www.wiley.com/en-us/Fundamentals+of+Heat+and+Mass+Transfer%2C+7th+Edition-p-9780470501979",
         "tags":   ["robin", "convection", "air", "h_coefficient", "natural_convection"],
         "bc_patterns": ["robin", "dirichlet+robin", "neumann+robin", "dirichlet+neumann+robin"],
     },
@@ -184,6 +194,7 @@ BC_REFERENCES: list[dict] = [
             "h ≈ 50–100 on a flat plate. Automotive under-hood: h ≈ 100–250."
         ),
         "source": "ASHRAE Handbook — Fundamentals 2017, ch. 4",
+        "url":    "https://www.ashrae.org/technical-resources/ashrae-handbook/description-2017-ashrae-handbook-fundamentals",
         "tags":   ["robin", "forced_convection", "air", "h_coefficient"],
         "bc_patterns": ["robin", "dirichlet+robin", "neumann+robin", "dirichlet+neumann+robin"],
     },
@@ -200,6 +211,7 @@ BC_REFERENCES: list[dict] = [
             "the cooling effect."
         ),
         "source": "Incropera et al., Fundamentals of Heat and Mass Transfer, Table 1.1",
+        "url":    "https://www.wiley.com/en-us/Fundamentals+of+Heat+and+Mass+Transfer%2C+7th+Edition-p-9780470501979",
         "tags":   ["robin", "water_cooling", "h_coefficient", "convection"],
         "bc_patterns": ["robin", "dirichlet+robin", "neumann+robin", "dirichlet+neumann+robin"],
     },
@@ -217,6 +229,7 @@ BC_REFERENCES: list[dict] = [
             "Note: positive q = flux into domain (heat addition)."
         ),
         "source": "CRC Handbook of Chemistry and Physics, 97th ed.; Incropera et al.",
+        "url":    "https://www.taylorfrancis.com/books/edit/10.1201/9781315369587/crc-handbook-chemistry-physics",
         "tags":   ["neumann", "heat_flux", "magnitude_check", "boundary_condition"],
         "bc_patterns": ["neumann", "dirichlet+neumann", "neumann+robin", "dirichlet+neumann+robin"],
     },
@@ -233,7 +246,8 @@ BC_REFERENCES: list[dict] = [
             "If T_max > 3,000 K in a simulation, verify units (K vs °C) and "
             "that material properties remain valid at those temperatures."
         ),
-        "source": "Engineering practice / ASME PTC standards",
+        "source": "ASME PTC Performance Test Codes / Engineering practice",
+        "url":    "https://www.asme.org/codes-standards/find-codes-standards/ptc-performance-test-codes",
         "tags":   ["dirichlet", "temperature_range", "physical_validity"],
         "bc_patterns": ["dirichlet", "dirichlet+neumann", "dirichlet+robin", "dirichlet+neumann+robin"],
     },
@@ -256,6 +270,7 @@ SOLVER_REFERENCES: list[dict] = [
             "marginal for steep gradients. Use nx ≥ 20 for reliable results."
         ),
         "source": "Brenner & Scott, Mathematical Theory of Finite Element Methods, ch. 5",
+        "url":    "https://link.springer.com/book/10.1007/978-0-387-75934-0",
         "tags":   ["mesh", "resolution", "accuracy", "P1", "P2"],
         "bc_patterns": [],
     },
@@ -273,6 +288,7 @@ SOLVER_REFERENCES: list[dict] = [
             "Using Δt=100s with this mesh loses temporal accuracy."
         ),
         "source": "Ferziger, Perić & Street, Computational Methods for Fluid Dynamics, ch. 7",
+        "url":    "https://link.springer.com/book/10.1007/978-3-319-99693-6",
         "tags":   ["timestep", "stability", "Fourier_number", "backward_euler", "accuracy"],
         "bc_patterns": [],
     },
@@ -289,6 +305,7 @@ SOLVER_REFERENCES: list[dict] = [
             "For smooth solutions on fine meshes, P1 is usually sufficient."
         ),
         "source": "Logg, Mardal & Wells, Automated Solution of Differential Equations by FEM",
+        "url":    "https://link.springer.com/book/10.1007/978-3-642-23099-8",
         "tags":   ["P2", "P1", "element_degree", "convergence", "accuracy"],
         "bc_patterns": [],
     },
@@ -305,6 +322,7 @@ SOLVER_REFERENCES: list[dict] = [
             "Keep petsc_solver=cg, petsc_preconditioner=hypre unless the problem changes."
         ),
         "source": "Saad, Iterative Methods for Sparse Linear Systems, 2nd ed.",
+        "url":    "https://epubs.siam.org/doi/book/10.1137/1.9780898718003",
         "tags":   ["CG", "GMRES", "linear_solver", "SPD", "preconditioner"],
         "bc_patterns": [],
     },
@@ -324,7 +342,8 @@ DOMAIN_REFERENCES: list[dict] = [
             "Exception: high-temperature MEMS or laser-heated micro-domains "
             "where T > 1000K — radiation then becomes significant even at μm scale."
         ),
-        "source": "Incropera et al., ch. 12 / Majumdar, ASME J. Heat Transfer, 1993",
+        "source": "Incropera et al., ch. 12 / Majumdar, ASME J. Heat Transfer 115(1):7, 1993",
+        "url":    "https://asmedigitalcollection.asme.org/heattransfer/article-abstract/115/1/7/441234/",
         "tags":   ["micro", "radiation", "scale_effects", "validity"],
         "domain_labels": ["micro"],
     },
@@ -341,6 +360,7 @@ DOMAIN_REFERENCES: list[dict] = [
             "k_eff = k × Nu or model flow explicitly."
         ),
         "source": "Churchill & Chu, Int. J. Heat Mass Transfer 18:1323, 1975",
+        "url":    "https://www.sciencedirect.com/science/article/abs/pii/0017931075901715",
         "tags":   ["structural", "natural_convection", "buoyancy", "scale_effects"],
         "domain_labels": ["structural"],
     },
@@ -357,6 +377,7 @@ DOMAIN_REFERENCES: list[dict] = [
             "Set t_end ≥ 3τ to reach 95% of steady state."
         ),
         "source": "Carslaw & Jaeger, Conduction of Heat in Solids, 2nd ed., ch. 3",
+        "url":    "https://global.oup.com/academic/product/conduction-of-heat-in-solids-9780198533689",
         "tags":   ["panel", "thermal_time_constant", "steady_state", "transient"],
         "domain_labels": ["panel", "component"],
     },

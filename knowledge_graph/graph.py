@@ -314,6 +314,7 @@ class SimulationKnowledgeGraph:
                     r.subject = $subject,
                     r.text    = $text,
                     r.source  = $source,
+                    r.url     = $url,
                     r.tags    = $tags
                 """,
                 ref_id=ref["ref_id"],
@@ -321,6 +322,7 @@ class SimulationKnowledgeGraph:
                 subject=ref["subject"],
                 text=ref["text"],
                 source=ref["source"],
+                url=ref.get("url", ""),
                 tags=ref.get("tags", []),
             )
             counts[ref["type"]] = counts.get(ref["type"], 0) + 1

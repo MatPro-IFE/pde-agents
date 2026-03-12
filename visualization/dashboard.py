@@ -1837,6 +1837,7 @@ def refresh_reference_browser(ref_type, n):
                ref.subject AS subject,
                ref.text    AS text,
                ref.source  AS source,
+               ref.url     AS url,
                ref.tags    AS tags,
                collect(DISTINCT m.name)    AS materials,
                collect(DISTINCT b.pattern) AS bc_patterns,
@@ -1889,11 +1890,21 @@ def refresh_reference_browser(ref_type, n):
             html.Strong(r["subject"], style={"fontSize": "0.85rem", "color": color}),
             html.P(r["text"], className="mb-1 mt-1",
                    style={"fontSize": "0.8rem", "color": "#c8d8e8", "lineHeight": "1.4"}),
-            html.Small(
-                f"📚 {r['source']}",
-                className="text-muted",
-                style={"fontSize": "0.7rem", "fontStyle": "italic"},
-            ),
+            html.Small([
+                "📚 ",
+                html.A(
+                    r["source"],
+                    href=r.get("url") or "#",
+                    target="_blank",
+                    rel="noopener noreferrer",
+                    style={
+                        "color": "#8ab4c8",
+                        "textDecoration": "underline",
+                        "cursor": "pointer",
+                    },
+                ) if r.get("url") else r["source"],
+            ], className="text-muted",
+               style={"fontSize": "0.7rem", "fontStyle": "italic"}),
             html.Div([
                 dbc.Badge(tag, color="secondary", className="me-1",
                           style={"fontSize": "0.62rem", "opacity": "0.7"})
