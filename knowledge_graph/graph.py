@@ -1,10 +1,10 @@
 """
-SimulationKnowledgeGraph — Phase 2 implementation.
+SimulationKnowledgeGraph — Phase 2 implementation with vector embeddings.
 
 Graph schema
 ────────────
 Nodes
-  (:Run)          — one per simulation run
+  (:Run)          — one per simulation run  (embedding: 768-dim vector)
   (:Material)     — engineering materials with thermal properties
   (:KnownIssue)   — documented failure patterns
   (:BCConfig)     — boundary-condition pattern (dirichlet, neumann, robin combos)
@@ -17,8 +17,18 @@ Relationships
   (:Run)-[:USES_BC_CONFIG]->(:BCConfig)
   (:Run)-[:ON_DOMAIN]->(:Domain)
   (:Material)-[:HAS_THERMAL_CLASS]->(:ThermalClass)
-  (:Run)-[:SPAWNED_FROM]->(:Run)         — created from a suggestion
+  (:Run)-[:SPAWNED_FROM]->(:Run)           — created from a suggestion
   (:Run)-[:IMPROVED_OVER {metric}]->(:Run) — better result than parent
+  (:Run)-[:SIMILAR_TO {score}]->(:Run)     — KNN semantic similarity (Feature 2)
+
+Vector search
+─────────────
+Each Run node stores an `embedding` property (768-dim float list) produced
+by nomic-embed-text via Ollama.  A Neo4j HNSW vector index on Run.embedding
+enables sub-millisecond semantic similarity search.
+
+get_similar_runs() uses vector search when Ollama + the index are available,
+and falls back transparently to the Cypher parameter-distance query.
 
 All operations degrade gracefully if Neo4j is unavailable — agents still
 work, they just don't get knowledge graph context.
@@ -153,22 +163,39 @@ class SimulationKnowledgeGraph:
     # ── Initialization ────────────────────────────────────────────────────────
 
     def initialize(self) -> None:
-        """Create uniqueness constraints and full-text indexes."""
+        """Create uniqueness constraints, full-text indexes, and vector index."""
         if not self._available:
             return
         statements = [
-            "CREATE CONSTRAINT run_id_unique           IF NOT EXISTS FOR (r:Run)          REQUIRE r.run_id  IS UNIQUE",
-            "CREATE CONSTRAINT material_name_unique    IF NOT EXISTS FOR (m:Material)     REQUIRE m.name    IS UNIQUE",
-            "CREATE CONSTRAINT issue_code_unique       IF NOT EXISTS FOR (i:KnownIssue)   REQUIRE i.code    IS UNIQUE",
-            "CREATE CONSTRAINT bcconfig_pattern_unique IF NOT EXISTS FOR (b:BCConfig)     REQUIRE b.pattern IS UNIQUE",
-            "CREATE CONSTRAINT domain_label_unique     IF NOT EXISTS FOR (d:Domain)       REQUIRE d.label   IS UNIQUE",
-            "CREATE CONSTRAINT thermalclass_name_unique IF NOT EXISTS FOR (t:ThermalClass) REQUIRE t.name   IS UNIQUE",
+            "CREATE CONSTRAINT run_id_unique            IF NOT EXISTS FOR (r:Run)          REQUIRE r.run_id  IS UNIQUE",
+            "CREATE CONSTRAINT material_name_unique     IF NOT EXISTS FOR (m:Material)     REQUIRE m.name    IS UNIQUE",
+            "CREATE CONSTRAINT issue_code_unique        IF NOT EXISTS FOR (i:KnownIssue)   REQUIRE i.code    IS UNIQUE",
+            "CREATE CONSTRAINT bcconfig_pattern_unique  IF NOT EXISTS FOR (b:BCConfig)     REQUIRE b.pattern IS UNIQUE",
+            "CREATE CONSTRAINT domain_label_unique      IF NOT EXISTS FOR (d:Domain)       REQUIRE d.label   IS UNIQUE",
+            "CREATE CONSTRAINT thermalclass_name_unique IF NOT EXISTS FOR (t:ThermalClass) REQUIRE t.name    IS UNIQUE",
         ]
         for stmt in statements:
             try:
                 self._run(stmt)
             except Exception:
                 pass
+
+        # Neo4j 5.x native HNSW vector index for semantic Run similarity.
+        # nomic-embed-text produces 768-dim vectors; cosine similarity is
+        # the standard metric for sentence/document embeddings.
+        try:
+            self._run("""
+                CREATE VECTOR INDEX run_embedding_index IF NOT EXISTS
+                FOR (r:Run) ON r.embedding
+                OPTIONS {indexConfig: {
+                    `vector.dimensions`:       768,
+                    `vector.similarity_function`: 'cosine'
+                }}
+            """)
+            log.info("Vector index run_embedding_index ensured")
+        except Exception as exc:
+            log.warning("Could not create vector index (non-fatal): %s", exc)
+
         log.info("Knowledge graph schema initialized")
 
     def seed_if_empty(self) -> dict:
@@ -428,12 +455,105 @@ class SimulationKnowledgeGraph:
                     parent_id=spawned_from,
                 )
 
+            # Compute and store embedding vector for semantic search.
+            # Non-blocking: if Ollama is unavailable this is silently skipped.
+            self._embed_and_store_run(run_id, config, results)
+
             return True
         except Exception as exc:
             log.warning("KG add_run failed for %s: %s", run_id, exc)
             return False
 
+    def _embed_and_store_run(self, run_id: str, config: dict, results: dict) -> None:
+        """
+        Compute a nomic-embed-text vector for this run and store it on the
+        Run node so it can be retrieved via the HNSW vector index.
+        Silently no-ops when Ollama is not available.
+        """
+        try:
+            from knowledge_graph.embeddings import get_embedder
+            vec = get_embedder().embed_run(run_id, config, results)
+            if vec:
+                self._run(
+                    "MATCH (r:Run {run_id: $run_id}) SET r.embedding = $vec",
+                    run_id=run_id,
+                    vec=vec,
+                )
+                log.debug("Stored embedding for run %s (%d dims)", run_id, len(vec))
+        except Exception as exc:
+            log.debug("_embed_and_store_run skipped for %s: %s", run_id, exc)
+
     # ── Similarity search ─────────────────────────────────────────────────────
+
+    def get_similar_runs_semantic(
+        self,
+        config: dict,
+        results: dict | None = None,
+        top_k: int = 5,
+    ) -> list[dict]:
+        """
+        Find the top-k most similar past runs using Neo4j vector similarity.
+
+        The query config is embedded with nomic-embed-text and compared to all
+        Run nodes that have an embedding stored via the HNSW index.  Returns an
+        empty list if Ollama is unavailable or the index doesn't exist yet.
+
+        Each result has an additional `similarity_score` field (0–1, higher is
+        better) that the caller can use to rank alongside other signals.
+        """
+        try:
+            from knowledge_graph.embeddings import get_embedder, run_to_text
+            embedder = get_embedder()
+            # Embed the *proposed* config (results may be partial/empty for pre-run)
+            text = run_to_text("query", config, results or {})
+            vec  = embedder.embed_text(text)
+            if not vec:
+                return []
+
+            rows = self._run(
+                """
+                CALL db.index.vector.queryNodes(
+                    'run_embedding_index', $top_k, $vec
+                ) YIELD node AS r, score
+                WHERE r.status = 'success'
+                OPTIONAL MATCH (r)-[:USES_MATERIAL]->(m:Material)
+                OPTIONAL MATCH (r)-[:USES_BC_CONFIG]->(b:BCConfig)
+                OPTIONAL MATCH (r)-[:ON_DOMAIN]->(d:Domain)
+                OPTIONAL MATCH (m)-[:HAS_THERMAL_CLASS]->(t:ThermalClass)
+                RETURN r.run_id      AS run_id,
+                       r.k           AS k,
+                       r.rho         AS rho,
+                       r.cp          AS cp,
+                       r.dim         AS dim,
+                       r.nx          AS nx,
+                       r.ny          AS ny,
+                       r.Lx          AS Lx,
+                       r.Ly          AS Ly,
+                       r.t_end       AS t_end,
+                       r.t_max       AS t_max,
+                       r.t_min       AS t_min,
+                       r.t_mean      AS t_mean,
+                       r.wall_time   AS wall_time,
+                       r.n_dofs      AS n_dofs,
+                       r.l2_norm     AS l2_norm,
+                       r.created_at  AS created_at,
+                       m.name        AS material,
+                       b.pattern     AS bc_pattern,
+                       b.description AS bc_description,
+                       d.label       AS domain_label,
+                       t.name        AS thermal_class,
+                       round(score, 4) AS similarity_score
+                ORDER BY similarity_score DESC
+                LIMIT $top_k
+                """,
+                top_k=top_k * 2,   # fetch extra to filter out query itself
+                vec=vec,
+            )
+            return rows[:top_k]
+
+        except Exception as exc:
+            log.debug("Semantic similarity search failed (non-fatal): %s", exc)
+            return []
 
     def get_similar_runs(
         self,
@@ -445,14 +565,26 @@ class SimulationKnowledgeGraph:
         """
         Find past runs with similar physical setup.
 
-        Similarity score (higher = more relevant):
-          - Same BC pattern  → +1 bonus
+        Strategy (priority order):
+          1. Semantic vector search via Neo4j HNSW index (when embeddings exist)
+          2. Cypher parameter-distance fallback (always available)
+
+        The Cypher fallback scoring:
+          - Same BC pattern   → +1 bonus
           - Same domain class → +1 bonus
           - Sorted by (bonus DESC, |k_diff| + |nx_diff| ASC)
 
         Each result includes bc_pattern, domain_label, and thermal_class
         so the LLM gets full context without extra round-trips.
         """
+        # ── Strategy 1: semantic vector search ───────────────────────────────
+        semantic_rows = self.get_similar_runs_semantic(config, top_k=top_k)
+        if semantic_rows:
+            log.debug("get_similar_runs: using semantic path (%d results)", len(semantic_rows))
+            return semantic_rows
+
+        # ── Strategy 2: Cypher parameter-distance fallback ───────────────────
+        log.debug("get_similar_runs: falling back to Cypher parameter search")
         k   = config.get("k", 1.0) or 1.0
         dim = config.get("dim", 2)
         nx  = config.get("nx", 20) or 20
@@ -804,6 +936,104 @@ class SimulationKnowledgeGraph:
             "bc_configs":      counts[3] if len(counts) > 3 else 0,
             "domains":         counts[4] if len(counts) > 4 else 0,
             "thermal_classes": counts[5] if len(counts) > 5 else 0,
+            "embedded_runs":   self._count_embedded_runs(),
+        }
+
+    def _count_embedded_runs(self) -> int:
+        rows = self._run(
+            "MATCH (r:Run) WHERE r.embedding IS NOT NULL RETURN count(r) AS n"
+        )
+        return rows[0]["n"] if rows else 0
+
+    # ── Embedding backfill ────────────────────────────────────────────────────
+
+    def backfill_embeddings(self, batch_size: int = 50) -> dict:
+        """
+        Embed all Run nodes that don't yet have an embedding vector.
+
+        Useful after the first pull of nomic-embed-text to retroactively
+        embed all existing runs.  Safe to call multiple times — skips runs
+        that already have an embedding.
+
+        Returns a summary dict: {total, already_embedded, newly_embedded, failed}.
+        """
+        if not self._available:
+            return {"error": "Neo4j unavailable"}
+
+        try:
+            from knowledge_graph.embeddings import get_embedder, run_to_text
+            embedder = get_embedder()
+            if not embedder._check_available():
+                return {"error": "Ollama / nomic-embed-text not available"}
+        except Exception as exc:
+            return {"error": str(exc)}
+
+        # Fetch runs without embeddings
+        rows = self._run(
+            """
+            MATCH (r:Run)
+            WHERE r.embedding IS NULL
+            RETURN r.run_id AS run_id,
+                   r.k AS k, r.rho AS rho, r.cp AS cp,
+                   r.dim AS dim, r.nx AS nx, r.ny AS ny,
+                   r.Lx AS Lx, r.Ly AS Ly, r.Lz AS Lz,
+                   r.t_end AS t_end, r.dt AS dt, r.source AS source,
+                   r.bc_types AS bc_types, r.status AS status,
+                   r.t_max AS t_max, r.t_min AS t_min, r.t_mean AS t_mean,
+                   r.wall_time AS wall_time, r.n_dofs AS n_dofs
+            LIMIT $limit
+            """,
+            limit=batch_size,
+        )
+
+        total_missing  = self._run(
+            "MATCH (r:Run) WHERE r.embedding IS NULL RETURN count(r) AS n"
+        )
+        total_unembedded = total_missing[0]["n"] if total_missing else 0
+
+        newly_embedded = 0
+        failed         = 0
+
+        for row in rows:
+            run_id = row["run_id"]
+            # Reconstruct minimal config/results dicts from stored properties
+            config = {
+                "k": row.get("k"), "rho": row.get("rho"), "cp": row.get("cp"),
+                "dim": row.get("dim", 2), "nx": row.get("nx"), "ny": row.get("ny"),
+                "Lx": row.get("Lx", 1.0), "Ly": row.get("Ly", 1.0),
+                "Lz": row.get("Lz", 1.0), "t_end": row.get("t_end"),
+                "dt": row.get("dt"), "source": row.get("source", 0.0),
+                "bcs": [{"type": t} for t in (row.get("bc_types") or "").split("+") if t],
+            }
+            results = {
+                "status": row.get("status", "unknown"),
+                "max_temperature":  row.get("t_max"),
+                "min_temperature":  row.get("t_min"),
+                "mean_temperature": row.get("t_mean"),
+                "wall_time":  row.get("wall_time", 0.0),
+                "n_dofs":     row.get("n_dofs", 0),
+            }
+            vec = embedder.embed_run(run_id, config, results)
+            if vec:
+                self._run(
+                    "MATCH (r:Run {run_id: $run_id}) SET r.embedding = $vec",
+                    run_id=run_id, vec=vec,
+                )
+                newly_embedded += 1
+            else:
+                failed += 1
+
+        already_embedded = self._count_embedded_runs() - newly_embedded
+        log.info(
+            "backfill_embeddings: newly_embedded=%d  failed=%d  total_unembedded=%d",
+            newly_embedded, failed, total_unembedded,
+        )
+        return {
+            "total_unembedded":  total_unembedded,
+            "processed_in_batch": len(rows),
+            "newly_embedded":    newly_embedded,
+            "failed":            failed,
+            "already_embedded":  already_embedded,
         }
 
     def close(self) -> None:
