@@ -1,0 +1,30 @@
+{
+  "dim": 3,
+  "nx": 24,
+  "ny": 24,
+  "nz": 24,
+  "rho": 2700.0,
+  "cp": 900.0,
+  "k": 200.0,
+  "source": 0.0,
+  "bcs": [
+    {"type": "dirichlet", "value": 273.0, "location": "left",   "note": "cold wall: 0°C"},
+    {"type": "dirichlet", "value": 373.0, "location": "right",  "note": "hot wall: 100°C"},
+    {"type": "neumann",   "value": 0.0,   "location": "top",    "note": "adiabatic"},
+    {"type": "neumann",   "value": 0.0,   "location": "bottom", "note": "adiabatic"},
+    {"type": "robin",     "alpha": 10.0,  "u_inf": 293.0, "location": "front",  "note": "convective cooling"},
+    {"type": "robin",     "alpha": 10.0,  "u_inf": 293.0, "location": "back",   "note": "convective cooling"}
+  ],
+  "u_init": 293.0,
+  "t_start": 0.0,
+  "t_end": 500.0,
+  "dt": 2.0,
+  "theta": 1.0,
+  "element_degree": 1,
+  "output_dir": "/workspace/results",
+  "run_id": "heat_3d_aluminum",
+  "save_every": 10,
+  "save_format": "xdmf",
+  "petsc_solver": "cg",
+  "petsc_preconditioner": "hypre"
+}
