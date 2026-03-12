@@ -280,6 +280,73 @@ At every `save_every` steps:
 
 ---
 
+## 2b. Gmsh — Complex Geometry Meshing
+
+### What it is
+
+[Gmsh](https://gmsh.info/) is an open-source 3D finite element mesh generator with
+a built-in scripting language and Python API. In PDE Agents it is used to define
+non-rectangular simulation domains that cannot be expressed as simple structured grids.
+
+### Why Gmsh?
+
+The built-in FEniCSx `create_box_mesh` / `create_rectangle_mesh` functions only
+produce unit-square or unit-cube domains. Real engineering geometries — an L-bracket,
+a tube cross-section, a stepped notch — require an explicit mesh generator.
+
+Gmsh:
+- Runs inside the FEniCSx container (installed in `Dockerfile.fenics`)
+- Uses Gmsh's Python API to define geometry programmatically
+- Tags boundary surfaces with **physical group names** (`"left"`, `"inner_wall"`, etc.)
+- Converts the Gmsh model to a DOLFINx mesh via `dolfinx.io.gmshio.model_to_mesh()`
+- Returns `(mesh, cell_tags, facet_tags)` — the same structure as a built-in mesh
+
+### Available geometry types
+
+```python
+# simulations/geometry/gmsh_geometries.py
+from simulations.geometry.gmsh_geometries import build_gmsh_mesh, GmshMeshResult
+
+result: GmshMeshResult = build_gmsh_mesh({
+    "type": "l_shape",
+    "Lx": 0.08, "Ly": 0.08,
+    "mesh_size": 0.005
+})
+# result.mesh, result.cell_tags, result.facet_tags, result.boundary_names
+```
+
+| Type | Key parameters | Physical groups (boundaries) |
+|------|----------------|------------------------------|
+| `rectangle` | `Lx`, `Ly`, `mesh_size` | `left`, `right`, `top`, `bottom` |
+| `l_shape` | `Lx`, `Ly`, `mesh_size` | `left`, `right`, `top`, `bottom`, `inner_h`, `inner_v` |
+| `circle` | `radius`, `mesh_size` | `boundary` |
+| `annulus` | `r_inner`, `r_outer`, `mesh_size` | `inner_wall`, `outer_wall` |
+| `hollow_rectangle` | `Lx`, `Ly`, `hole_*`, `mesh_size` | `outer_left`, `outer_right`, `outer_top`, `outer_bottom`, `inner_*` |
+| `t_shape` | `Lx`, `Ly`, `stem_*`, `mesh_size` | `left`, `right`, `top`, `bottom`, `stem_left`, `stem_right` |
+| `stepped_notch` | `Lx`, `Ly`, `notch_*`, `mesh_size` | `left`, `right`, `top`, `bottom`, `notch_left`, `notch_right`, `notch_bottom` |
+| `box` (3D) | `Lx`, `Ly`, `Lz`, `mesh_size` | `left`, `right`, `top`, `bottom`, `front`, `back` |
+| `cylinder` (3D) | `radius`, `height`, `mesh_size` | `bottom_face`, `top_face`, `lateral` |
+
+### Integration with the solver
+
+`heat_equation.py` dispatches on the `geometry.type` key in the config:
+
+```python
+if config.geometry:
+    result = build_gmsh_mesh(config.geometry)
+    mesh = result.mesh
+    # boundary condition lookup uses result.boundary_names dict
+else:
+    # built-in DOLFINx structured mesh (default)
+    mesh = create_rectangle_mesh(...)
+```
+
+BCs on Gmsh meshes use `"boundary"` key (Gmsh physical group name) instead of
+`"location"` (built-in named boundary). The solver automatically detects which
+key is present.
+
+---
+
 ## 3. Ollama — Local LLM Server
 
 ### What it is
@@ -878,28 +945,58 @@ server round-trip):
 // dashboard.py — clientside_callback
 function(href) {
     var host = window.location.hostname;
+    var boltUrl = encodeURIComponent('bolt://' + host + ':7687');
     return [
-        '/agents/docs',              // API Docs  — via nginx subpath
-        '/mlflow/',                  // MLflow    — via nginx subpath
-        'http://' + host + ':9001', // MinIO     — direct port (not proxied)
-        '/browser/'                  // Neo4j     — via nginx subpath
+        '/agents/docs',                              // API Docs  — via nginx
+        '/mlflow/',                                  // MLflow    — via nginx
+        'http://' + host + ':9001',                  // MinIO     — direct port
+        'http://' + host + ':7474/browser/?connectURL=' + boltUrl, // Neo4j
+        'http://' + host + ':5005',                  // NeoDash   — direct port
     ];
 }
 ```
 
-Relative paths (`/agents/docs`, `/mlflow/`, `/browser/`) resolve through nginx
-on port 8050 automatically. MinIO uses an absolute URL with `window.location.hostname`
-because its SPA (`<base href="/">`) cannot be served behind a subpath without
-additional configuration.
-
-All nav links use `external_link=True` so Dash opens them in new tabs rather
-than routing them through its internal SPA router.
+Relative paths go through nginx on port 8050. MinIO and NeoDash use absolute
+URLs because their SPAs cannot be served behind a subpath.
 
 **MinIO access when port 9001 is firewalled:**
 ```bash
 ssh -L 19001:localhost:9001 -N <server>   # tunnel to a free local port
 # then open http://localhost:19001
 ```
+
+### Dashboard tabs
+
+| Tab | Purpose |
+|-----|---------|
+| 📊 Overview | Recent runs table, solver scaling scatter, peak T by conductivity, system health, run inspector with SIMILAR_TO neighbours |
+| 🌡️ Field Viewer | Heatmap, 3D surface, heat flux, profiles, Z-slice, volume render, time animation |
+| 📈 Convergence | L2-norm history comparison across runs |
+| 🔬 Parametric | Scatter/bar comparison across swept parameters |
+| 🤖 Agent Chat | Async chat with orchestrator/simulation/analytics/database agents + quick prompts |
+| 🧠 Knowledge Graph | KG stats, semantic run search, physics reference browser, NeoDash launcher |
+| 🔎 Run Explorer | Full run browser with agent timeline, config, files, and recommendations |
+
+### Knowledge Graph tab architecture
+
+The **🧠 Knowledge Graph** tab is the dashboard surface for the GraphRAG features:
+
+```
+KG Tab
+├── Left panel
+│   ├── Graph Statistics (8 stat cards: runs, embeddings, SIMILAR_TO edges,
+│   │   references, materials, bc_configs, domains, thermal_classes)
+│   ├── Semantic Run Search
+│   │   └── TextArea → embed via nomic-embed-text → vector queryNodes() → results
+│   └── NeoDash launcher (opens port 5005)
+└── Right panel — Physics Reference Browser
+    ├── Type filter (All / material_property / bc_practice / solver_guidance / domain_physics)
+    └── Cards: subject, full text, citation source, linked nodes, tags
+```
+
+The `_get_kg()` helper in the dashboard lazy-loads the `SimulationKnowledgeGraph`
+singleton. It requires `knowledge_graph/` bind-mounted into the dashboard container
+(via docker-compose) and the `neo4j` Python driver installed.
 
 ### The seven view modes
 
@@ -969,14 +1066,15 @@ with mlflow.start_run(run_name=run_id):
 
 ---
 
-## 13. Neo4j — Simulation Knowledge Graph
+## 13. Neo4j — Simulation Knowledge Graph (GraphRAG)
 
 ### What it is
 
 Neo4j is a **native graph database** — data is stored as nodes, relationships, and
 properties rather than rows and columns. It is the foundation of the system's
-long-term memory: every simulation run is added to the graph, and agents query it
-before deciding what to do next.
+long-term memory: every simulation run is added to the graph, enriched with
+semantic vector embeddings, connected to similar runs, and linked to curated
+physics reference knowledge.
 
 ### Why a graph database?
 
@@ -984,54 +1082,67 @@ before deciding what to do next.
 |---------|------------------------|---------------|
 | "Which runs used similar parameters?" | Complex multi-join SQL | Single MATCH with range filter |
 | "What material is k=50, ρ=7800?" | Full table scan | O(1) index + relationship hop |
-| "What happened after similar failures?" | 5-table join | MATCH path traversal |
+| "Find semantically similar runs" | Not possible | HNSW vector index query |
+| "What physics fact is relevant here?" | Not possible | HAS_REFERENCE edge traversal |
 | Pattern mining over relationships | Requires ORM + aggregations | First-class Cypher |
 
-### Graph schema (Phase 1)
+### Graph schema
 
 ```
 (:Run {
-    run_id, dim, status, k, rho, cp,
-    nx, ny, nz, t_end, dt, theta, source, u_init,
+    run_id, name, dim, status, k, rho, cp,
+    nx, ny, nz, Lx, Ly, Lz, bc_types,
+    t_end, dt, theta, source, u_init,
     t_max, t_min, t_mean, l2_norm, wall_time, n_dofs,
-    created_at
+    created_at,
+    embedding   ← 768-dim nomic-embed-text vector
 })
 
-(:Material {
-    name, k, rho, cp, alpha,
-    k_min, k_max, description, typical_uses
-})
-
-(:KnownIssue {
-    code, severity, condition,
-    description, recommendation, observed_in
-})
+(:Material { name, k, rho, cp, alpha, k_min, k_max, description, typical_uses })
+(:KnownIssue { code, severity, condition, description, recommendation })
+(:BCConfig { pattern, description, has_dirichlet, has_neumann, has_robin, has_source })
+(:Domain { label, description, Lx_ref, Ly_ref, char_len })
+  Labels: micro | component | panel | structural (by characteristic length √(Lx·Ly))
+(:ThermalClass { name, description, k_threshold })
+  Labels: high_conductor | medium_conductor | low_conductor | thermal_insulator
+(:Reference { ref_id, type, subject, text, source, tags })
+  Types: material_property | bc_practice | solver_guidance | domain_physics
 
 Relationships:
   (:Run)-[:USES_MATERIAL {confidence}]->(:Material)
   (:Run)-[:TRIGGERED {detected_at}]->(:KnownIssue)
-  (:Run)-[:SPAWNED_FROM]->(:Run)      — created from an agent suggestion
-  (:Run)-[:IMPROVED_OVER {metric}]->(:Run)  — planned Phase 2
+  (:Run)-[:USES_BC_CONFIG]->(:BCConfig)
+  (:Run)-[:ON_DOMAIN]->(:Domain)
+  (:Material)-[:HAS_THERMAL_CLASS]->(:ThermalClass)
+  (:Run)-[:SPAWNED_FROM]->(:Run)
+  (:Run)-[:SIMILAR_TO {score, updated_at}]->(:Run)     ← KNN semantic edges
+  (:Material)-[:HAS_REFERENCE]->(:Reference)
+  (:BCConfig)-[:HAS_REFERENCE]->(:Reference)
+  (:Domain)-[:HAS_REFERENCE]->(:Reference)
+```
+
+### Neo4j indexes
+
+```cypher
+-- Uniqueness constraints (one per node type)
+CREATE CONSTRAINT run_id_unique ...
+CREATE CONSTRAINT material_name_unique ...
+-- (+ BCConfig, Domain, ThermalClass, KnownIssue, Reference)
+
+-- HNSW vector index for semantic Run similarity
+CREATE VECTOR INDEX run_embedding_index IF NOT EXISTS
+FOR (r:Run) ON r.embedding
+OPTIONS {indexConfig: {
+    `vector.dimensions`:          768,
+    `vector.similarity_function`: 'cosine'
+}}
 ```
 
 ### What is seeded at startup
 
-The agents container seeds static physical knowledge into Neo4j when it starts:
+The agents container seeds static physical knowledge into Neo4j at first start:
 
-**10 engineering materials:**
-
-| Material | k [W/m·K] | ρ [kg/m³] | c_p [J/kg·K] |
-|----------|-----------|-----------|--------------|
-| Steel (carbon) | 50 | 7800 | 500 |
-| Stainless Steel 316 | 16 | 8000 | 500 |
-| Aluminium 6061 | 200 | 2700 | 900 |
-| Copper | 385 | 8960 | 385 |
-| Titanium Ti-6Al-4V | 6.7 | 4430 | 526 |
-| Silicon | 150 | 2330 | 700 |
-| Concrete | 1.7 | 2300 | 880 |
-| Glass (borosilicate) | 1.0 | 2230 | 830 |
-| Water | 0.6 | 1000 | 4182 |
-| Air | 0.026 | 1.2 | 1005 |
+**10 engineering materials** → linked to ThermalClass and Reference nodes
 
 **6 documented failure patterns (KnownIssue nodes):**
 
@@ -1044,9 +1155,79 @@ The agents container seeds static physical knowledge into Neo4j when it starts:
 | `PURE_NEUMANN_ILL_POSED` | No Dirichlet BC → singular system | high |
 | `NEGATIVE_TEMPERATURES` | T_min < 0 K in solution | high |
 
-### How the graph grows with usage
+**20 physics Reference nodes** in 4 categories:
 
-Every successful simulation run triggers:
+| Category | Count | Coverage |
+|----------|-------|---------|
+| `material_property` | 8 | k(T) for steel/copper/aluminium/silicon, Curie point anomaly, water convection limit, concrete moisture dependence |
+| `bc_practice` | 5 | h = 5–25 (natural air), 25–250 (forced air), 500–10,000 (water), heat flux magnitudes, Dirichlet temperature validity |
+| `solver_guidance` | 4 | Mesh resolution rule, Fourier accuracy criterion (Fo = α·Δt/Δx² < 1), P2 vs P1, CG vs GMRES |
+| `domain_physics` | 3 | Radiation negligible at micro-scale, natural convection at structural scale, thermal time constant τ = ρc_pL²/(π²k) |
+
+### GraphRAG features — how they work
+
+#### Feature 1: Vector embeddings
+
+Every run is described by `run_to_text()` which builds a physics summary:
+```
+"2D l_shape geometry, panel-scale, k=50.0 W/(m·K) [medium_conductor],
+ rho=7800 kg/m³, cp=500 J/(kg·K), thermal_diffusivity=1.282e-05 m²/s,
+ BCs: dirichlet+robin robin: h=25 T_inf=300K, t_end=0.2s dt=0.02s,
+ T_max=800.0K T_min=753.1K T_mean=771.2K, DOFs=116, wall_time=0.69s, status=success."
+```
+
+This text is embedded via Ollama (`POST /api/embeddings`, model `nomic-embed-text`)
+producing a 768-dim float vector stored as `r.embedding` on the Run node.
+
+**`get_similar_runs()` strategy:**
+```
+1. Embed the proposed config with nomic-embed-text
+2. CALL db.index.vector.queryNodes('run_embedding_index', k, vec)
+   → top-k results with cosine similarity scores
+3. If Ollama unavailable → fall back to Cypher parameter-distance query
+```
+
+#### Feature 2: SIMILAR_TO KNN edges
+
+After every `add_run()`, `_build_similar_to_edges()` creates `SIMILAR_TO`
+relationships to the top-5 nearest embedded neighbours (cosine ≥ 0.85):
+
+```cypher
+CALL db.index.vector.queryNodes('run_embedding_index', 6, $vec)
+YIELD node AS neighbour, score
+WHERE neighbour.run_id <> $run_id AND score >= 0.85
+MATCH (src:Run {run_id: $run_id})
+MERGE (src)-[rel:SIMILAR_TO]->(neighbour)
+SET rel.score = round(score, 4), rel.updated_at = $ts
+```
+
+Agents and the dashboard can now find nearest neighbours with a single Cypher
+hop rather than a vector query on every call. The Overview tab Run Inspector
+shows this table directly.
+
+#### Feature 3: Reference nodes
+
+`seed_references()` in `graph.py` creates 20 `Reference` nodes and links them
+to existing Material, BCConfig, and Domain nodes via `HAS_REFERENCE` edges.
+
+`get_references_for_config(config)` retrieves all relevant references using
+EXISTS subqueries:
+```cypher
+MATCH (ref:Reference)
+WHERE (
+    EXISTS { MATCH (m:Material)-[:HAS_REFERENCE]->(ref)
+             WHERE m.k_min <= $k <= m.k_max }
+    OR EXISTS { MATCH (b:BCConfig {pattern: $bc_pattern})-[:HAS_REFERENCE]->(ref) }
+    OR EXISTS { MATCH (d:Domain {label: $domain_label})-[:HAS_REFERENCE]->(ref) }
+)
+RETURN ref.*
+```
+
+The `check_config_warnings()` and `get_pre_run_context()` methods include
+these references, and the new `get_physics_references` agent tool exposes
+them to agents with source citations.
+
+### How the graph grows with usage
 
 ```
 run_simulation(config)
@@ -1056,24 +1237,16 @@ run_simulation(config)
   ├── 3. _upload_run_to_minio() → output files archived in MinIO
   └── 4. kg.add_run(run_id, config, results, warnings)
             │
-            ├── MERGE (:Run {run_id}) with all properties
-            ├── MERGE (:Run)-[:USES_MATERIAL]->(:Material)   ← material inferred
-            │         by matching k to the k_range of each Material node
-            └── MERGE (:Run)-[:TRIGGERED]->(:KnownIssue)    ← for each rule violation
-```
-
-After 50 runs, a typical query for context looks like:
-```
-"2D run with k≈50 (steel)"
-  → 8 similar past runs found
-  → T_max range: 478–502 K (consistent)
-  → 2 runs triggered INCONSISTENT_IC (u_init was 0, BCs were 300/500 K)
-  → 0 runs triggered CFL violation (all used theta=1.0)
+            ├── MERGE (:Run) with all properties
+            ├── MERGE (:BCConfig), (:Domain), link to (:Material)
+            ├── MERGE triggered (:KnownIssue) edges
+            ├── _embed_and_store_run() → 768-dim vector on r.embedding
+            └── _build_similar_to_edges() → up to 5 SIMILAR_TO edges
 ```
 
 ### Rule-based warning engine
 
-`knowledge_graph/rules.py` implements 8 pure-Python rules that run **instantly**
+`knowledge_graph/rules.py` implements 9 pure-Python rules that run **instantly**
 before every simulation, regardless of Neo4j availability:
 
 | Rule code | Trigger condition |
@@ -1095,79 +1268,81 @@ before every simulation, regardless of Neo4j availability:
 Iteration 1:
   check_config_warnings(config_json) →
     warnings: [INCONSISTENT_IC (high): u_init=0 K, BC_min=300 K]
-    similar_runs: [heat_abc123 (T_max=500, wall_time=0.7s), ...]
-    recommendation: "CAUTION: 1 high-severity issue. Review before running."
+    similar_runs: [heat_abc123 score=0.97 (T_max=500, wall_time=0.7s), ...]
+    physics_references: [bc_robin_h_natural_air, mat_steel_k_temp, ...]
+    recommendation: "CAUTION: 1 high-severity issue. Similar runs achieved T_max 478–502 K."
 
 Iteration 2:
   LLM fixes: u_init=300 (matches BC), then calls validate_config()
 
 Iteration 3:
   run_simulation(fixed_config) → FEniCSx → success
-  [auto: MinIO upload + KG add_run]
+  [auto: MinIO upload + KG add_run + embed + SIMILAR_TO edges]
 ```
 
-**Database Agent** (material lookup):
+**Analytics Agent** (physics reference lookup):
 ```
-User: "What are the thermal properties of titanium?"
-Agent calls: query_knowledge_graph(material="titanium")
-  → {name: "Titanium Ti-6Al-4V", k: 6.7, rho: 4430, cp: 526,
-     description: "Very low conductivity for a metal. High thermal gradients expected.",
-     typical_uses: "aerospace, biomedical implants, high-temperature applications"}
-```
-
-**Analytics Agent** (similar-run discovery):
-```
-User: "Find runs similar to my copper simulation"
-Agent calls: query_knowledge_graph(k=385.0, dim=2)
-  → similar_runs: [{run_id: "heat_xyz", t_max: 373.1, wall_time: 0.4s, material: "Copper"}, ...]
+User: "What h coefficient should I use for air cooling?"
+Agent calls: get_physics_references(config_json)
+  → [{ref_id: "bc_robin_h_natural_air",
+      subject: "natural convection h coefficient in air",
+      text: "Natural convection in air: h = 5–25 W/(m²·K)...",
+      source: "Bergman et al., Fundamentals of Heat and Mass Transfer, 7th ed."}]
 ```
 
 ### REST API
 
 ```bash
-GET  /kg/stats                    # node counts (runs, materials, known_issues)
-POST /kg/seed                     # re-seed static knowledge (idempotent)
-GET  /kg/material/{name}          # look up material by name (partial, case-insensitive)
-GET  /kg/run/{run_id}/similar     # find runs similar to this run's config
+GET  /kg/stats                    # node counts incl. embedded_runs, references
+POST /kg/seed                     # re-seed static knowledge + references (idempotent)
+GET  /kg/material/{name}          # look up material by name
+GET  /kg/run/{run_id}/similar     # semantic similarity search for this run
 GET  /kg/run/{run_id}/lineage     # SPAWNED_FROM ancestry chain
 ```
 
-### Neo4j Browser
+### Graph visualization tools
 
-Open **http://`host`:8050/browser/** and log in with `neo4j` / `pde_graph_secret`.
+**Neo4j Browser** (`http://host:7474`): raw Cypher queries, graph visualization.
 
-> Also directly accessible at `http://host:7474` if that port is open.
-> When accessed via the nginx proxy at `/browser/`, the Bolt WebSocket connection
-> is tunnelled through the `/neo4j-bolt` location on port 8050 — no extra port
-> forwarding needed.
+**NeoDash** (`http://host:5005`): open-source (Apache 2.0) graph dashboard builder
+by Neo4j Labs. Build no-code dashboards with Cypher-powered graph, table, chart,
+and map panels. Start with: `docker compose up neodash -d`
 
-Useful starter queries:
+Useful starter Cypher queries:
 ```cypher
-// Overview of the graph
-MATCH (n) RETURN labels(n), count(n)
+-- Graph overview
+MATCH (n) RETURN labels(n)[0] AS type, count(n) AS count ORDER BY count DESC
 
-// All runs and their material
-MATCH (r:Run)-[:USES_MATERIAL]->(m:Material)
-RETURN r.run_id, r.dim, r.k, r.t_max, m.name
-ORDER BY r.created_at DESC LIMIT 20
+-- Semantic similarity network (top KNN pairs)
+MATCH (r:Run)-[rel:SIMILAR_TO]->(s:Run)
+RETURN r.run_id, s.run_id, rel.score ORDER BY rel.score DESC LIMIT 20
 
-// Which failure patterns are most common?
-MATCH (r:Run)-[:TRIGGERED]->(i:KnownIssue)
-RETURN i.code, i.severity, count(r) AS occurrences
-ORDER BY occurrences DESC
+-- BC pattern outcomes
+MATCH (r:Run)-[:USES_BC_CONFIG]->(b:BCConfig)
+WHERE r.status = 'success'
+RETURN b.pattern, count(r) AS runs, avg(r.t_max) AS avg_t_max
+ORDER BY runs DESC
 
-// Runs that spawned from a suggestion chain
-MATCH p=(child:Run)-[:SPAWNED_FROM*]->(root:Run)
-RETURN [n IN nodes(p) | n.run_id] AS lineage
+-- Physics references for steel
+MATCH (m:Material {name: 'steel'})-[:HAS_REFERENCE]->(ref:Reference)
+RETURN ref.subject, ref.text, ref.source
+
+-- Full neighbourhood of a run
+MATCH (r:Run {run_id: 'your_run_id'})
+OPTIONAL MATCH (r)-[:USES_MATERIAL]->(m)
+OPTIONAL MATCH (r)-[:USES_BC_CONFIG]->(b)
+OPTIONAL MATCH (r)-[:ON_DOMAIN]->(d)
+OPTIONAL MATCH (r)-[:SIMILAR_TO]->(nb)
+RETURN r, m, b, d, collect(nb) AS neighbours
 ```
 
 ### Phase roadmap
 
 | Phase | Status | Features |
 |-------|--------|---------|
-| **Phase 1** | ✅ Done | Neo4j container, Run nodes, Material + KnownIssue seeding, `add_run`, similarity search, pre-run context, rule engine, agent tools, REST endpoints |
-| Phase 2 | Planned | Automated correlation miner (finds patterns across 50+ runs), `IMPROVED_OVER` relationships, `suggest_next_run` that reads from graph |
-| Phase 3 | Planned | Graph becomes primary agent memory; agents cite specific past run IDs in their reasoning; user-facing "Why did the agent suggest this?" lineage view |
+| **Phase 1** | ✅ Done | Neo4j container, Run/Material/KnownIssue nodes, `add_run`, similarity search, rule engine, agent tools, REST endpoints |
+| **Phase 2** | ✅ Done | BCConfig, Domain, ThermalClass nodes; vector embeddings (nomic-embed-text); HNSW vector index; SIMILAR_TO KNN edges; Reference nodes with physics knowledge; semantic `get_similar_runs`; dashboard KG tab; NeoDash integration |
+| Phase 3 | Planned | Automated correlation miner across 50+ runs, `IMPROVED_OVER` relationships, `suggest_next_run` reading from graph, agent reasoning cites specific past run IDs |
 
 
 ---
@@ -1450,58 +1625,60 @@ Bolt protocol, and file formats). This means:
 
 ### Service URLs
 
-All web UIs are accessed through **nginx on port 8050** (single entry point):
-
 | URL | Purpose |
 |-----|---------|
-| http://`host`:8050/ | Dashboard (Field Viewer, Run Explorer, Chat) |
-| http://`host`:8050/agents/docs | FastAPI Swagger UI (all endpoints incl. /kg/ /explorer/) |
+| http://`host`:8050/ | Dashboard (all tabs — proxied via nginx) |
+| http://`host`:8050/agents/docs | FastAPI Swagger UI |
 | http://`host`:8050/mlflow/ | MLflow experiment tracking |
-| http://`host`:8050/browser/ | Neo4j Browser (log in: `neo4j` / `pde_graph_secret`) |
-| http://`host`:9001 | MinIO object storage console (direct — port 9001) |
-| http://`host`:8000 | Agents REST API (also proxied via `/agents/`) |
+| http://`host`:7474 | Neo4j Browser (direct) |
+| http://`host`:5005 | NeoDash — open-source graph explorer (Apache 2.0) |
+| http://`host`:9001 | MinIO object storage console (direct) |
+| http://`host`:8000 | Agents REST API |
 | http://`host`:11434 | Ollama LLM API |
 
-> Replace `host` with `localhost` for local access or the server's IP/hostname when
-> connecting remotely. When only port 8050 is open in the firewall, use an SSH tunnel
-> to access MinIO: `ssh -L 19001:localhost:9001 -N <server>`
+> Replace `host` with `localhost` for local access or the server's IP for remote.
+> When port 9001 is firewalled: `ssh -L 19001:localhost:9001 -N <server>`
 
 ### Key files
 
 | File | Purpose |
 |------|---------|
-| `docker-compose.yml` | All service definitions (incl. Neo4j) |
-| `simulations/solvers/heat_equation.py` | FEM solver |
+| `docker-compose.yml` | All service definitions incl. NeoDash on port 5005 |
+| `simulations/solvers/heat_equation.py` | FEM solver (built-in + Gmsh meshes) |
+| `simulations/geometry/gmsh_geometries.py` | 9 Gmsh geometry builders |
 | `docker/fenics_runner_api.py` | FEniCSx HTTP API |
-| `agents/base_agent.py` | ReAct loop + tool-call parser + agent_run_logs instrumentation |
-| `orchestrator/api.py` | FastAPI + async job + /kg/ + /explorer/ endpoints |
-| `visualization/dashboard.py` | Dash UI: field viewer, Run Explorer, Agent Chat |
-| `database/models.py` | SQLAlchemy ORM schema (incl. AgentRunLog) |
-| `database/operations.py` | CRUD + log_agent_step + search_runs |
-| `knowledge_graph/graph.py` | SimulationKnowledgeGraph core class |
-| `knowledge_graph/rules.py` | Rule-based pre-run warning engine (8 rules) |
-| `knowledge_graph/seeder.py` | Static physical knowledge (materials + failure patterns) |
-| `tools/knowledge_tools.py` | check_config_warnings + query_knowledge_graph tools |
+| `agents/base_agent.py` | ReAct loop + tool-call parser |
+| `orchestrator/api.py` | FastAPI + async jobs + /kg/ endpoints |
+| `visualization/dashboard.py` | Dash: Overview, Field, KG tab, Run Explorer, Chat |
+| `database/models.py` | SQLAlchemy ORM |
+| `knowledge_graph/graph.py` | SimulationKnowledgeGraph: full schema, vector index, semantic search, SIMILAR_TO edges, Reference queries, backfill |
+| `knowledge_graph/embeddings.py` | OllamaEmbedder + run_to_text() physics summary |
+| `knowledge_graph/references.py` | 20 curated physics reference entries |
+| `knowledge_graph/rules.py` | Rule-based pre-run warning engine (9 rules) |
+| `knowledge_graph/seeder.py` | Static knowledge: 10 materials + 6 failure patterns |
+| `tools/knowledge_tools.py` | check_config_warnings, query_knowledge_graph, get_physics_references |
 
 ### Data flow summary
 
 ```
 User text
-  → LLM (Ollama)              : intent understanding + tool selection
-  → check_config_warnings()   : rule engine + KG similarity check (before every run)
-  → Neo4j (Knowledge Graph)   : similar past runs, material info, failure patterns
-  → Python tool function      : actual computation / DB query / API call
-  → FEniCSx                   : PDE solving (if simulation tool)
-  → PostgreSQL                : metadata + agent_run_logs storage
-  → MinIO                     : binary storage (auto-upload every run)
-  → Neo4j                     : add_run() — new Run node linked to material + issues
-  → numpy files               : field data (u_final.npy, snapshots/)
-  → scipy.griddata            : scattered→regular grid interpolation
-  → Plotly                    : interactive web charts
-  → Browser                   : user sees result + can browse Run Explorer
+  → LLM (Ollama)                   : intent understanding + tool selection
+  → check_config_warnings()        : rule engine + semantic KG search + physics refs
+  → Neo4j                          : vector queryNodes() → similar runs + references
+  → Python tool function           : actual computation / DB query / API call
+  → FEniCSx + Gmsh                 : PDE solving (if simulation tool)
+  → PostgreSQL                     : metadata + agent_run_logs storage
+  → MinIO                          : binary storage (auto-upload every run)
+  → Neo4j kg.add_run()             : Run node + BCConfig + Domain + material link
+  → Ollama nomic-embed-text        : 768-dim vector stored on Run.embedding
+  → Neo4j SIMILAR_TO edges         : top-5 KNN precomputed for fast traversal
+  → numpy files                    : field data (u_final.npy, snapshots/)
+  → scipy.griddata                 : scattered → regular grid interpolation
+  → Plotly Dash                    : interactive charts + KG tab + Run Explorer
+  → Browser                        : user sees results + can explore graph in NeoDash
 ```
 
 ---
 
-*Document updated: PDE Agents v1.2  
-FEniCSx 0.10.0.post2 · LangGraph · Ollama · Plotly Dash · PostgreSQL · Neo4j · MinIO · Nginx*
+*Document updated: PDE Agents v2.0  
+FEniCSx 0.10.0.post2 · LangGraph · Ollama · nomic-embed-text · Plotly Dash · PostgreSQL · Neo4j 5.x · NeoDash · MinIO · Nginx · Gmsh*

@@ -1,6 +1,6 @@
 # PDE Agents
 
-A multi-agent ecosystem built on open-source LLMs running locally to solve PDEs with the Finite Element Method.
+A multi-agent ecosystem built on open-source LLMs running locally to solve PDEs with the Finite Element Method, enhanced with a GraphRAG knowledge graph for physics-informed reasoning.
 
 **Hardware:** 2× NVIDIA RTX PRO 6000 Blackwell Server Edition (~98 GB VRAM each · ~196 GB total) · CUDA 13.1  
 **FEM Solver:** DOLFINx (FEniCSx) `0.10.0.post2`
@@ -10,35 +10,29 @@ A multi-agent ecosystem built on open-source LLMs running locally to solve PDEs 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    ORCHESTRATOR (LangGraph)                      │
-│              LLM: llama3.3:70b  (supervisor)                    │
-└───────────┬───────────────┬────────────────┬────────────────────┘
+┌──────────────────────────────────────────────────────────────────────┐
+│                    ORCHESTRATOR (LangGraph)                           │
+│              LLM: llama3.3:70b  (supervisor)                         │
+└───────────┬───────────────┬────────────────┬─────────────────────────┘
             │               │                │
             ▼               ▼                ▼
   ┌─────────────────┐ ┌──────────────┐ ┌───────────────┐
   │  AGENT-1        │ │  AGENT-2     │ │  AGENT-3      │
   │  Simulation     │ │  Analytics   │ │  Database     │
-  │  ─────────────  │ │  ──────────  │ │  ──────────   │
   │  qwen2.5-coder  │ │  llama3.3    │ │  qwen2.5-coder│
   │  :32b           │ │  :70b        │ │  :14b         │
   └────────┬────────┘ └──────┬───────┘ └──────┬────────┘
            │                 │                │
            │    ┌────────────┴────────────┐   │
            ▼    ▼                         ▼   ▼
-  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
-  │  FEniCSx     │  │  NumPy       │  │  PostgreSQL  │
-  │  DOLFINx     │  │  Plotly Dash │  │  MinIO       │
-  │  2D/3D FEM   │  │  MLflow      │  │  (XDMF/VTK)  │
-  └──────────────┘  └──────────────┘  └──────────────┘
-                              │
-                              ▼
-                    ┌──────────────────┐
-                    │  Neo4j           │
-                    │  Knowledge Graph │
-                    │  (materials +    │
-                    │   learned runs)  │
-                    └──────────────────┘
+  ┌──────────────┐  ┌──────────────┐  ┌───────────────────────────────┐
+  │  FEniCSx     │  │  NumPy       │  │  Neo4j Knowledge Graph (GraphRAG)│
+  │  DOLFINx     │  │  Plotly Dash │  │  ─────────────────────────────│
+  │  2D/3D FEM   │  │  MLflow      │  │  Run nodes + 768-dim embeddings│
+  │  Gmsh meshes │  │  PostgreSQL  │  │  SIMILAR_TO KNN edges          │
+  └──────────────┘  └──────────────┘  │  Reference nodes (physics KB)  │
+                                       │  Semantic vector search (HNSW) │
+                                       └───────────────────────────────┘
 ```
 
 ### Agents
@@ -53,16 +47,16 @@ A multi-agent ecosystem built on open-source LLMs running locally to solve PDEs 
 ### Services
 
 All browser-facing UIs are accessed through a single **nginx reverse proxy on port 8050**.
-Only port 8050 needs to be open in a firewall for full dashboard access.
 
 | Service | Host access | Purpose |
 |---------|-------------|---------|
 | **nginx** | `:8050` | Reverse proxy — single entry point for all web UIs |
-| Dashboard | `:8050/` (via nginx) | Plotly Dash interactive visualization & chat |
+| Dashboard | `:8050/` (via nginx) | Plotly Dash visualization, agent chat, KG explorer |
 | Agents API | `:8050/agents/` or `:8000` | FastAPI REST + Swagger UI |
 | MLflow | `:8050/mlflow/` (via nginx) | Experiment tracking UI |
-| Neo4j Browser | `:8050/browser/` (via nginx) | Knowledge graph browser |
-| MinIO Console | `:9001` (direct) | Object storage browser — see note below |
+| Neo4j Browser | `:7474` (direct) | Knowledge graph browser |
+| **NeoDash** | `:5005` (direct) | Open-source graph dashboard (Neo4j Labs, Apache 2.0) |
+| MinIO Console | `:9001` (direct) | Object storage browser |
 | MinIO API | `:9000` | S3-compatible object storage API |
 | FEniCSx Runner | `:8080` | DOLFINx simulation job REST API |
 | Ollama | `:11434` | Local LLM server (GPU-accelerated) |
@@ -102,37 +96,46 @@ chmod +x setup.sh
 
 This will:
 - Build the three custom Docker images (agents, fenics-runner, dashboard)
-- Start all services including Neo4j
+- Start all services including Neo4j and NeoDash
 - Initialize the PostgreSQL schema
-- Auto-seed the knowledge graph with 10 engineering materials and 6 known failure patterns
+- Auto-seed the knowledge graph with 10 engineering materials, 6 known failure patterns, and 20 physics reference nodes
 - Pull LLM models in the background (~70 GB total, 30–90 min first time)
 
-### 2. Confirm all models are ready
+### 2. Pull the embedding model
+
+The knowledge graph uses `nomic-embed-text` (274 MB) for semantic similarity:
+```bash
+docker exec pde-ollama ollama pull nomic-embed-text
+```
+
+### 3. Confirm all models are ready
 ```bash
 docker exec pde-ollama ollama list
 # Expected output once all pulls complete:
-# NAME                  SIZE
-# llama3.3:70b          42 GB
-# qwen2.5-coder:32b     19 GB
-# qwen2.5-coder:14b     9.0 GB
+# NAME                    SIZE
+# llama3.3:70b            42 GB
+# qwen2.5-coder:32b       19 GB
+# qwen2.5-coder:14b       9.0 GB
+# nomic-embed-text:latest 274 MB
 ```
 
-### 3. Check all services are healthy
+### 4. Check all services are healthy
 ```bash
 make health
 ```
 
-### 4. Open the dashboard
+### 5. Open the dashboard
 Navigate to **http://localhost:8050** in your browser.
 
 All services are accessible from the dashboard navbar or directly:
 
 | URL | What you get |
 |-----|-------------|
-| http://localhost:8050/ | Dashboard |
+| http://localhost:8050/ | Dashboard (all tabs) |
 | http://localhost:8050/agents/docs | API Swagger UI |
 | http://localhost:8050/mlflow/ | MLflow |
-| http://localhost:8050/browser/ | Neo4j Browser |
+| http://localhost:7474 | Neo4j Browser |
+| http://localhost:5005 | NeoDash (open-source graph explorer) |
 | http://localhost:9001 | MinIO console (direct) |
 
 ---
@@ -179,107 +182,94 @@ curl -s -X POST http://localhost:8080/run \
   }' | python3 -m json.tool
 ```
 
-**Via Makefile:**
-```bash
-make simulate-2d
-```
-
 After every successful run the system automatically:
 1. Stores metadata in **PostgreSQL**
 2. Uploads output files to **MinIO** (`simulation-results/runs/<run_id>/`)
-3. Adds a **Run node** to the **Neo4j knowledge graph** (with material inference and rule warnings)
+3. Adds a **Run node** to the **Neo4j knowledge graph** (material inference + rule warnings)
+4. Embeds the run summary with **nomic-embed-text** (768-dim vector stored on the Run node)
+5. Creates **SIMILAR_TO** edges to the top-5 most similar past runs (cosine ≥ 0.85)
 
 ---
 
-### Use Case 2 — 3D Heat Equation (Aluminum Block with Convection)
+### Use Case 2 — Complex Geometry with Gmsh
 
-A 3D aluminum block with fixed-temperature left/right walls, convective Robin
-boundaries on the front and back, and insulated top/bottom. Demonstrates all three
-boundary condition types simultaneously.
+FEniCSx supports 9 built-in Gmsh geometry types for non-rectangular domains.
+Specify `"geometry"` in the config with a `"type"` key:
 
-**Via Agents API:**
-```bash
-curl -s -X POST http://localhost:8000/run \
-  -H "Content-Type: application/json" \
-  -d '{
-    "task": "Run a 3D heat equation on a 16x16x16 aluminum block. k=237 W/(mK), rho=2700, cp=900. Left wall 273K, right wall 373K. Front and back surfaces have Robin convection: h=25 W/(m2K), T_ambient=293K. Top and bottom insulated. Use u_init=293.0, t_end=300.0, dt=2.0. Report min/max temperature and steady-state estimate."
-  }' | python3 -m json.tool
-```
-
-**Direct FEniCSx REST API:**
 ```bash
 curl -s -X POST http://localhost:8080/run \
   -H "Content-Type: application/json" \
   -d '{
-    "dim": 3, "nx": 16, "ny": 16, "nz": 16,
-    "k": 237.0, "rho": 2700.0, "cp": 900.0,
-    "u_init": 293.0,
+    "dim": 2,
+    "k": 50.0, "rho": 7800.0, "cp": 500.0,
+    "u_init": 300.0,
+    "geometry": {"type": "l_shape", "Lx": 0.08, "Ly": 0.08, "mesh_size": 0.005},
     "bcs": [
-      {"type": "dirichlet", "value": 273.0, "location": "left"},
-      {"type": "dirichlet", "value": 373.0, "location": "right"},
-      {"type": "robin", "alpha": 25.0, "u_inf": 293.0, "location": "front"},
-      {"type": "robin", "alpha": 25.0, "u_inf": 293.0, "location": "back"},
-      {"type": "neumann", "value": 0.0, "location": "top"},
-      {"type": "neumann", "value": 0.0, "location": "bottom"}
+      {"type": "dirichlet", "value": 800.0, "boundary": "left"},
+      {"type": "robin",     "h": 25.0,  "T_inf": 300.0, "boundary": "top"},
+      {"type": "robin",     "h": 25.0,  "T_inf": 300.0, "boundary": "right"},
+      {"type": "neumann",   "value": 0.0,               "boundary": "bottom"}
     ],
-    "t_end": 300.0, "dt": 2.0,
-    "run_id": "aluminum_block_3d",
-    "output_dir": "/workspace/results"
+    "t_end": 0.5, "dt": 0.02,
+    "run_id": "steel_l_shape_robin"
   }' | python3 -m json.tool
 ```
 
-**Via Makefile:**
+**Available geometry types:**
+
+| Type | Description | Boundaries |
+|------|-------------|------------|
+| `rectangle` | Standard rectangle (default) | `left`, `right`, `top`, `bottom` |
+| `l_shape` | L-shaped domain (re-entrant corner) | `left`, `right`, `top`, `bottom`, `inner_h`, `inner_v` |
+| `circle` | Full circular disk | `boundary` |
+| `annulus` | Ring / annular domain | `inner_wall`, `outer_wall` |
+| `hollow_rectangle` | Rectangle with rectangular hole | `outer_*`, `inner_*` |
+| `t_shape` | T-shaped cross-section | `left`, `right`, `top`, `bottom`, `stem_left`, `stem_right` |
+| `stepped_notch` | Stepped notch (stress concentrator) | `left`, `right`, `top`, `bottom`, `notch_*` |
+| `box` | 3D rectangular box | `left`, `right`, `top`, `bottom`, `front`, `back` |
+| `cylinder` | 3D cylinder | `bottom_face`, `top_face`, `lateral` |
+
+For Gmsh geometries use `"boundary"` key in BCs (physical group name) instead of `"location"`.
+
+---
+
+### Use Case 3 — 3D Heat Equation (Aluminum Block with Convection)
+
 ```bash
-make simulate-3d
+curl -s -X POST http://localhost:8000/run \
+  -H "Content-Type: application/json" \
+  -d '{
+    "task": "Run a 3D heat equation on a 16x16x16 aluminum block. k=237, rho=2700, cp=900. Left wall 273K, right wall 373K. Front and back surfaces have Robin convection: h=25, T_inf=293K. Top and bottom insulated. t_end=300.0, dt=2.0. Report min/max temperature."
+  }' | python3 -m json.tool
 ```
 
 ---
 
-### Use Case 3 — Parametric Sweep (Thermal Conductivity Study)
+### Use Case 4 — Parametric Sweep (Thermal Conductivity Study)
 
-The Simulation Agent runs multiple simulations while varying a single parameter,
-automatically cataloging each run in the database.
-
-**Via Agents API:**
 ```bash
 curl -s -X POST http://localhost:8000/agent/simulation \
   -H "Content-Type: application/json" \
   -d '{
-    "task": "Run a parametric sweep on a 2D 32x32 domain varying thermal conductivity k over [1, 10, 50, 100, 200] W/(mK). Keep rho=7800, cp=500, left wall 300K, right wall 500K, insulated top and bottom, u_init=300.0, t_end=20.0, dt=0.5. Use run_ids: sweep_k_001 through sweep_k_005."
+    "task": "Run a parametric sweep on a 2D 32x32 domain varying thermal conductivity k over [1, 10, 50, 100, 200] W/(mK). Keep rho=7800, cp=500, left wall 300K, right wall 500K, insulated top and bottom, u_init=300.0, t_end=20.0, dt=0.5."
   }' | python3 -m json.tool
-```
-
-**Via Makefile:**
-```bash
-make sweep
 ```
 
 ---
 
-### Use Case 4 — Analytics: Compare Runs
-
-After running multiple simulations, the Analytics Agent cross-references results
-and suggests what to try next.
+### Use Case 5 — Analytics: Compare Runs
 
 ```bash
 curl -s -X POST http://localhost:8000/agent/analytics \
   -H "Content-Type: application/json" \
   -d '{
-    "task": "Compare the runs steel_plate_64x64 and steel_agent_final. What is the difference in temperature distribution? Which mesh resolution is sufficient and why? Suggest the next simulation parameter set to test."
+    "task": "Compare the runs steel_plate_64x64 and steel_agent_final. What is the difference in temperature distribution? Which mesh resolution is sufficient and why?"
   }' | python3 -m json.tool
-```
-
-**Via Makefile:**
-```bash
-make analyze RUN_ID=steel_plate_64x64
 ```
 
 ---
 
-### Use Case 5 — Database Queries in Natural Language
-
-The Database Agent translates natural-language questions into SQL queries and can
-also search the knowledge graph for material or pattern information.
+### Use Case 6 — Database Queries in Natural Language
 
 ```bash
 # Find the hottest simulations
@@ -288,114 +278,122 @@ curl -s -X POST http://localhost:8000/agent/database \
   -d '{"task": "Show me all runs where the maximum temperature exceeded 450K, ordered by wall time."}' \
   | python3 -m json.tool
 
-# History query through the knowledge graph
+# Material lookup via knowledge graph
 curl -s -X POST http://localhost:8000/agent/database \
   -H "Content-Type: application/json" \
   -d '{"task": "What material properties does copper have? Find similar past runs that used copper-like conductivity."}' \
   | python3 -m json.tool
-
-# Get statistics
-curl -s -X POST http://localhost:8000/agent/database \
-  -H "Content-Type: application/json" \
-  -d '{"task": "How many simulations have been run in total? What is the average wall time for 2D vs 3D runs?"}' \
-  | python3 -m json.tool
-```
-
-**Via Makefile:**
-```bash
-make query Q="Show me all 3D runs with fewer than 10000 DOFs"
-make db-stats
-```
-
----
-
-### Use Case 6 — Full Multi-Agent Pipeline
-
-The orchestrator decomposes a high-level task across all three agents: Simulation
-runs the FEM, Analytics interprets results, and Database stores and retrieves data.
-
-```bash
-curl -s -X POST http://localhost:8000/run \
-  -H "Content-Type: application/json" \
-  -d '{
-    "task": "Investigate the effect of mesh refinement on the 2D heat equation. Run the steel plate problem (k=50, rho=7800, cp=500, left 300K, right 500K, t_end=20.0, dt=0.5) on three meshes: 16x16, 32x32, and 64x64. Store all results, compare maximum temperatures and wall times, and summarize which mesh gives the best accuracy-to-cost trade-off."
-  }' | python3 -m json.tool
 ```
 
 ---
 
 ### Use Case 7 — Knowledge Graph Queries
 
-The knowledge graph accumulates information with every run. Query it directly
-via the API, or ask any agent in natural language.
+The knowledge graph accumulates information with every run and stores curated physics knowledge. Query it via the API or ask any agent.
 
 ```bash
-# Graph statistics
+# Graph statistics (includes embedding coverage and reference count)
 curl -s http://localhost:8000/kg/stats | python3 -m json.tool
 
-# Look up a material
-curl -s http://localhost:8000/kg/material/titanium | python3 -m json.tool
+# Semantic similarity search — finds past runs similar to a natural language description
+curl -s -X POST http://localhost:8000/kg/search \
+  -H "Content-Type: application/json" \
+  -d '{"query": "steel l-shape with robin convection, component-scale", "top_k": 5}' \
+  | python3 -m json.tool
 
-# Find runs similar to a given run
-curl -s http://localhost:8000/kg/run/steel_plate_64x64/similar | python3 -m json.tool
+# Pre-run context: warnings + similar runs + physics references
+curl -s -X POST http://localhost:8000/kg/check \
+  -H "Content-Type: application/json" \
+  -d '{"k": 50, "dim": 2, "Lx": 0.08, "Ly": 0.08,
+       "bcs": [{"type": "dirichlet", "value": 800},
+               {"type": "robin", "h": 25, "T_inf": 300}]}' \
+  | python3 -m json.tool
 
 # Re-seed static knowledge (safe to call repeatedly)
 curl -s -X POST http://localhost:8000/kg/seed | python3 -m json.tool
-
-# Ask the Simulation Agent to check a config before running
-curl -s -X POST http://localhost:8000/agent/simulation \
-  -H "Content-Type: application/json" \
-  -d '{
-    "task": "What issues might arise if I run a 2D simulation with k=50, nx=8, ny=8, theta=0.0, dt=0.5, u_init=0, and Dirichlet BCs at 300 K and 800 K? Use check_config_warnings."
-  }' | python3 -m json.tool
 ```
 
-**Browse the graph visually:** open **http://localhost:8050/browser/** in your browser
-(login: `neo4j` / `pde_graph_secret`)
+**Browse the graph visually:**
 
-> Neo4j Browser is also accessible at `http://localhost:7474` if that port is open.
-> When connecting through the nginx proxy at `/browser/`, the Bolt WebSocket is
-> tunnelled via `/neo4j-bolt` on port 8050 — no separate port needed.
+- **Neo4j Browser** at `http://localhost:7474` — raw Cypher queries, graph visualization
+- **NeoDash** at `http://localhost:5005` — no-code graph dashboards and visualizations (open-source, Apache 2.0)
 
-Example Cypher queries in the Neo4j Browser:
+Example Cypher queries:
 ```cypher
-// All runs that triggered the INCONSISTENT_IC warning
-MATCH (r:Run)-[:TRIGGERED]->(i:KnownIssue {code: "INCONSISTENT_IC"})
-RETURN r.run_id, r.t_max, i.recommendation
+-- Semantically similar run pairs (via KNN edges)
+MATCH (r:Run)-[rel:SIMILAR_TO]->(s:Run)
+RETURN r.run_id, s.run_id, rel.score AS similarity
+ORDER BY rel.score DESC LIMIT 10
 
-// Runs grouped by inferred material
-MATCH (r:Run)-[:USES_MATERIAL]->(m:Material)
-RETURN m.name, count(r) AS runs, avg(r.t_max) AS avg_t_max
+-- Runs grouped by BC pattern with average outcomes
+MATCH (r:Run)-[:USES_BC_CONFIG]->(b:BCConfig)
+WHERE r.status = 'success'
+RETURN b.pattern, count(r) AS runs, avg(r.t_max) AS avg_t_max
 ORDER BY runs DESC
 
-// Find similar runs to a given configuration
-MATCH (r:Run)
-WHERE r.dim = 2 AND r.k >= 40 AND r.k <= 60
-RETURN r.run_id, r.k, r.t_max, r.wall_time
-ORDER BY r.k
+-- Physics references for a material
+MATCH (m:Material {name: 'steel'})-[:HAS_REFERENCE]->(ref:Reference)
+RETURN ref.subject, ref.text, ref.source
+
+-- Full knowledge graph overview
+MATCH (n) RETURN labels(n)[0] AS type, count(n) AS count ORDER BY count DESC
 ```
 
 ---
 
-### Use Case 8 — Run Explorer (Dashboard)
+### Use Case 8 — Pre-Run Physics Check
 
-The **🔎 Run Explorer** tab in the dashboard (`http://localhost:8050/`) provides a
-visual interface to browse every simulation run:
+Ask the Simulation Agent to validate a configuration using the knowledge graph before running:
+
+```bash
+curl -s -X POST http://localhost:8000/agent/simulation \
+  -H "Content-Type: application/json" \
+  -d '{
+    "task": "What issues might arise if I run a 2D simulation with k=50, nx=8, ny=8, theta=0.0, dt=0.5, u_init=0, and Dirichlet BCs at 300 K and 800 K? Use check_config_warnings and get_physics_references."
+  }' | python3 -m json.tool
+```
+
+The response includes:
+- Rule violations (mesh too coarse, explicit instability, inconsistent IC)
+- Semantic similar runs with outcomes
+- Physics reference facts (h coefficients, k(T) validity, solver guidance)
+- An overall `recommendation` string
+
+---
+
+### Use Case 9 — Run Explorer (Dashboard)
+
+The **🔎 Run Explorer** tab provides a visual interface to browse every simulation run:
 
 - **Left panel:** searchable, filterable run list (status, dimension, keyword)
 - **Right panel:** detailed view with sub-tabs for:
-  - **Overview** — KPIs (T_max, T_min, wall time, DOFs)
+  - **Overview** — KPIs (T_max, T_min, wall time, DOFs) + SIMILAR_TO neighbour table
   - **Agent Timeline** — step-by-step trace of every agent reasoning and tool-call
   - **Config** — full simulation configuration used (for reproducibility)
   - **Files** — MinIO file listing with object names and sizes
   - **Recommendations** — agent suggestions from the run
 
-Every run stores its agent decision trace in the `agent_run_logs` table so you
-can replay exactly what the LLM reasoned and which tools it called.
+---
+
+### Use Case 10 — Knowledge Graph Tab (Dashboard)
+
+The **🧠 Knowledge Graph** tab in the dashboard exposes the GraphRAG features visually:
+
+**Graph Statistics panel:** Real-time counts of all node types, embedding coverage percentage, SIMILAR_TO edge count, and Reference node count.
+
+**Semantic Run Search:** Type a free-text description (e.g. "2D steel with convective cooling") and the KG embeds it with nomic-embed-text and finds the top-5 similar past runs using the HNSW vector index. Results show similarity scores with progress bars.
+
+**Physics Reference Browser:** Browse all 20 curated reference facts filtered by type:
+- 📐 Material Properties — k(T) and cp(T) dependence, phase transition limits
+- 🔲 BC Practice — realistic h coefficients, heat flux magnitudes, temperature validity
+- ⚙️ Solver Guidance — mesh resolution rules, Fourier number criterion, P2 vs P1
+- 🌐 Domain Physics — radiation at micro-scale, buoyancy at structural scale, thermal time constants
+
+**NeoDash launcher:** Opens the open-source graph visualization tool at port 5005.
 
 ---
 
-### Use Case 9 — Direct Python (inside containers)
+### Use Case 11 — Direct Python (inside containers)
 
 #### Run the solver directly
 ```python
@@ -403,26 +401,26 @@ can replay exactly what the LLM reasoned and which tools it called.
 import sys; sys.path.insert(0, '/workspace')
 from simulations.solvers.heat_equation import HeatConfig, HeatEquationSolver
 
+# Gmsh L-shape geometry with named boundary conditions
 cfg = HeatConfig(
-    dim=2, nx=128, ny=128,
-    k=1.5, rho=2500.0, cp=800.0,
-    source=5000.0,          # internal heat generation [W/m³]
-    u_init=293.0,
+    dim=2,
+    k=50.0, rho=7800.0, cp=500.0,
+    u_init=300.0,
+    geometry={"type": "l_shape", "Lx": 0.08, "Ly": 0.08, "mesh_size": 0.005},
     bcs=[
-        {"type": "dirichlet", "value": 293.0, "location": "left"},
-        {"type": "dirichlet", "value": 293.0, "location": "right"},
-        {"type": "neumann",   "value": 0.0,   "location": "top"},
-        {"type": "neumann",   "value": 0.0,   "location": "bottom"},
+        {"type": "dirichlet", "value": 800.0, "boundary": "left"},
+        {"type": "robin",     "h": 25.0, "T_inf": 300.0, "boundary": "top"},
+        {"type": "neumann",   "value": 0.0,              "boundary": "right"},
     ],
-    t_end=200.0, dt=1.0,
-    run_id="custom_run_001",
+    t_end=0.5, dt=0.02,
+    run_id="l_shape_robin",
     output_dir="/workspace/results",
 )
 result = HeatEquationSolver(cfg).solve()
 print(result)
 ```
 
-#### Query the knowledge graph directly
+#### Query the knowledge graph with semantic search
 ```python
 # docker exec -it pde-agents python3
 import sys; sys.path.insert(0, '/app')
@@ -430,18 +428,46 @@ from knowledge_graph.graph import get_kg
 
 kg = get_kg()
 print("Stats:", kg.stats())
-print("Copper:", kg.get_material_info("copper"))
+# Stats: {'total_runs': 313, 'embedded_runs': 313, 'references': 20,
+#          'materials': 10, 'bc_configs': 4, 'domains': 4, ...}
 
-# Pre-run context for a proposed config
-ctx = kg.get_pre_run_context({
-    "dim": 2, "k": 50, "rho": 7800, "cp": 500,
-    "nx": 64, "ny": 64, "dt": 0.5, "t_end": 100,
-    "theta": 1.0, "u_init": 300,
-    "bcs": [{"type": "dirichlet", "value": 300, "location": "left"},
-            {"type": "dirichlet", "value": 500, "location": "right"}]
-})
-print("Warnings:", ctx["warnings"])
-print("Similar runs:", ctx["similar_runs"])
+# Semantic similarity search using vector embeddings
+similar = kg.get_similar_runs_semantic({
+    "k": 50.0, "dim": 2, "Lx": 0.08, "Ly": 0.08,
+    "bcs": [{"type": "dirichlet"}, {"type": "robin", "h": 25}],
+    "geometry": {"type": "l_shape"},
+}, top_k=5)
+for r in similar:
+    print(f"  {r['run_id'][:16]}  score={r['similarity_score']:.4f}  T_max={r['t_max']:.0f}K")
+
+# Get curated physics references for a config
+refs = kg.get_references_for_config({"k": 50.0, "Lx": 0.1, "Ly": 0.1,
+    "bcs": [{"type": "robin", "h": 20}]})
+for r in refs:
+    print(f"  [{r['type']}] {r['subject']} — {r['source']}")
+
+# Full pre-run context (warnings + similar + material + references)
+ctx = kg.get_pre_run_context({"k": 50, "dim": 2, "Lx": 0.08, "Ly": 0.08,
+    "bcs": [{"type": "dirichlet", "value": 300},
+            {"type": "robin", "h": 25, "T_inf": 300}]})
+print("Recommendation:", ctx["recommendation"])
+print("Physics refs:", len(ctx["physics_references"]))
+```
+
+#### Backfill embeddings and build KNN edges
+```python
+# docker exec -it pde-agents python3
+import sys; sys.path.insert(0, '/app')
+from knowledge_graph.graph import get_kg
+kg = get_kg()
+
+# Embed all runs that don't yet have a vector
+result = kg.backfill_embeddings(batch_size=50)
+print(result)  # {'newly_embedded': 0, 'failed': 0, ...}
+
+# Build / refresh SIMILAR_TO KNN edges for all embedded runs
+result = kg.build_all_similar_to_edges(k=5, min_score=0.85)
+print(result)  # {'processed': 313, 'total_similar_to_in_graph': 1566}
 ```
 
 #### Drive the Simulation Agent directly
@@ -458,22 +484,6 @@ result = agent.run(
     "u_init=273.0, t_end=5.0, dt=0.1, run_id='copper_test'."
 )
 print(result["answer"])
-print(f"Iterations: {result['iterations']}")
-```
-
-#### Run the multi-agent orchestrator
-```python
-# docker exec -it pde-agents python3
-import sys; sys.path.insert(0, '/app')
-from orchestrator.graph import MultiAgentOrchestrator
-
-orch = MultiAgentOrchestrator()
-result = orch.run(
-    "Investigate how thermal conductivity affects heat distribution "
-    "in a 2D square domain. Sweep k from 1 to 200 W/(m·K) in 4 steps, "
-    "analyze the results, and recommend the optimal k for maximum uniformity."
-)
-print(result["final_report"])
 ```
 
 ---
@@ -500,41 +510,40 @@ print(result["final_report"])
 = ∫_Ω f v dx + ∫_ΓN h v ds + α(u_∞, v)_ΓR
 ```
 
-**Time integration schemes:**
-- θ = 1.0 — Backward Euler: unconditionally stable, 1st-order accurate *(default)*
-- θ = 0.5 — Crank-Nicolson: 2nd-order accurate, conditionally stable
-
 ### Configuration Reference
 
 | Parameter | Type | Description | Example |
 |-----------|------|-------------|---------|
 | `dim` | int | Spatial dimension (2 or 3) | `2` |
-| `nx`, `ny`, `nz` | int | Mesh divisions per axis | `64, 64` |
+| `nx`, `ny`, `nz` | int | Mesh divisions (built-in meshes) | `64, 64` |
 | `k` | float | Thermal conductivity [W/(m·K)] | `50.0` (steel) |
-| `rho` | float | Density [kg/m³] | `7800.0` (steel) |
-| `cp` | float | Specific heat [J/(kg·K)] | `500.0` (steel) |
+| `rho` | float | Density [kg/m³] | `7800.0` |
+| `cp` | float | Specific heat [J/(kg·K)] | `500.0` |
 | `source` | float | Volumetric heat source [W/m³] | `0.0` |
 | `u_init` | float | Initial temperature [K] — set close to BCs | `300.0` |
 | `t_end` | float | Simulation end time [s] | `100.0` |
 | `dt` | float | Time step [s] | `0.5` |
 | `theta` | float | Time integration: 1.0=BE, 0.5=CN | `1.0` |
-| `bcs` | list | Boundary condition specs (see below) | — |
+| `geometry` | dict | Gmsh geometry spec — see table above | `{"type": "l_shape"}` |
+| `bcs` | list | Boundary condition specs | — |
 | `run_id` | str | Unique run identifier | `"steel_plate_01"` |
 | `output_dir` | str | Directory for XDMF/VTK output | `"/workspace/results"` |
 
 **Boundary condition spec:**
 ```json
+// Built-in mesh (location key)
 {"type": "dirichlet", "value": 300.0, "location": "left"}
 {"type": "neumann",   "value": 0.0,   "location": "top"}
 {"type": "robin",     "alpha": 10.0,  "u_inf": 293.0, "location": "front"}
+
+// Gmsh mesh (boundary key — matches physical group name)
+{"type": "dirichlet", "value": 800.0, "boundary": "left"}
+{"type": "robin",     "h": 25.0, "T_inf": 300.0, "boundary": "outer_wall"}
 ```
-Locations for 2D: `left`, `right`, `top`, `bottom`.  
-Locations for 3D: `left`, `right`, `top`, `bottom`, `front`, `back`.
 
 > **Important:** Always set `u_init` close to the Dirichlet boundary values.
-> Starting from `u_init=0.0` with walls at 300–500 K causes numerical overshoot
-> (Gibbs-like oscillation) in the first few time steps. The knowledge graph will
-> automatically warn you if this inconsistency is detected.
+> The knowledge graph will automatically warn you with `INCONSISTENT_IC` if
+> a large temperature jump is detected.
 
 ### Material Parameters (seeded in Knowledge Graph)
 
@@ -551,8 +560,85 @@ Locations for 3D: `left`, `right`, `top`, `bottom`, `front`, `back`.
 | Water | 0.6 | 1000 | 4182 | 1.43e-7 |
 | Air | 0.026 | 1.2 | 1005 | 2.16e-5 |
 
-Thermal diffusivity `α = k / (ρ c_p)`. Characteristic time `τ = L² / α`.  
-All materials are stored in Neo4j and agents can look them up by name (e.g. "what are the properties of titanium?").
+---
+
+## Knowledge Graph — GraphRAG Features
+
+The Neo4j knowledge graph is the system's long-term physics memory. Each simulation run is stored as a graph node and connected to typed context nodes, enabling agents to reason with both accumulated experience and curated domain knowledge.
+
+### Graph Schema
+
+```
+(:Run {
+    run_id, name, dim, status, k, rho, cp,
+    nx, ny, nz, Lx, Ly, Lz, bc_types,
+    t_end, dt, theta, source, u_init,
+    t_max, t_min, t_mean, l2_norm,
+    wall_time, n_dofs, created_at,
+    embedding   ← 768-dim nomic-embed-text vector
+})
+
+(:Material { name, k, rho, cp, alpha, k_min, k_max, description, typical_uses })
+(:KnownIssue { code, severity, condition, description, recommendation, observed_in })
+(:BCConfig { pattern, description, has_dirichlet, has_neumann, has_robin, has_source })
+(:Domain { label, description, Lx_ref, Ly_ref, char_len })
+(:ThermalClass { name, description, k_threshold })
+(:Reference { ref_id, type, subject, text, source, tags })
+
+Relationships:
+  (:Run)-[:USES_MATERIAL {confidence}]->(:Material)
+  (:Run)-[:TRIGGERED {detected_at}]->(:KnownIssue)
+  (:Run)-[:USES_BC_CONFIG]->(:BCConfig)
+  (:Run)-[:ON_DOMAIN]->(:Domain)
+  (:Material)-[:HAS_THERMAL_CLASS]->(:ThermalClass)
+  (:Run)-[:SPAWNED_FROM]->(:Run)            — created from an agent suggestion
+  (:Run)-[:SIMILAR_TO {score, updated_at}]->(:Run)  — KNN semantic edges
+  (:Material)-[:HAS_REFERENCE]->(:Reference)
+  (:BCConfig)-[:HAS_REFERENCE]->(:Reference)
+  (:Domain)-[:HAS_REFERENCE]->(:Reference)
+```
+
+### Feature 1 — Vector Embeddings + Semantic Search
+
+Every Run node stores a 768-dimensional `embedding` property computed by `nomic-embed-text` (via Ollama). The embedding text summarises the simulation's physics: geometry, material class, BC types, thermal diffusivity, temperature range, and DOFs.
+
+A **Neo4j HNSW vector index** (`run_embedding_index`) enables sub-millisecond semantic similarity search.
+
+`get_similar_runs()` automatically uses vector search as the primary strategy and falls back to Cypher parameter-distance search when Ollama is unavailable.
+
+```python
+# Semantic search from a natural-language query
+kg.get_similar_runs_semantic(config, top_k=5)
+# → [{run_id, k, bc_pattern, domain_label, t_max, similarity_score: 0.9656}, ...]
+
+# Backfill all existing runs
+kg.backfill_embeddings(batch_size=50)
+# → {total_unembedded: 0, newly_embedded: 313, failed: 0}
+```
+
+### Feature 2 — SIMILAR_TO KNN Edges
+
+After every run, the system creates `SIMILAR_TO` edges to the top-5 nearest embedded neighbours (cosine ≥ 0.85). This precomputes the neighbourhood graph so agents can traverse it with a simple Cypher hop rather than a vector query:
+
+```cypher
+MATCH (r:Run {run_id: $id})-[rel:SIMILAR_TO]->(nb:Run)
+RETURN nb.run_id, rel.score ORDER BY rel.score DESC
+```
+
+These edges are also shown in the **Run Inspector** panel on the Overview tab.
+
+### Feature 3 — Physics Reference Nodes
+
+20 curated reference facts are stored as `Reference` nodes, linked to Material, BCConfig, and Domain nodes:
+
+| Type | Count | Examples |
+|------|-------|---------|
+| `material_property` | 8 | Steel k(T) dependence, Curie point anomaly in cp, copper melting, silicon k drop, water convection limit |
+| `bc_practice` | 5 | h = 5–25 W/(m²·K) natural air convection, h = 500–10,000 for water cooling, typical heat flux ranges |
+| `solver_guidance` | 4 | 10 elements minimum across thinnest dimension, Fourier accuracy criterion, P2 vs P1 trade-offs, CG vs GMRES |
+| `domain_physics` | 3 | Radiation negligible at micro-scale, natural convection at structural scale, thermal time constant formula |
+
+References appear in `check_config_warnings()`, `get_pre_run_context()`, and the `get_physics_references` agent tool. Agents cite the `source` field when presenting reference data.
 
 ---
 
@@ -562,64 +648,72 @@ All materials are stored in Neo4j and agents can look them up by name (e.g. "wha
 pde-agents/
 ├── agents/
 │   ├── base_agent.py         # LangGraph ReAct base: reason → act loop + tool-call parser
-│   │                         #   + step-by-step agent_run_logs instrumentation
 │   ├── simulation_agent.py   # Agent-1: KG-aware setup, run, debug FEM simulations
 │   ├── analytics_agent.py    # Agent-2: analysis, comparison, KG pattern queries
 │   └── database_agent.py     # Agent-3: DB storage, SQL queries, history search
 │
 ├── tools/                    # LangChain @tool functions (agent "hands")
-│   ├── simulation_tools.py   # run_simulation (auto MinIO + KG), validate_config,
-│   │                         #   debug_simulation, run_parametric_sweep
+│   ├── simulation_tools.py   # run_simulation, validate_config, run_parametric_sweep
 │   ├── analytics_tools.py    # analyze_run, compare_runs, list_runs_for_analysis
-│   ├── database_tools.py     # search_history, get_run_summary, query_runs,
-│   │                         #   store_result, export_to_csv
-│   └── knowledge_tools.py    # check_config_warnings, query_knowledge_graph
+│   ├── database_tools.py     # search_history, get_run_summary, query_runs
+│   └── knowledge_tools.py    # check_config_warnings, query_knowledge_graph,
+│                             #   get_physics_references (NEW)
 │
-├── knowledge_graph/          # Phase-1 knowledge graph (Neo4j)
-│   ├── __init__.py
-│   ├── graph.py              # SimulationKnowledgeGraph: add_run, get_similar_runs,
-│   │                         #   get_pre_run_context, get_material_info, get_run_lineage
-│   ├── rules.py              # Pure-Python rule engine (8 rules: IC, CFL, mesh, BCs…)
+├── knowledge_graph/
+│   ├── graph.py              # SimulationKnowledgeGraph: full schema, vector index,
+│   │                         #   semantic search, SIMILAR_TO edges, Reference queries,
+│   │                         #   backfill_embeddings, build_all_similar_to_edges
+│   ├── embeddings.py         # OllamaEmbedder: nomic-embed-text 768-dim, run_to_text()
+│   ├── references.py         # 20 curated physics reference entries (material_property,
+│   │                         #   bc_practice, solver_guidance, domain_physics)
+│   ├── rules.py              # Pure-Python rule engine (9 rules: IC, CFL, mesh, BCs…)
 │   └── seeder.py             # Static knowledge: 10 materials + 6 failure patterns
 │
 ├── orchestrator/
 │   ├── graph.py              # Multi-agent supervisor graph (LangGraph)
-│   └── api.py                # FastAPI REST interface + WebSocket streaming
-│                             #   /explorer/* endpoints (Run Explorer)
-│                             #   /kg/* endpoints (knowledge graph REST)
+│   └── api.py                # FastAPI REST interface + /kg/* endpoints
 │
 ├── simulations/
 │   ├── solvers/
-│   │   └── heat_equation.py  # DOLFINx 0.10 FEM solver (2D/3D, all BC types)
+│   │   └── heat_equation.py  # DOLFINx 0.10 FEM solver (2D/3D, all BC types,
+│   │                         #   built-in + Gmsh mesh dispatch)
+│   ├── geometry/
+│   │   ├── __init__.py
+│   │   └── gmsh_geometries.py  # 9 Gmsh geometry builders (rectangle, l_shape, circle,
+│   │                           #   annulus, hollow_rectangle, t_shape, stepped_notch,
+│   │                           #   box, cylinder) + GmshMeshResult dataclass
 │   └── configs/
 │       ├── heat_2d.json      # Steel plate example config
 │       └── heat_3d.json      # Aluminum block with convection config
 │
 ├── database/
-│   ├── models.py             # SQLAlchemy ORM (SimulationRun, RunResult,
-│   │                         #   AgentRunLog, AgentSuggestion, ParametricStudy…)
+│   ├── models.py             # SQLAlchemy ORM (SimulationRun, AgentRunLog, …)
 │   ├── operations.py         # CRUD, log_agent_step, search_runs, get_agent_logs
 │   └── init.sql              # PostgreSQL init (extensions, permissions)
 │
 ├── visualization/
-│   └── dashboard.py          # Plotly Dash: field viewer, convergence, parametric,
-│                             #   🔎 Run Explorer tab, 🤖 Agent Chat (Enter-key + quick prompts)
-│
-├── docker/
-│   ├── Dockerfile.fenics     # dolfinx/dolfinx:stable + uvicorn API
-│   ├── Dockerfile.agents     # Python 3.11 + LangGraph + FastAPI + neo4j driver
-│   ├── Dockerfile.dashboard  # Python 3.11 + Dash + pandas
-│   └── fenics_runner_api.py  # FastAPI server inside the FEniCSx container
+│   └── dashboard.py          # Plotly Dash: Overview, Field Viewer, Convergence,
+│                             #   Parametric, Agent Chat, 🧠 Knowledge Graph (NEW),
+│                             #   🔎 Run Explorer
 │
 ├── scripts/
-│   └── ollama-init.sh        # Model pull script (uses ollama CLI only, no curl)
+│   ├── migrate_kg_schema_v2.py   # One-off: add BCConfig/Domain/ThermalClass to existing runs
+│   ├── seed_knowledge_graph.py   # 23 representative simulations for KG bootstrapping
+│   ├── seed_bc_geometry_study.py # BC + geometry parametric study
+│   └── ollama-init.sh            # Pull all required Ollama models
+│
+├── docker/
+│   ├── Dockerfile.fenics     # dolfinx/dolfinx:stable + Gmsh + uvicorn API
+│   ├── Dockerfile.agents     # Python 3.11 + LangGraph + FastAPI + neo4j driver
+│   ├── Dockerfile.dashboard  # Python 3.11 + Dash + pandas + neo4j driver
+│   └── fenics_runner_api.py  # FastAPI server inside the FEniCSx container
 │
 ├── nginx/
-│   └── nginx.conf            # Nginx reverse proxy config (subpath routing for all UIs)
-├── docker-compose.yml        # Full service stack orchestration (includes nginx + Neo4j)
+│   └── nginx.conf            # Nginx reverse proxy (subpath routing, WebSocket tunnelling)
+├── docker-compose.yml        # Full service stack incl. NeoDash on port 5005
 ├── env.example               # Environment variable template (copy to .env)
 ├── requirements.txt          # Python dependencies for agents container
-├── Makefile                  # Common commands (simulate, sweep, query, logs, etc.)
+├── Makefile                  # Common commands
 └── setup.sh                  # One-time setup script
 ```
 
@@ -627,33 +721,25 @@ pde-agents/
 
 ## LLM Models
 
-All three models are pulled automatically by `setup.sh` and confirmed ready once
-`docker exec pde-ollama ollama list` shows all three entries.
-
 | Model | Params | VRAM | Role |
 |-------|--------|------|------|
 | `qwen2.5-coder:14b` | 14B | ~9 GB  | Database Agent — fast structured queries |
 | `qwen2.5-coder:32b` | 32B | ~19 GB | Simulation Agent — code generation & debugging |
 | `llama3.3:70b`      | 70B | ~42 GB | Analytics Agent + Orchestrator — reasoning |
+| `nomic-embed-text`  | 137M | <1 GB | Embedding model — 768-dim semantic vectors |
 
-All three fit simultaneously (~70 GB out of 196 GB available VRAM).
+All LLMs fit simultaneously (~70 GB out of 196 GB available VRAM). The embedding model adds negligible overhead.
 
-**Tool-calling compatibility note:** `qwen2.5-coder` models output tool calls as
-JSON text inside the `content` field rather than in the structured `tool_calls`
-field. The base agent (`base_agent.py`) includes a `_parse_content_tool_call()`
-fallback that detects and normalizes this automatically — the parser handles plain
-JSON, markdown code fences, and JSON embedded after preamble text.
+**Tool-calling compatibility:** `qwen2.5-coder` models output tool calls as JSON text inside the `content` field. The base agent includes a `_parse_content_tool_call()` fallback that normalizes this automatically.
 
 ```bash
-# Check download progress
-docker exec pde-ollama ollama list
-
-# Pull all required models manually if needed
+# Pull all required models (including embedding model)
 make pull-models
 
-# Optional: use larger/alternative models — edit .env:
+# Optional: use alternative models — edit .env:
 SIM_MODEL=qwen2.5-coder:72b      # ~40 GB, premium code generation
 ANALYTICS_MODEL=deepseek-r1:70b  # strong chain-of-thought reasoning
+EMBED_MODEL=nomic-embed-text      # default embedding model (274 MB)
 ```
 
 ---
@@ -672,9 +758,8 @@ make sweep           # parametric sweep: k=[1..200], analyze, find optimal
 make analyze RUN_ID=<id>            # analyze a specific run
 make query Q="<natural language>"   # database natural-language query
 
-make pull-models            # pull all required LLM models into Ollama
+make pull-models            # pull all required LLM + embedding models
 make list-models            # list available Ollama models
-make pull-model MODEL=<name>        # pull a specific model
 
 make db-init         # initialize database tables
 make db-shell        # psql shell into pde_simulations
@@ -683,78 +768,99 @@ make db-stats        # show run count and avg wall time by status
 make shell-fenics    # bash inside fenics-runner container
 make shell-agents    # bash inside agents container
 make logs            # tail all service logs
-make logs-agents     # tail agents container logs
-make logs-fenics     # tail fenics-runner logs
 make health          # check all service HTTP endpoints
 
 make test-solver     # quick FEniCSx solver smoke test (8×8 mesh)
-make clean           # ⚠ stop, DELETE all volumes, wipe results/ — see Data Persistence section
+make clean           # ⚠ stop, DELETE all volumes, wipe results/
 ```
 
 ---
 
 ## Troubleshooting
 
+### Knowledge Graph tab shows "Knowledge graph unavailable"
+
+The dashboard needs the `neo4j` Python driver and access to `knowledge_graph/`. After a fresh deploy:
+
+```bash
+# Option A: recreate the container (picks up updated docker-compose.yml)
+docker compose up dashboard -d --force-recreate
+
+# Option B: install driver into running container directly
+docker exec pde-dashboard pip install neo4j
+
+# Verify
+docker exec pde-dashboard python3 -c "
+import sys; sys.path.insert(0, '/app')
+from knowledge_graph.graph import get_kg
+kg = get_kg()
+print('Available:', kg.available)
+print('Stats:', kg.stats())
+"
+```
+
 ### A nav link opens a blank page or 502 Bad Gateway
 
-All web UIs are proxied through nginx. If a link gives 502:
 1. Check the target container is running: `docker compose ps`
-2. Reload nginx config: `docker compose exec nginx nginx -s reload`
+2. Reload nginx: `docker compose exec nginx nginx -s reload`
 3. Check nginx logs: `docker compose logs nginx --tail=30`
 
-If the **MinIO** link does not work, the server's port 9001 may be firewalled.
-Use an SSH tunnel from your local machine:
-```bash
-ssh -L 19001:localhost:9001 -N <server>   # use any free local port
-# then open http://localhost:19001
-```
+### NeoDash not reachable at port 5005
 
-### NVIDIA Container Toolkit warning during setup
 ```bash
-sudo apt-get install -y nvidia-container-toolkit
-sudo nvidia-ctk runtime configure --runtime=docker
-sudo systemctl restart docker
+docker compose up neodash -d
+docker logs pde-neodash --tail=20
 ```
-Without it, Ollama and FEniCSx containers fall back to CPU.
+NeoDash connects to Neo4j internally on the `pde-net` network — no extra credentials needed if `NEO4J_USER`/`NEO4J_PASSWORD` are set in `.env`.
 
-### Database init fails during `./setup.sh`
-Run it manually after all services are up:
+### Embedding model not available (semantic search returns empty)
+
 ```bash
-make db-init
-```
+# Pull nomic-embed-text into Ollama
+docker exec pde-ollama ollama pull nomic-embed-text
 
-### Ollama shows as `(unhealthy)` after startup
-The healthcheck uses `ollama list` (not curl, which is absent in the Ollama image).
-If still unhealthy after ~60 seconds:
-```bash
-docker compose restart ollama
-docker exec pde-ollama ollama list   # confirm server is responding
+# Backfill embeddings for existing runs
+docker exec pde-agents python3 -c "
+import sys; sys.path.insert(0, '/app')
+from knowledge_graph.graph import get_kg
+kg = get_kg()
+print(kg.backfill_embeddings(batch_size=50))
+print(kg.build_all_similar_to_edges(k=5, min_score=0.85))
+"
 ```
-
-### Agents container stays in `Created` state
-The agents service depends on `ollama`, `postgres`, `redis`, and `neo4j` all being
-`healthy`. Wait for all healthchecks to pass (~40 s for Neo4j), then bring up agents:
-```bash
-docker compose up -d neo4j
-sleep 45
-docker compose up -d agents
-```
-
-### Neo4j shows `(unhealthy)` on first start
-Neo4j takes 30–40 seconds to initialize its store on first boot. The healthcheck
-runs `neo4j status` — wait for it to pass before the agents container tries to connect.
-The agents service gracefully handles a temporarily unavailable Neo4j (it logs a warning
-and continues without KG features until Neo4j is reachable).
 
 ### Knowledge graph is empty after restart
-The KG is seeded automatically when the agents container starts (5 s after startup).
-If it's empty, trigger it manually:
+
+The KG is seeded automatically when the agents container starts. Trigger manually if empty:
 ```bash
+# Seed static knowledge (materials + failure patterns + references)
 curl -s -X POST http://localhost:8000/kg/seed | python3 -m json.tool
+
+# Re-run representative simulations to rebuild Run nodes
+docker exec pde-agents python3 /app/scripts/seed_knowledge_graph.py
+
+# Backfill embeddings and KNN edges for all runs
+docker exec pde-agents python3 -c "
+import sys; sys.path.insert(0, '/app')
+from knowledge_graph.graph import get_kg
+kg = get_kg()
+kg.backfill_embeddings()
+kg.build_all_similar_to_edges()
+print(kg.stats())
+"
 ```
 
-This re-seeds the 10 engineering materials and 6 known failure patterns, but
-does **not** restore simulation run history. See below for how to rebuild that.
+### FEniCSx API returns 500 errors
+```bash
+docker exec pde-fenics find /workspace/simulations -name "*.pyc" -delete
+docker compose restart fenics-runner
+```
+
+### Negative temperatures in early time steps
+Set `u_init` close to the lower Dirichlet BC value. The `check_config_warnings` tool will catch this with the `INCONSISTENT_IC` rule.
+
+### Tool calls not executing (agent loops without running tools)
+Check that the tool name in the LLM's JSON output matches the registered tool name exactly (case-sensitive). The parser is in `agents/base_agent.py` → `_parse_content_tool_call`.
 
 ---
 
@@ -762,126 +868,67 @@ does **not** restore simulation run history. See below for how to rebuild that.
 
 ### What persists across restarts
 
-Normal stop/start operations (`docker compose stop` / `docker compose start`, or
-a server reboot) preserve all data — Docker named volumes are kept on disk.
+Normal stop/start operations preserve all data — Docker named volumes are kept on disk.
 
 ```bash
-# Safe — all data preserved
-docker compose stop
-docker compose start
-
-# Also safe — volumes untouched
-docker compose down        # no -v flag
-docker compose up -d
+docker compose stop && docker compose start   # safe, all data preserved
+docker compose down && docker compose up -d   # safe — no -v flag
 ```
 
 ### What a clean wipe removes
 
-Running `docker compose down -v` (or `make clean`) deletes all named volumes:
+```bash
+docker compose down -v   # or: make clean
+```
 
 | Volume | Contents lost |
 |--------|--------------|
-| `neo4j_data` | All Run nodes, `USES_MATERIAL` and `TRIGGERED` edges |
-| `postgres_data` | All simulation records, agent logs, parametric studies |
+| `neo4j_data` | All Run nodes, embeddings, SIMILAR_TO edges, Reference links |
+| `postgres_data` | All simulation records, agent logs |
 | `minio_data` | All uploaded XDMF/NPY result files |
 | `redis_data` | Any queued jobs |
 
-After a clean wipe and `docker compose up -d`, the KG auto-seeds the static
-knowledge (materials + known issues), but all simulation run history is gone.
-
-### Rebuilding the knowledge graph after a clean wipe
-
-A seeding script is provided that bypasses the LLM orchestrator and directly
-calls the FEniCSx runner to re-populate the graph with a representative set
-of simulations across all 10 materials:
+### Rebuilding after a clean wipe
 
 ```bash
-# Rebuild everything (23 simulations, ~2 minutes)
+# 1. Start all services
+docker compose up -d
+
+# 2. Re-seed static knowledge + references
+curl -s -X POST http://localhost:8000/kg/seed
+
+# 3. Re-run representative simulations
 docker exec pde-agents python3 /app/scripts/seed_knowledge_graph.py
 
-# Preview what it will run without executing
-docker exec pde-agents python3 /app/scripts/seed_knowledge_graph.py --dry-run
-
-# Rebuild only specific materials
-docker exec pde-agents python3 /app/scripts/seed_knowledge_graph.py --filter steel
-docker exec pde-agents python3 /app/scripts/seed_knowledge_graph.py --filter 3d
-docker exec pde-agents python3 /app/scripts/seed_knowledge_graph.py --filter rule
+# 4. Pull embedding model and backfill
+docker exec pde-ollama ollama pull nomic-embed-text
+docker exec pde-agents python3 -c "
+import sys; sys.path.insert(0, '/app')
+from knowledge_graph.graph import get_kg
+kg = get_kg()
+kg.backfill_embeddings()
+kg.build_all_similar_to_edges()
+"
 ```
-
-The script runs 23 simulations covering:
-- All 10 materials with auto-calculated stable `dt` and `t_end`
-- Steel geometry variants (square, wide, tall domains)
-- Robin (convective) boundary conditions on aluminium and steel
-- Internal heat source on concrete and silicon
-- 3D runs for steel, aluminium, and copper
-- 3 deliberate rule violations to create `TRIGGERED` edges in the KG
-  (`INCONSISTENT_IC`, `SHORT_SIMULATION`, `LARGE_DT_RELATIVE_TO_DIFFUSION`)
-
-> **Why use this script instead of asking the orchestrator?**
-> The LLM orchestrator is designed for open-ended reasoning tasks, not bulk
-> data generation. For 20+ simulations it frequently drifts from the task,
-> makes JSON formatting errors, and uses ~400 LLM tokens per run. The seed
-> script is deterministic and completes in under 2 minutes.
-
-### FEniCSx API returns 500 errors
-Stale `.pyc` bytecode files can shadow updated solver code. Clear them and restart:
-```bash
-docker exec pde-fenics find /workspace/simulations -name "*.pyc" -delete
-docker exec pde-fenics find /workspace/simulations -name "__pycache__" -exec rm -rf {} + 2>/dev/null
-docker compose restart fenics-runner
-```
-
-### Negative temperatures in early time steps
-This is a numerical artifact when `u_init` is far from the Dirichlet BC values
-(e.g., `u_init=0.0` with walls at 300–500 K). The FEM lifting operation can
-cause slight Gibbs-like overshoot in the first few time steps. Fix: always set
-`u_init` close to the lower Dirichlet BC value. The `check_config_warnings` tool
-will automatically catch this with the `INCONSISTENT_IC` rule.
-
-### Tool calls not executing (agent loops without running tools)
-If an agent completes in 1 iteration and returns raw JSON as its answer, the
-tool-call parser may have failed to recognize a custom tool name. Check that the
-tool name in the LLM's JSON output matches the registered tool name exactly
-(case-sensitive). The parser is in `agents/base_agent.py` → `_parse_content_tool_call`.
-It handles plain JSON, markdown code fences, and JSON embedded after preamble text.
-
-### Chat agent stuck on history queries
-If the agent responds with repeated apology messages without calling tools, the
-most likely cause is a tool signature mismatch. The `search_history`, `query_runs`,
-and `list_runs_for_analysis` tools use **flat parameters** (not a JSON string argument)
-which are easier for LLMs to call correctly. Verify the tool definitions in
-`tools/database_tools.py` and `tools/analytics_tools.py`.
-
-### SQLAlchemy `DetachedInstanceError`
-Occurs when an ORM object is accessed after its session has closed. The session
-factory is configured with `expire_on_commit=False` and `get_run` / `list_runs`
-call `.expunge()` before returning. If you write new database operations, always
-either expunge objects or serialize them to dicts inside the `with get_db()` block.
-
-### Re-running a simulation with the same `run_id`
-`create_run` uses overwrite semantics: if a record with the same `run_id` already
-exists it is deleted and re-created. This allows freely re-running experiments
-with the same identifier during development.
 
 ---
 
 ## Extending to Other PDEs
 
-The framework is designed for extensibility. To add a new PDE solver:
+To add a new PDE solver:
 
 1. Create `simulations/solvers/my_pde.py` with the same interface as `heat_equation.py`
-   (`HeatConfig`-style dataclass → `MyConfig`, `HeatEquationSolver`-style class → `MySolver`)
 2. Add corresponding tools in `tools/simulation_tools.py`
 3. Register the new tool in the relevant agent's tool list
 4. Update the Simulation Agent's system prompt with PDE-specific guidance
 5. Add a visualization tab in `visualization/dashboard.py`
-6. Extend `knowledge_graph/seeder.py` with PDE-specific failure patterns
+6. Extend `knowledge_graph/seeder.py` and `knowledge_graph/references.py` with PDE-specific failure patterns and physics knowledge
 
 **Planned extensions:**
 - **Poisson equation** — electrostatics, groundwater pressure
 - **Linear elasticity** — structural mechanics, thermal stress
 - **Navier-Stokes** — incompressible laminar flow
-- **Coupled thermo-mechanical** — heat + stress (natural next step after heat equation)
+- **Coupled thermo-mechanical** — heat + stress
 
 ---
 
@@ -895,6 +942,7 @@ alongside this system for hybrid FEM + PINN workflows:
 | Validation | Run FEniCSx (ground truth) + PhysicsNemo (PINN), compare fields |
 | Surrogate models | Generate FEM training data → train PhysicsNemo surrogate |
 | Fast parametric scans | FEM at sparse reference points, PINN to interpolate |
+| KG-guided training | Use KG similar-run search to find best FEM training seeds |
 
 To connect PhysicsNemo to the same Docker network and shared storage:
 ```yaml
@@ -902,8 +950,7 @@ To connect PhysicsNemo to the same Docker network and shared storage:
 physicsnemo:
   image: nvcr.io/nvidia/physicsnemo/physicsnemo:25.11
   volumes:
-    - ./results:/workspace/results      # shared result directory
-    - simulation_results:/workspace/fem  # shared Docker volume
+    - simulation_results:/workspace/fem
   networks: [pde-net]
   deploy:
     resources:
