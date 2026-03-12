@@ -1059,7 +1059,7 @@ app.layout = dbc.Container([
                         target="_blank",
                     ),
                     html.P(
-                        "Note: NeoDash runs on port 5005. "
+                        "Note: NeoDash runs on port 9001 (reuses MinIO console slot). "
                         "Start with: docker compose up neodash",
                         className="text-muted mt-1",
                         style={"fontSize": "0.72rem", "opacity": "0.7"},
@@ -1162,13 +1162,13 @@ app.clientside_callback(
 
         var docs   = '/agents/docs';
         var mlflow = '/mlflow/';
-        var minio  = 'http://' + host + ':9001';
+        var minio  = 'http://' + host + ':9002';  // MinIO console moved to 9002 (9001 is NeoDash)
 
         var boltUrl = encodeURIComponent('bolt://' + host + ':7687');
         var neo4j   = 'http://' + host + ':7474/browser/?connectURL=' + boltUrl;
 
-        // NeoDash runs on port 5005 (open-source Neo4j Labs graph dashboard)
-        var neodash = 'http://' + host + ':5005';
+        // NeoDash runs on port 9001 (reuses the MinIO console slot — no new port needed)
+        var neodash = 'http://' + host + ':9001';
 
         return [docs, mlflow, minio, neo4j, neodash];
     }
@@ -1667,7 +1667,7 @@ def refresh_kg_stats(n, href):
         try:
             from urllib.parse import urlparse
             host = urlparse(href).hostname or "localhost"
-            neodash_href = f"http://{host}:5005"
+            neodash_href = f"http://{host}:9001"
         except Exception:
             pass
 

@@ -949,9 +949,9 @@ function(href) {
     return [
         '/agents/docs',                              // API Docs  — via nginx
         '/mlflow/',                                  // MLflow    — via nginx
-        'http://' + host + ':9001',                  // MinIO     — direct port
+        'http://' + host + ':9002',                  // MinIO     — direct port (moved from 9001)
         'http://' + host + ':7474/browser/?connectURL=' + boltUrl, // Neo4j
-        'http://' + host + ':5005',                  // NeoDash   — direct port
+        'http://' + host + ':9001',                  // NeoDash   — reuses ex-MinIO port
     ];
 }
 ```
@@ -1631,8 +1631,8 @@ Bolt protocol, and file formats). This means:
 | http://`host`:8050/agents/docs | FastAPI Swagger UI |
 | http://`host`:8050/mlflow/ | MLflow experiment tracking |
 | http://`host`:7474 | Neo4j Browser (direct) |
-| http://`host`:5005 | NeoDash — open-source graph explorer (Apache 2.0) |
-| http://`host`:9001 | MinIO object storage console (direct) |
+| http://`host`:9001 | NeoDash — open-source graph explorer (reuses ex-MinIO console port) |
+| http://`host`:9002 | MinIO object storage console (moved from 9001; SSH tunnel recommended) |
 | http://`host`:8000 | Agents REST API |
 | http://`host`:11434 | Ollama LLM API |
 

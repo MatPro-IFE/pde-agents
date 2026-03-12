@@ -96,7 +96,9 @@ services:
     networks: [pde-net]
     ports:
       - "9000:9000"
-      - "9001:9001"
+      # MinIO console mapped to host port 9002 (9001 is repurposed for NeoDash).
+      # Access via SSH tunnel: ssh -L 19001:localhost:9002 -N <server>
+      - "9002:9001"
     volumes:
       - minio_data:/data
     environment:
@@ -308,7 +310,8 @@ services:
 
   # ─── NeoDash — open-source KG dashboard (Neo4j Labs, Apache 2.0) ───────────
   # Provides a no-code graph visualization UI for Neo4j.
-  # Access at http://<host>:5005  (or via the dashboard nav link).
+  # Reuses port 9001 (previously MinIO console) — no new firewall rule needed.
+  # Access at http://<host>:9001  (or via the dashboard nav link).
   # Credentials are read from .env: NEO4J_USER / NEO4J_PASSWORD.
   neodash:
     image: neo4jlabs/neodash:latest
@@ -316,7 +319,7 @@ services:
     restart: unless-stopped
     networks: [pde-net]
     ports:
-      - "5005:5005"
+      - "9001:5005"
     environment:
       - ssoEnabled=false
       - standalone=true

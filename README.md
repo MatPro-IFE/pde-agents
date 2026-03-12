@@ -55,8 +55,8 @@ All browser-facing UIs are accessed through a single **nginx reverse proxy on po
 | Agents API | `:8050/agents/` or `:8000` | FastAPI REST + Swagger UI |
 | MLflow | `:8050/mlflow/` (via nginx) | Experiment tracking UI |
 | Neo4j Browser | `:7474` (direct) | Knowledge graph browser |
-| **NeoDash** | `:5005` (direct) | Open-source graph dashboard (Neo4j Labs, Apache 2.0) |
-| MinIO Console | `:9001` (direct) | Object storage browser |
+| **NeoDash** | `:9001` (direct) | Open-source graph dashboard — reuses ex-MinIO console port |
+| MinIO Console | `:9002` → SSH tunnel | Object storage browser (moved to port 9002) |
 | MinIO API | `:9000` | S3-compatible object storage API |
 | FEniCSx Runner | `:8080` | DOLFINx simulation job REST API |
 | Ollama | `:11434` | Local LLM server (GPU-accelerated) |
@@ -64,11 +64,12 @@ All browser-facing UIs are accessed through a single **nginx reverse proxy on po
 | Redis | `:6379` | Message broker for agent coordination |
 | Neo4j Bolt | `:7687` | Graph database driver protocol |
 
-> **MinIO console** (`port 9001`) is accessed directly rather than through nginx
-> because its SPA uses a hardcoded `<base href="/">` that prevents subpath proxying.
-> If port 9001 is firewalled, use an SSH tunnel:
+> **NeoDash** reuses port 9001 so no new firewall rule is needed.
+> The MinIO **S3 API on port 9000** is unaffected — all agent file uploads and
+> downloads continue normally. The MinIO web console is remapped to **port 9002**
+> (internal only — no firewall change required). Access it via SSH tunnel:
 > ```bash
-> ssh -L 19001:localhost:9001 -N <server>   # then open http://localhost:19001
+> ssh -L 19002:localhost:9002 -N <server>   # then open http://localhost:19002
 > ```
 
 ---
@@ -135,8 +136,8 @@ All services are accessible from the dashboard navbar or directly:
 | http://localhost:8050/agents/docs | API Swagger UI |
 | http://localhost:8050/mlflow/ | MLflow |
 | http://localhost:7474 | Neo4j Browser |
-| http://localhost:5005 | NeoDash (open-source graph explorer) |
-| http://localhost:9001 | MinIO console (direct) |
+| http://localhost:9001 | NeoDash (graph explorer — reuses MinIO console port) |
+| via SSH tunnel | MinIO console (see note below) |
 
 ---
 
@@ -805,13 +806,21 @@ print('Stats:', kg.stats())
 2. Reload nginx: `docker compose exec nginx nginx -s reload`
 3. Check nginx logs: `docker compose logs nginx --tail=30`
 
-### NeoDash not reachable at port 5005
+### NeoDash not reachable at port 9001
 
 ```bash
 docker compose up neodash -d
 docker logs pde-neodash --tail=20
 ```
-NeoDash connects to Neo4j internally on the `pde-net` network — no extra credentials needed if `NEO4J_USER`/`NEO4J_PASSWORD` are set in `.env`.
+NeoDash connects to Neo4j internally on the `pde-net` network. Port 9001 on the host maps to NeoDash (the MinIO console was moved to port 9002).
+
+### MinIO console access
+
+The MinIO console is on host port 9002 (port 9001 is now NeoDash). Access via SSH tunnel:
+```bash
+ssh -L 19002:localhost:9002 -N <server>   # then open http://localhost:19002
+```
+The MinIO S3 API on port 9000 is unaffected — agents use `http://minio:9000` internally.
 
 ### Embedding model not available (semantic search returns empty)
 
