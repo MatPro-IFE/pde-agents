@@ -1,9 +1,10 @@
 """
 LangChain tools for the Simulation Knowledge Graph.
 
-Provides two tools:
+Provides three tools:
   query_knowledge_graph  — General-purpose KG query for agents
   check_config_warnings  — Pre-run validation; returns warnings + similar runs
+  get_physics_references — Retrieve curated physics references for a config
 """
 
 from __future__ import annotations
@@ -250,12 +251,13 @@ def check_config_warnings(config_json: str) -> str:
     Returns:
         JSON string with:
           - warnings:                   list of triggered rule violations
-          - similar_runs:               up to 5 past runs ranked by BC+domain+k match
+          - similar_runs:               up to 5 past runs (semantic or Cypher fallback)
           - inferred_material:          best-guess material for the given k/rho/cp
           - past_issues_in_similar_runs: failure patterns seen in similar runs
           - bc_pattern_insights:        aggregate stats for same BC combination
           - domain_insights:            expected solve time / DOF count for domain size
           - thermal_class_insights:     class-level behaviour for same conductivity range
+          - physics_references:         curated physics facts / warnings for this config
           - recommendation:             overall pass/warning/caution assessment
     """
     try:
@@ -280,6 +282,7 @@ def check_config_warnings(config_json: str) -> str:
             "bc_pattern_insights": {},
             "domain_insights": {},
             "thermal_class_insights": {},
+            "physics_references": [],
             "kg_available": False,
         }
 
@@ -328,5 +331,67 @@ def check_config_warnings(config_json: str) -> str:
             f"and ~{_fmt(dom_ins.get('avg_n_dofs'), fmt='.0f')} DOFs."
         )
 
+    # Append material-specific reference warnings to recommendation
+    refs = ctx.get("physics_references", [])
+    validity_refs = [r for r in refs if "validity_limit" in (r.get("tags") or [])]
+    if validity_refs:
+        subjects = "; ".join(r["subject"] for r in validity_refs[:2])
+        recommendation += f" Physics note(s): {subjects}."
+
     ctx["recommendation"] = recommendation
     return json.dumps(ctx, default=str)
+
+
+# ─── Tool 3: Physics reference lookup ────────────────────────────────────────
+
+@tool
+def get_physics_references(config_json: str) -> str:
+    """
+    Retrieve curated physics reference facts for a simulation configuration.
+
+    Use this tool when you need authoritative guidance on:
+      - Material property validity ranges and temperature dependence
+      - Physically realistic boundary condition values (h coefficients,
+        heat flux magnitudes, temperature ranges)
+      - Mesh resolution and time-step accuracy rules
+      - Domain-scale effects (radiation, natural convection, thermal mass)
+
+    Always cite the source when presenting reference data to the user.
+
+    Args:
+        config_json: JSON string of the simulation configuration
+                     (same format as run_simulation config_json).
+                     Use {} to get all solver guidance references.
+
+    Returns:
+        JSON list of references, each with:
+          - ref_id:   unique identifier
+          - type:     "material_property" | "bc_practice" | "solver_guidance"
+                      | "domain_physics"
+          - subject:  what the reference is about
+          - text:     the actual knowledge / warning / recommendation
+          - source:   citation
+          - tags:     searchable keywords
+    """
+    try:
+        config = json.loads(config_json) if config_json.strip() else {}
+    except json.JSONDecodeError as exc:
+        return json.dumps({"error": f"Invalid JSON: {exc}"})
+
+    kg = _kg()
+    if not kg or not kg.available:
+        return json.dumps({"error": "Knowledge graph unavailable", "references": []})
+
+    refs   = kg.get_references_for_config(config) if config else []
+    solver = kg.get_solver_guidance()
+
+    # Combine, deduplicate by ref_id
+    seen     = set()
+    combined = []
+    for r in refs + solver:
+        rid = r.get("ref_id")
+        if rid and rid not in seen:
+            seen.add(rid)
+            combined.append(r)
+
+    return json.dumps({"references": combined, "count": len(combined)}, default=str)

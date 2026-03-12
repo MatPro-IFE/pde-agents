@@ -279,6 +279,146 @@ class SimulationKnowledgeGraph:
         log.info("KG seeded: %d materials, %d known issues, ThermalClass nodes", mat_count, issue_count)
         return {"seeded": True, "materials": mat_count, "known_issues": issue_count}
 
+    # ── Reference node management ────────────────────────────────────────────
+
+    def seed_references(self) -> dict:
+        """
+        Seed Reference nodes encoding curated physics knowledge.
+
+        Reference nodes are connected to existing Material, BCConfig, and
+        Domain nodes so agents can retrieve them via graph traversal.
+        Safe to call repeatedly — MERGE prevents duplicates.
+
+        Returns: {seeded: bool, material_refs, bc_refs, solver_refs, domain_refs}
+        """
+        if not self._available:
+            return {"seeded": False, "reason": "Neo4j unavailable"}
+
+        from knowledge_graph.references import ALL_REFERENCES
+
+        # Ensure Reference uniqueness constraint
+        try:
+            self._run(
+                "CREATE CONSTRAINT reference_id_unique IF NOT EXISTS "
+                "FOR (r:Reference) REQUIRE r.ref_id IS UNIQUE"
+            )
+        except Exception:
+            pass
+
+        counts: dict[str, int] = {}
+        for ref in ALL_REFERENCES:
+            self._run(
+                """
+                MERGE (r:Reference {ref_id: $ref_id})
+                SET r.type    = $type,
+                    r.subject = $subject,
+                    r.text    = $text,
+                    r.source  = $source,
+                    r.tags    = $tags
+                """,
+                ref_id=ref["ref_id"],
+                type=ref["type"],
+                subject=ref["subject"],
+                text=ref["text"],
+                source=ref["source"],
+                tags=ref.get("tags", []),
+            )
+            counts[ref["type"]] = counts.get(ref["type"], 0) + 1
+
+            # Link to Material nodes
+            for mat_name in ref.get("material_names", []):
+                self._run(
+                    """
+                    MATCH (m:Material)
+                    WHERE toLower(m.name) CONTAINS toLower($name)
+                    MATCH (ref:Reference {ref_id: $ref_id})
+                    MERGE (m)-[:HAS_REFERENCE]->(ref)
+                    """,
+                    name=mat_name, ref_id=ref["ref_id"],
+                )
+
+            # Link to BCConfig nodes
+            for pattern in ref.get("bc_patterns", []):
+                self._run(
+                    """
+                    MATCH (b:BCConfig {pattern: $pattern})
+                    MATCH (ref:Reference {ref_id: $ref_id})
+                    MERGE (b)-[:HAS_REFERENCE]->(ref)
+                    """,
+                    pattern=pattern, ref_id=ref["ref_id"],
+                )
+
+            # Link to Domain nodes
+            for domain_label in ref.get("domain_labels", []):
+                self._run(
+                    """
+                    MATCH (d:Domain {label: $label})
+                    MATCH (ref:Reference {ref_id: $ref_id})
+                    MERGE (d)-[:HAS_REFERENCE]->(ref)
+                    """,
+                    label=domain_label, ref_id=ref["ref_id"],
+                )
+
+        log.info("Reference nodes seeded: %s", counts)
+        return {"seeded": True, **counts}
+
+    def get_references_for_config(self, config: dict) -> list[dict]:
+        """
+        Retrieve all Reference nodes relevant to a simulation config by
+        traversing Material → Reference, BCConfig → Reference, and
+        Domain → Reference edges.
+
+        Returns a deduplicated list of references sorted by type, giving
+        agents curated physics knowledge before/during/after a run.
+        """
+        k    = config.get("k")
+        Lx   = config.get("Lx", 1.0) or 1.0
+        Ly   = config.get("Ly", 1.0) or 1.0
+        bcs  = config.get("bcs", [])
+        bc_pattern = "+".join(sorted({b.get("type", "unknown") for b in bcs})) if bcs else ""
+        dom_label, _ = _domain_label(Lx, Ly)
+
+        rows = self._run(
+            """
+            MATCH (ref:Reference)
+            WHERE (
+                EXISTS {
+                    MATCH (m:Material)-[:HAS_REFERENCE]->(ref)
+                    WHERE m.k_min <= $k <= m.k_max
+                }
+                OR EXISTS {
+                    MATCH (b:BCConfig {pattern: $bc_pattern})-[:HAS_REFERENCE]->(ref)
+                }
+                OR EXISTS {
+                    MATCH (d:Domain {label: $domain_label})-[:HAS_REFERENCE]->(ref)
+                }
+            )
+            RETURN ref.ref_id  AS ref_id,
+                   ref.type    AS type,
+                   ref.subject AS subject,
+                   ref.text    AS text,
+                   ref.source  AS source,
+                   ref.tags    AS tags
+            ORDER BY ref.type, ref.subject
+            """,
+            k=float(k) if k else -1.0,
+            bc_pattern=bc_pattern,
+            domain_label=dom_label,
+        )
+        return rows
+
+    def get_solver_guidance(self) -> list[dict]:
+        """Return all solver guidance Reference nodes (not config-specific)."""
+        rows = self._run(
+            """
+            MATCH (r:Reference {type: 'solver_guidance'})
+            RETURN r.ref_id AS ref_id, r.subject AS subject,
+                   r.text AS text, r.source AS source
+            ORDER BY r.subject
+            """
+        )
+        return rows
+
     # ── Run management ────────────────────────────────────────────────────────
 
     def add_run(
@@ -832,6 +972,8 @@ class SimulationKnowledgeGraph:
         dom_insights = self.get_domain_insights(Lx, Ly)
         tc_insights  = self.get_thermal_class_insights(k) if k else {}
 
+        references = self.get_references_for_config(config)
+
         return {
             "warnings":                    warnings,
             "similar_runs":                similar,
@@ -840,6 +982,7 @@ class SimulationKnowledgeGraph:
             "bc_pattern_insights":         bc_insights,
             "domain_insights":             dom_insights,
             "thermal_class_insights":      tc_insights,
+            "physics_references":          references,
             "kg_available":                self._available,
         }
 
@@ -982,7 +1125,12 @@ class SimulationKnowledgeGraph:
             "domains":         counts[4] if len(counts) > 4 else 0,
             "thermal_classes": counts[5] if len(counts) > 5 else 0,
             "embedded_runs":   self._count_embedded_runs(),
+            "references":      self._count_references(),
         }
+
+    def _count_references(self) -> int:
+        rows = self._run("MATCH (r:Reference) RETURN count(r) AS n")
+        return rows[0]["n"] if rows else 0
 
     def _count_embedded_runs(self) -> int:
         rows = self._run(
