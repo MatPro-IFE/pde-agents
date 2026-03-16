@@ -179,3 +179,9 @@ health:
 	@curl -sf http://localhost:8050 > /dev/null && echo "Dashboard: OK" || echo "Dashboard: DOWN"
 	@curl -sf http://localhost:5000 > /dev/null && echo "MLflow: OK" || echo "MLflow: DOWN"
 	@curl -sf http://localhost:9000/minio/health/live > /dev/null && echo "MinIO: OK" || echo "MinIO: DOWN"
+
+# ─── NeoDash ──────────────────────────────────────────────────────────────────
+
+seed-neodash:
+	$(COMPOSE) exec agents python3 /app/scripts/seed_neodash_dashboard.py
+
