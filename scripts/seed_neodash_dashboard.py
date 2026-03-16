@@ -240,24 +240,30 @@ def seed(uri: str, user: str, password: str, title: str, dashboard: dict) -> Non
         print("ERROR: neo4j driver not installed. Run: pip install neo4j")
         sys.exit(1)
 
-    content = json.dumps(dashboard, ensure_ascii=False)
-    now     = datetime.now(timezone.utc).isoformat()
+    import uuid as _uuid
+    content  = json.dumps(dashboard, ensure_ascii=False)
+    now      = datetime.now(timezone.utc).isoformat()
+    dash_uuid = str(_uuid.uuid4())
 
     driver = GraphDatabase.driver(uri, auth=(user, password))
     with driver.session() as session:
+        # NeoDash uses label _Neodash_Dashboard (with leading underscore),
+        # looks up by title, stores content as JSON string.
+        # MERGE by title so re-running the script updates the existing dashboard.
         result = session.run(
             """
-            MERGE (n:NeoDashDashboard {title: $title})
+            MERGE (n:_Neodash_Dashboard {title: $title})
+            ON CREATE SET n.uuid    = $uuid
             SET   n.content  = $content,
                   n.date     = $date,
                   n.user     = 'admin',
                   n.version  = '2.4'
-            RETURN n.title AS title
+            RETURN n.title AS title, n.uuid AS uuid
             """,
-            title=title, content=content, date=now,
+            title=title, uuid=dash_uuid, content=content, date=now,
         )
         record = result.single()
-        print(f"✓ Dashboard seeded: '{record['title']}'")
+        print(f"✓ Dashboard seeded: '{record['title']}'  uuid={record['uuid']}")
         print(f"  Content length:   {len(content):,} chars")
         print(f"  Pages:            {len(dashboard['pages'])}")
         total_reports = sum(len(p['reports']) for p in dashboard['pages'])
