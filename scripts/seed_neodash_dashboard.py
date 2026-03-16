@@ -97,12 +97,12 @@ ORDER BY r.created_at DESC LIMIT 30
                 _report("pie_status", "Status Distribution",
                     "MATCH (r:Run) RETURN r.status AS status, count(r) AS count ORDER BY count DESC",
                     "pie", 9, 2, 3, 3,
-                    selection={"index": "status", "value": "count", "key": "status"}),
+                    selection={"index": "status", "value": ["count"], "key": "status"}),
 
                 _report("bar_dim", "Runs by Dimension",
                     "MATCH (r:Run) RETURN toString(r.dim)+'D' AS dim, count(r) AS runs",
                     "bar", 9, 5, 3, 3,
-                    selection={"index": "dim", "value": "runs", "key": "dim"},
+                    selection={"index": "dim", "value": ["runs"], "key": "dim"},
                     settings={"barValues": True, "colors": "neodash"}),
             ],
         },
@@ -130,7 +130,7 @@ RETURN m.name AS material, count(r) AS runs
 ORDER BY runs DESC
                     """,
                     "bar", 8, 0, 4, 7,
-                    selection={"index": "material", "value": "runs", "key": "material"},
+                    selection={"index": "material", "value": ["runs"], "key": "material"},
                     settings={"barValues": True, "layout": "horizontal"}),
 
                 _report("graph_sim", "Semantic Similarity Network  (top 30 SIMILAR_TO edges)",
@@ -172,7 +172,7 @@ RETURN d.label AS domain, count(r) AS runs
 ORDER BY runs DESC
                     """,
                     "pie", 6, 0, 3, 5,
-                    selection={"index": "domain", "value": "runs", "key": "domain"}),
+                    selection={"index": "domain", "value": ["runs"], "key": "domain"}),
 
                 _report("bar_issues", "KnownIssue Trigger Frequency",
                     """
@@ -181,7 +181,7 @@ RETURN i.code AS issue, count(r) AS occurrences
 ORDER BY occurrences DESC
                     """,
                     "bar", 9, 0, 3, 5,
-                    selection={"index": "issue", "value": "occurrences", "key": "issue"},
+                    selection={"index": "issue", "value": ["occurrences"], "key": "issue"},
                     settings={"barValues": True, "layout": "horizontal"}),
 
                 _report("tbl_top", "Top Runs by T_max",
