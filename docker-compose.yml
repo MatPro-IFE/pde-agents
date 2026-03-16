@@ -324,7 +324,7 @@ services:
       - ssoEnabled=false
       - standalone=true
       - standaloneProtocol=bolt
-      - standaloneHost=${NEO4J_HOST:-neo4j}
+      - standaloneHost=${SERVER_HOST:-localhost}
       - standalonePort=7687
       - standaloneDatabase=neo4j
       - standaloneDashboardName=PDE Agents KG
