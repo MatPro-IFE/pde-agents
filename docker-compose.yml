@@ -194,6 +194,7 @@ services:
       - ./orchestrator:/app/orchestrator
       - ./database:/app/database
       - ./knowledge_graph:/app/knowledge_graph
+      - ./scripts:/app/scripts
       - simulation_results:/workspace/results
       - mesh_store:/workspace/meshes
     environment:

@@ -29,27 +29,46 @@ from simulations.solvers.heat_equation import HeatConfig, HeatEquationSolver
 app = FastAPI(title="FEniCSx Runner API", version="1.0.0")
 
 
+from typing import Any, Dict, Optional
+
+
 class SimulationJob(BaseModel):
-    """Mirrors HeatConfig fields."""
+    """Mirrors HeatConfig fields — all parameters accepted."""
+    # Mesh resolution (built-in meshes)
     dim: int = 2
     nx: int = 32
     ny: int = 32
     nz: int = 16
+    # Physical domain dimensions [m]  — used by built-in mesh and ignored by Gmsh
+    # (Gmsh dimensions are embedded inside the geometry spec)
+    Lx: float = 1.0
+    Ly: float = 1.0
+    Lz: float = 1.0
+    # Gmsh geometry spec — when set, overrides nx/ny/nz and uses Gmsh mesher
+    # Example: {"type": "l_shape", "Lx": 0.1, "Ly": 0.1, "cut_x": 0.04, "mesh_size": 0.005}
+    geometry: Optional[Dict[str, Any]] = None
+    # Material properties
     rho: float = 1.0
     cp: float = 1.0
     k: float = 1.0
     source: float = 0.0
+    # Boundary conditions
     bcs: list = []
+    # Initial condition
     u_init: float = 0.0
+    # Time parameters
     t_start: float = 0.0
     t_end: float = 1.0
     dt: float = 0.01
-    theta: float = 1.0
+    theta: float = 1.0            # 1.0 = Backward Euler, 0.5 = Crank-Nicolson
+    # FEM parameters
     element_degree: int = 1
+    # Output
     output_dir: str = "/workspace/results"
     run_id: str = "run_001"
     save_every: int = 10
     save_format: str = "xdmf"
+    # Solver
     petsc_solver: str = "cg"
     petsc_preconditioner: str = "hypre"
 
@@ -72,6 +91,8 @@ async def run_simulation(job: SimulationJob):
     try:
         cfg = HeatConfig(
             dim=job.dim, nx=job.nx, ny=job.ny, nz=job.nz,
+            Lx=job.Lx, Ly=job.Ly, Lz=job.Lz,
+            geometry=job.geometry,
             rho=job.rho, cp=job.cp, k=job.k, source=job.source,
             bcs=job.bcs if job.bcs else _default_bcs(job.dim),
             u_init=job.u_init,
