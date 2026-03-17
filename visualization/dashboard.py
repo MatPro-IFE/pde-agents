@@ -1066,8 +1066,154 @@ app.layout = dbc.Container([
                 ], width=4, style={"borderRight": "1px solid #2a2a3e",
                                    "paddingRight": "16px"}),
 
-                # ── Right: Reference browser ────────────────────────────────
+                # ── Right: Upload + Reference browser ──────────────────────
                 dbc.Col([
+                    # ── Document Upload panel ───────────────────────────────
+                    dbc.Card([
+                        dbc.CardHeader(
+                            html.Span("📎 Upload External Document",
+                                      style={"fontWeight": "600", "fontSize": "0.95rem"}),
+                            style={"backgroundColor": "#141428", "padding": "8px 14px"},
+                        ),
+                        dbc.CardBody([
+                            html.P(
+                                "Upload a PDF, TXT, or Markdown document. The text will be "
+                                "embedded and automatically linked to the most similar "
+                                "simulation runs in the knowledge graph.",
+                                className="text-muted mb-2",
+                                style={"fontSize": "0.8rem"},
+                            ),
+                            # ── DOI quick-fill ─────────────────────────────
+                            dbc.InputGroup([
+                                dbc.InputGroupText(
+                                    "DOI", style={"backgroundColor": "#1a1a2e",
+                                                  "color": "#90e0ef",
+                                                  "borderColor": "#2e4a6a",
+                                                  "fontSize": "0.8rem",
+                                                  "fontWeight": "600"},
+                                ),
+                                dbc.Input(
+                                    id="ref-doi-input",
+                                    placeholder="10.xxxx/…  — paste a DOI to auto-fill metadata",
+                                    type="text",
+                                    style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
+                                           "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
+                                ),
+                                dbc.Button(
+                                    "Fetch", id="ref-doi-fetch-btn",
+                                    color="info", size="sm", n_clicks=0,
+                                    style={"fontSize": "0.8rem"},
+                                ),
+                            ], className="mb-1"),
+                            html.Div(id="ref-doi-status",
+                                     style={"fontSize": "0.77rem", "minHeight": "18px"},
+                                     className="mb-2 text-muted"),
+                            html.Hr(style={"borderColor": "#2a2a3e", "margin": "8px 0 10px"}),
+                            dcc.Upload(
+                                id="ref-upload-file",
+                                children=html.Div([
+                                    html.Span("📄 ", style={"fontSize": "1.4rem"}),
+                                    html.Span("Drag & drop or "),
+                                    html.A("browse", style={"color": ACCENT,
+                                                             "cursor": "pointer"}),
+                                    html.Br(),
+                                    html.Small("PDF · TXT · Markdown",
+                                               style={"color": "#888", "fontSize": "0.75rem"}),
+                                ]),
+                                style={
+                                    "width": "100%", "height": "80px",
+                                    "borderWidth": "1px", "borderStyle": "dashed",
+                                    "borderRadius": "6px", "borderColor": "#2e4a6a",
+                                    "textAlign": "center", "paddingTop": "16px",
+                                    "backgroundColor": "#11112a", "cursor": "pointer",
+                                },
+                                multiple=False,
+                            ),
+                            html.Div(id="ref-upload-filename-label",
+                                     className="text-muted mt-1 mb-2",
+                                     style={"fontSize": "0.78rem"}),
+                            dbc.Row([
+                                dbc.Col(dbc.Input(
+                                    id="ref-upload-title",
+                                    placeholder="Title *  (required)",
+                                    type="text",
+                                    style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
+                                           "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
+                                ), width=12, className="mb-2"),
+                                dbc.Col(dbc.Input(
+                                    id="ref-upload-source",
+                                    placeholder="Citation  (journal, year, pages…)",
+                                    type="text",
+                                    style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
+                                           "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
+                                ), width=12, className="mb-2"),
+                                dbc.Col(dbc.Input(
+                                    id="ref-upload-url",
+                                    placeholder="URL / DOI  (optional)",
+                                    type="text",
+                                    style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
+                                           "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
+                                ), width=12, className="mb-2"),
+                                dbc.Col(dbc.Input(
+                                    id="ref-upload-subject",
+                                    placeholder="Subject / keywords  (e.g. robin bc, titanium)",
+                                    type="text",
+                                    style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
+                                           "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
+                                ), width=8, className="mb-2"),
+                                dbc.Col(dbc.Select(
+                                    id="ref-upload-type",
+                                    options=[
+                                        {"label": "📄 Paper",    "value": "paper"},
+                                        {"label": "📋 Report",   "value": "report"},
+                                        {"label": "📚 Handbook", "value": "handbook"},
+                                        {"label": "🏛️ Standard", "value": "standard"},
+                                    ],
+                                    value="paper",
+                                    style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
+                                           "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
+                                ), width=4, className="mb-2"),
+                                dbc.Col(dbc.Input(
+                                    id="ref-upload-run-ids",
+                                    placeholder="Pin to run IDs  (comma-separated, optional)",
+                                    type="text",
+                                    style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
+                                           "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
+                                ), width=9, className="mb-2"),
+                                dbc.Col(dbc.Input(
+                                    id="ref-upload-top-k",
+                                    placeholder="Auto-link top",
+                                    type="number", min=0, max=50, value=10,
+                                    style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
+                                           "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
+                                ), width=3, className="mb-2"),
+                            ]),
+                            dbc.Button(
+                                "📤 Upload & Link to Knowledge Graph",
+                                id="ref-upload-submit-btn",
+                                color="success", className="w-100 mt-1",
+                                disabled=False,
+                            ),
+                            html.Div(id="ref-upload-status", className="mt-2"),
+                        ], style={"backgroundColor": "#0d0d1f", "padding": "14px"}),
+                    ], style={"border": "1px solid #1e2a3a", "marginTop": "12px",
+                              "marginBottom": "16px"}),
+
+                    # ── Uploaded documents list ──────────────────────────────
+                    dbc.Row([
+                        dbc.Col(html.H6("📚 Uploaded Documents",
+                                        className="mb-2",
+                                        style={"color": ACCENT}), width=9),
+                        dbc.Col(dbc.Button("↻", id="ref-docs-refresh-btn",
+                                           color="secondary", size="sm",
+                                           className="mb-2 w-100"), width=3),
+                    ]),
+                    html.Div(id="ref-uploaded-docs-list",
+                             style={"maxHeight": "200px", "overflowY": "auto",
+                                    "marginBottom": "12px"}),
+
+                    html.Hr(style={"borderColor": "#2a2a3e", "margin": "8px 0"}),
+
                     dbc.Row([
                         dbc.Col(html.H5("Physics Reference Browser",
                                         className="mt-3 mb-2"), width=8),
@@ -1647,6 +1793,257 @@ def _get_kg():
         return kg if kg.available else None
     except Exception:
         return None
+
+
+# ── Reference upload callbacks ────────────────────────────────────────────────
+
+@app.callback(
+    Output("ref-upload-filename-label", "children"),
+    Input("ref-upload-file", "filename"),
+    prevent_initial_call=True,
+)
+def show_uploaded_filename(filename):
+    if not filename:
+        return ""
+    return f"📎 {filename}"
+
+
+@app.callback(
+    Output("ref-upload-status",      "children"),
+    Output("ref-uploaded-docs-list", "children"),
+    Input("ref-upload-submit-btn",   "n_clicks"),
+    Input("ref-docs-refresh-btn",    "n_clicks"),
+    State("ref-upload-file",         "contents"),
+    State("ref-upload-file",         "filename"),
+    State("ref-upload-title",        "value"),
+    State("ref-upload-source",       "value"),
+    State("ref-upload-url",          "value"),
+    State("ref-upload-subject",      "value"),
+    State("ref-upload-type",         "value"),
+    State("ref-upload-run-ids",      "value"),
+    State("ref-upload-top-k",        "value"),
+    prevent_initial_call=True,
+)
+def handle_reference_upload(
+    upload_clicks, refresh_clicks,
+    file_contents, file_name,
+    title, source, url, subject, ref_type, run_ids, top_k,
+):
+    import base64
+    import io
+    import requests as _req
+    from dash import ctx
+
+    # ── Refresh-only: just reload the list ─────────────────────────────────
+    docs_panel = _build_uploaded_docs_list()
+    if ctx.triggered_id == "ref-docs-refresh-btn":
+        return no_update, docs_panel
+
+    # ── Upload triggered ────────────────────────────────────────────────────
+    if not file_contents:
+        return (
+            dbc.Alert("Please select a file first.", color="warning",
+                      className="py-2", style={"fontSize": "0.82rem"}),
+            docs_panel,
+        )
+    if not title or not title.strip():
+        return (
+            dbc.Alert("Title is required.", color="warning",
+                      className="py-2", style={"fontSize": "0.82rem"}),
+            docs_panel,
+        )
+
+    try:
+        # Decode base64 file content from Dash
+        _ctype, b64 = file_contents.split(",", 1)
+        file_bytes = base64.b64decode(b64)
+
+        agents_url = os.environ.get("AGENTS_API_URL", "http://agents:8000")
+        resp = _req.post(
+            f"{agents_url}/references/upload",
+            files={"file": (file_name or "document", io.BytesIO(file_bytes),
+                            "application/octet-stream")},
+            data={
+                "title":           title.strip(),
+                "source":          source or "",
+                "url":             url or "",
+                "subject":         subject or "",
+                "ref_type":        ref_type or "paper",
+                "run_ids":         run_ids or "",
+                "auto_link_top_k": int(top_k) if top_k else 10,
+            },
+            timeout=180,
+        )
+        resp.raise_for_status()
+        result = resp.json()
+
+        n_linked  = result.get("runs_linked", 0)
+        method    = result.get("link_method", "none")
+        embedded  = result.get("embedded", False)
+        method_label = {"manual": "manually pinned", "auto": "auto-linked by similarity",
+                        "none": "no runs linked"}.get(method, method)
+
+        status_el = dbc.Alert(
+            [
+                html.Strong(f"✅  '{title}' uploaded successfully."),
+                html.Br(),
+                html.Span(
+                    f"{n_linked} run(s) {method_label}. "
+                    f"{'Embedding stored ✓' if embedded else 'Embedding not available'}",
+                    style={"fontSize": "0.8rem"},
+                ),
+            ],
+            color="success", className="py-2 mt-1",
+            style={"fontSize": "0.85rem"},
+        )
+        return status_el, _build_uploaded_docs_list()
+
+    except Exception as exc:
+        return (
+            dbc.Alert(f"Upload failed: {exc}", color="danger",
+                      className="py-2", style={"fontSize": "0.82rem"}),
+            docs_panel,
+        )
+
+
+@app.callback(
+    Output("ref-upload-title",   "value"),
+    Output("ref-upload-source",  "value"),
+    Output("ref-upload-url",     "value"),
+    Output("ref-upload-subject", "value"),
+    Output("ref-upload-type",    "value"),
+    Output("ref-doi-status",     "children"),
+    Input("ref-doi-fetch-btn",   "n_clicks"),
+    State("ref-doi-input",       "value"),
+    prevent_initial_call=True,
+)
+def fetch_doi_metadata(n_clicks, doi):
+    """Look up a DOI via CrossRef and auto-fill the upload form fields."""
+    import requests as _req
+    from dash.exceptions import PreventUpdate
+
+    if not doi or not doi.strip():
+        raise PreventUpdate
+
+    doi = doi.strip().lstrip("https://doi.org/").lstrip("http://doi.org/")
+    try:
+        resp = _req.get(
+            f"https://api.crossref.org/works/{doi}",
+            headers={"User-Agent": "pde-agents/2.0 (mailto:admin@localhost)"},
+            timeout=12,
+        )
+        if resp.status_code == 404:
+            return (no_update, no_update, no_update, no_update, no_update,
+                    "❌ DOI not found in CrossRef.")
+        resp.raise_for_status()
+        msg = resp.json().get("message", {})
+    except Exception as exc:
+        return (no_update, no_update, no_update, no_update, no_update,
+                f"❌ Lookup failed: {exc}")
+
+    # ── Extract fields ──────────────────────────────────────────────────────
+    titles   = msg.get("title") or []
+    title    = titles[0] if titles else ""
+
+    container = msg.get("container-title") or []
+    journal   = container[0] if container else ""
+
+    authors = msg.get("author") or []
+    author_str = "; ".join(
+        f"{a.get('family', '')} {a.get('given', '')}".strip() for a in authors[:4]
+    )
+    if len(authors) > 4:
+        author_str += " et al."
+
+    year_parts = (msg.get("published") or msg.get("issued") or {}).get("date-parts", [])
+    year = str(year_parts[0][0]) if year_parts and year_parts[0] else ""
+
+    source   = f"{author_str}. {journal}. {year}".strip(". ")
+    doc_url  = msg.get("URL") or f"https://doi.org/{doi}"
+
+    # ── Guess ref type ──────────────────────────────────────────────────────
+    rtype_raw = (msg.get("type") or "").lower()
+    ref_type_map = {
+        "journal-article": "paper",
+        "proceedings-article": "paper",
+        "book-chapter": "handbook",
+        "book": "handbook",
+        "report": "report",
+        "standard": "standard",
+    }
+    ref_type = ref_type_map.get(rtype_raw, "paper")
+
+    subject_list = msg.get("subject") or []
+    subject = ", ".join(subject_list[:5])
+
+    status_msg = f"✅ Fetched: {journal or rtype_raw} ({year})"
+    return title, source, doc_url, subject, ref_type, status_msg
+
+
+def _build_uploaded_docs_list():
+    """Fetch and render the uploaded documents list from the KG."""
+    try:
+        import requests as _req
+        agents_url = os.environ.get("AGENTS_API_URL", "http://agents:8000")
+        resp = _req.get(f"{agents_url}/references/uploaded?limit=30", timeout=10)
+        resp.raise_for_status()
+        docs = resp.json()
+    except Exception:
+        docs = []
+
+    if not docs:
+        return html.P("No uploaded documents yet.",
+                      className="text-muted", style={"fontSize": "0.8rem"})
+
+    rows = []
+    for d in docs:
+        title      = d.get("title") or d.get("subject") or d.get("ref_id", "—")
+        n_runs     = d.get("linked_runs", 0)
+        ref_type   = d.get("type", "uploaded")
+        uploaded   = (d.get("uploaded_at") or "")[:10]
+        doc_url    = d.get("url") or ""
+        file_name  = d.get("file_name") or ""
+
+        type_badge_color = {
+            "paper": "primary", "report": "info",
+            "handbook": "warning", "standard": "secondary",
+        }.get(ref_type, "light")
+
+        title_el = (
+            html.A(title, href=doc_url, target="_blank",
+                   style={"color": ACCENT, "fontSize": "0.8rem",
+                          "textDecoration": "none"})
+            if doc_url else html.Span(title, style={"fontSize": "0.8rem"})
+        )
+
+        rows.append(dbc.ListGroupItem(
+            dbc.Row([
+                dbc.Col([
+                    title_el,
+                    html.Br(),
+                    html.Small(file_name, className="text-muted"),
+                ], width=7),
+                dbc.Col(
+                    dbc.Badge(ref_type, color=type_badge_color, pill=True,
+                              style={"fontSize": "0.7rem"}),
+                    width=2, className="d-flex align-items-center",
+                ),
+                dbc.Col(
+                    html.Small(f"🔗 {n_runs} runs", className="text-muted",
+                               style={"fontSize": "0.75rem"}),
+                    width=2,
+                ),
+                dbc.Col(
+                    html.Small(uploaded, className="text-muted",
+                               style={"fontSize": "0.72rem"}),
+                    width=1,
+                ),
+            ], align="center"),
+            style={"backgroundColor": "#11112a", "borderColor": "#1e2a3a",
+                   "padding": "6px 10px"},
+        ))
+
+    return dbc.ListGroup(rows, flush=True)
 
 
 @app.callback(

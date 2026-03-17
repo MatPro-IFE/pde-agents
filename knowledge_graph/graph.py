@@ -364,6 +364,303 @@ class SimulationKnowledgeGraph:
         log.info("Reference nodes seeded: %s", counts)
         return {"seeded": True, **counts}
 
+    # ── Uploaded-document reference management ────────────────────────────────
+
+    def ensure_reference_vector_index(self) -> None:
+        """Create HNSW vector index on Reference.embedding (if not exists)."""
+        try:
+            self._run("""
+                CREATE VECTOR INDEX reference_embedding_index IF NOT EXISTS
+                FOR (r:Reference) ON r.embedding
+                OPTIONS {indexConfig: {
+                    `vector.dimensions`:           768,
+                    `vector.similarity_function`:  'cosine'
+                }}
+            """)
+        except Exception as exc:
+            log.debug("reference_embedding_index not created (non-fatal): %s", exc)
+
+    def add_uploaded_reference(
+        self,
+        ref_id: str,
+        title: str,
+        text: str,
+        source: str = "",
+        url: str = "",
+        subject: str = "",
+        ref_type: str = "uploaded",
+        file_name: str = "",
+        minio_path: str = "",
+        run_ids: list[str] | None = None,
+        auto_link_top_k: int = 10,
+    ) -> dict:
+        """
+        Add a user-uploaded document as a Reference node and auto-link it to
+        the most relevant simulation runs.
+
+        Parameters
+        ----------
+        ref_id          Unique identifier (e.g. derived from title + timestamp).
+        title           Human-readable document title.
+        text            Full extracted text (or abstract/summary).
+        source          Citation string (journal, volume, year, etc.).
+        url             Direct link to the document.
+        subject         Physics topic / keyword tag.
+        ref_type        Node type tag (default "uploaded").
+        file_name       Original uploaded filename.
+        minio_path      Storage path in MinIO (if saved).
+        run_ids         Explicit list of run_ids to link; if empty, auto-link.
+        auto_link_top_k How many similar runs to auto-link when run_ids is empty.
+
+        Returns
+        -------
+        dict with ref_id, runs_linked, and method ('manual' | 'auto' | 'none').
+        """
+        if not self._available:
+            return {"error": "Neo4j unavailable"}
+
+        # Ensure uniqueness constraint on Reference nodes
+        try:
+            self._run(
+                "CREATE CONSTRAINT reference_id_unique IF NOT EXISTS "
+                "FOR (r:Reference) REQUIRE r.ref_id IS UNIQUE"
+            )
+        except Exception:
+            pass
+
+        now = datetime.now(timezone.utc).isoformat()
+
+        # Upsert the Reference node
+        self._run(
+            """
+            MERGE (ref:Reference {ref_id: $ref_id})
+            SET ref.title       = $title,
+                ref.type        = $type,
+                ref.subject     = $subject,
+                ref.text        = $text,
+                ref.source      = $source,
+                ref.url         = $url,
+                ref.file_name   = $file_name,
+                ref.minio_path  = $minio_path,
+                ref.is_uploaded = true,
+                ref.uploaded_at = $now
+            """,
+            ref_id=ref_id, title=title, type=ref_type, subject=subject,
+            text=text[:4000],   # cap stored text to avoid huge properties
+            source=source, url=url, file_name=file_name,
+            minio_path=minio_path, now=now,
+        )
+
+        # Generate embedding so the reference can be found semantically
+        embedding: list[float] | None = None
+        try:
+            from knowledge_graph.embeddings import get_embedder
+            embedding = get_embedder().embed_text(f"{title}\n{subject}\n{text[:2000]}")
+            if embedding:
+                self._run(
+                    "MATCH (ref:Reference {ref_id: $ref_id}) SET ref.embedding = $vec",
+                    ref_id=ref_id, vec=embedding,
+                )
+                self.ensure_reference_vector_index()
+        except Exception as exc:
+            log.debug("Reference embedding failed (non-fatal): %s", exc)
+
+        # ── Link to runs ─────────────────────────────────────────────────────
+        linked_run_ids: list[str] = []
+        link_method = "none"
+
+        if run_ids:
+            # Explicit links requested by the user
+            for rid in run_ids:
+                try:
+                    self._run(
+                        """
+                        MATCH (r:Run {run_id: $run_id})
+                        MATCH (ref:Reference {ref_id: $ref_id})
+                        MERGE (r)-[rel:CITES]->(ref)
+                        SET rel.link_type  = 'manual',
+                            rel.linked_at  = $now
+                        """,
+                        run_id=rid, ref_id=ref_id, now=now,
+                    )
+                    linked_run_ids.append(rid)
+                except Exception:
+                    pass
+            link_method = "manual"
+
+        elif embedding and auto_link_top_k > 0:
+            # Auto-link via vector similarity: find runs most similar to the doc
+            try:
+                rows = self._run(
+                    """
+                    CALL db.index.vector.queryNodes(
+                        'run_embedding_index', $k, $vec
+                    ) YIELD node AS r, score
+                    WHERE r.status = 'success' AND score >= $min_score
+                    RETURN r.run_id AS run_id, score
+                    ORDER BY score DESC
+                    """,
+                    k=auto_link_top_k,
+                    vec=embedding,
+                    min_score=0.75,
+                )
+                for row in rows:
+                    rid = row["run_id"]
+                    self._run(
+                        """
+                        MATCH (r:Run {run_id: $run_id})
+                        MATCH (ref:Reference {ref_id: $ref_id})
+                        MERGE (r)-[rel:CITES]->(ref)
+                        SET rel.link_type   = 'auto',
+                            rel.similarity  = $score,
+                            rel.linked_at   = $now
+                        """,
+                        run_id=rid, ref_id=ref_id,
+                        score=round(row["score"], 4), now=now,
+                    )
+                    linked_run_ids.append(rid)
+                link_method = "auto"
+            except Exception as exc:
+                log.debug("Auto-link failed (non-fatal): %s", exc)
+
+        log.info(
+            "Uploaded reference %r: linked %d runs via %s",
+            ref_id, len(linked_run_ids), link_method,
+        )
+        return {
+            "ref_id":      ref_id,
+            "title":       title,
+            "runs_linked": len(linked_run_ids),
+            "run_ids":     linked_run_ids,
+            "method":      link_method,
+            "embedded":    embedding is not None,
+        }
+
+    def link_reference_to_run(self, ref_id: str, run_id: str) -> bool:
+        """Manually attach an existing Reference node to a Run."""
+        if not self._available:
+            return False
+        now = datetime.now(timezone.utc).isoformat()
+        try:
+            self._run(
+                """
+                MATCH (r:Run {run_id: $run_id})
+                MATCH (ref:Reference {ref_id: $ref_id})
+                MERGE (r)-[rel:CITES]->(ref)
+                SET rel.link_type = 'manual',
+                    rel.linked_at = $now
+                """,
+                run_id=run_id, ref_id=ref_id, now=now,
+            )
+            return True
+        except Exception as exc:
+            log.warning("link_reference_to_run failed: %s", exc)
+            return False
+
+    def get_references_for_run(self, run_id: str) -> list[dict]:
+        """
+        Return all Reference nodes linked to a specific run.
+        Includes both user-uploaded (CITES) and auto-linked structural refs
+        (via Material/BCConfig/Domain → HAS_REFERENCE traversal).
+        """
+        rows = self._run(
+            """
+            MATCH (r:Run {run_id: $run_id})
+
+            // Direct citations (uploaded documents)
+            OPTIONAL MATCH (r)-[c:CITES]->(cited:Reference)
+
+            // Structural references via material / BC / domain
+            OPTIONAL MATCH (r)-[:USES_MATERIAL]->(m:Material)-[:HAS_REFERENCE]->(mat_ref:Reference)
+            OPTIONAL MATCH (r)-[:USES_BC_CONFIG]->(b:BCConfig)-[:HAS_REFERENCE]->(bc_ref:Reference)
+            OPTIONAL MATCH (r)-[:ON_DOMAIN]->(d:Domain)-[:HAS_REFERENCE]->(dom_ref:Reference)
+
+            WITH collect(DISTINCT {
+                    ref_id:       cited.ref_id,
+                    title:        coalesce(cited.title, cited.subject),
+                    type:         cited.type,
+                    subject:      cited.subject,
+                    text:         cited.text,
+                    source:       cited.source,
+                    url:          cited.url,
+                    is_uploaded:  coalesce(cited.is_uploaded, false),
+                    link_type:    c.link_type,
+                    similarity:   c.similarity
+                }) AS cited_refs,
+                collect(DISTINCT {
+                    ref_id:      mat_ref.ref_id,
+                    title:       coalesce(mat_ref.title, mat_ref.subject),
+                    type:        mat_ref.type,
+                    subject:     mat_ref.subject,
+                    text:        mat_ref.text,
+                    source:      mat_ref.source,
+                    url:         mat_ref.url,
+                    is_uploaded: coalesce(mat_ref.is_uploaded, false),
+                    link_type:   'material',
+                    similarity:  null
+                }) AS mat_refs,
+                collect(DISTINCT {
+                    ref_id:      bc_ref.ref_id,
+                    title:       coalesce(bc_ref.title, bc_ref.subject),
+                    type:        bc_ref.type,
+                    subject:     bc_ref.subject,
+                    text:        bc_ref.text,
+                    source:      bc_ref.source,
+                    url:         bc_ref.url,
+                    is_uploaded: coalesce(bc_ref.is_uploaded, false),
+                    link_type:   'bc_config',
+                    similarity:  null
+                }) AS bc_refs,
+                collect(DISTINCT {
+                    ref_id:      dom_ref.ref_id,
+                    title:       coalesce(dom_ref.title, dom_ref.subject),
+                    type:        dom_ref.type,
+                    subject:     dom_ref.subject,
+                    text:        dom_ref.text,
+                    source:      dom_ref.source,
+                    url:         dom_ref.url,
+                    is_uploaded: coalesce(dom_ref.is_uploaded, false),
+                    link_type:   'domain',
+                    similarity:  null
+                }) AS dom_refs
+
+            RETURN cited_refs + mat_refs + bc_refs + dom_refs AS all_refs
+            """,
+            run_id=run_id,
+        )
+        if not rows:
+            return []
+        all_refs = rows[0].get("all_refs", [])
+        # Deduplicate by ref_id and remove null entries
+        seen: set[str] = set()
+        result: list[dict] = []
+        for r in all_refs:
+            if r and r.get("ref_id") and r["ref_id"] not in seen:
+                seen.add(r["ref_id"])
+                result.append(r)
+        return result
+
+    def list_uploaded_references(self, limit: int = 50) -> list[dict]:
+        """Return recently uploaded Reference nodes."""
+        return self._run(
+            """
+            MATCH (ref:Reference {is_uploaded: true})
+            OPTIONAL MATCH (r:Run)-[:CITES]->(ref)
+            RETURN ref.ref_id     AS ref_id,
+                   ref.title      AS title,
+                   ref.type       AS type,
+                   ref.subject    AS subject,
+                   ref.source     AS source,
+                   ref.url        AS url,
+                   ref.file_name  AS file_name,
+                   ref.uploaded_at AS uploaded_at,
+                   count(r)       AS linked_runs
+            ORDER BY ref.uploaded_at DESC
+            LIMIT $limit
+            """,
+            limit=limit,
+        )
+
     def get_references_for_config(self, config: dict) -> list[dict]:
         """
         Retrieve all Reference nodes relevant to a simulation config by

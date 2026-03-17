@@ -10,6 +10,7 @@ langgraph-prebuilt>=0.1.0
 
 # ─── Web Framework ────────────────────────────────────────────────────────────
 fastapi>=0.115.0
+python-multipart>=0.0.9    # required by FastAPI for File/Form upload endpoints
 uvicorn[standard]>=0.32.0
 httpx>=0.28.0
 pydantic>=2.10.0
@@ -25,6 +26,7 @@ minio>=7.2.11
 
 # ─── Knowledge Graph ──────────────────────────────────────────────────────────
 neo4j>=5.26.0
+pypdf>=4.0.0            # PDF text extraction for reference document upload
 
 # ─── Message Queue ────────────────────────────────────────────────────────────
 redis>=5.2.1

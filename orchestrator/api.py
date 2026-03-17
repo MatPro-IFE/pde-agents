@@ -22,7 +22,7 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Optional
 
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import HTMLResponse
@@ -812,3 +812,196 @@ async def kg_run_lineage(run_id: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ─── Reference / document upload endpoints ────────────────────────────────────
+
+def _extract_text(content: bytes, filename: str) -> str:
+    """
+    Extract plain text from uploaded file content.
+
+    Supports:
+      .pdf  — extracted via pypdf (pure-Python, no system deps)
+      .txt / .md / .rst / .tex — decoded as UTF-8
+    Falls back to a best-effort UTF-8 decode for unknown types.
+    """
+    ext = (filename.rsplit(".", 1)[-1].lower()) if "." in filename else "txt"
+
+    if ext == "pdf":
+        try:
+            import io
+            from pypdf import PdfReader
+            reader = PdfReader(io.BytesIO(content))
+            pages = [page.extract_text() or "" for page in reader.pages]
+            return "\n".join(pages).strip()
+        except ImportError:
+            return (
+                "[PDF text extraction requires pypdf — "
+                "install it in the agents container]"
+            )
+        except Exception as exc:
+            return f"[PDF extraction failed: {exc}]"
+
+    # Plain text formats
+    for enc in ("utf-8", "latin-1", "utf-16"):
+        try:
+            return content.decode(enc).strip()
+        except UnicodeDecodeError:
+            continue
+    return content.decode("utf-8", errors="replace").strip()
+
+
+def _ref_id_from_title(title: str) -> str:
+    """Derive a stable ref_id slug from a document title + timestamp."""
+    import re
+    from datetime import datetime, timezone
+    slug = re.sub(r"[^a-z0-9]+", "_", title.lower())[:40].strip("_")
+    ts   = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+    return f"upload_{slug}_{ts}"
+
+
+@app.post("/references/upload")
+async def upload_reference(
+    file: UploadFile                     = File(..., description="PDF, TXT, or Markdown document"),
+    title:    str                        = Form(...,  description="Document title"),
+    source:   str                        = Form("",   description="Citation (journal, year, etc.)"),
+    url:      str                        = Form("",   description="Link to the document"),
+    subject:  str                        = Form("",   description="Physics topic / keyword"),
+    ref_type: str                        = Form("uploaded", description="paper | report | handbook | standard | uploaded"),
+    run_ids:  str                        = Form("",   description="Comma-separated run_ids to link explicitly"),
+    auto_link_top_k: int                 = Form(10,   description="Top-K similar runs to auto-link (0 = disable)"),
+    store_in_minio:  bool                = Form(True, description="Also save the file in MinIO"),
+):
+    """
+    Upload an external document (PDF, TXT, Markdown) into the knowledge graph.
+
+    The document text is embedded with nomic-embed-text and the resulting
+    768-dim vector is used to automatically link the reference to the most
+    semantically similar simulation runs (top-K by cosine similarity).
+
+    You can also supply a comma-separated list of run_ids to create explicit
+    (manual) citations regardless of semantic similarity.
+    """
+    content = await file.read()
+    if not content:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty")
+
+    text     = _extract_text(content, file.filename or "document.txt")
+    ref_id   = _ref_id_from_title(title)
+    run_id_list = [r.strip() for r in run_ids.split(",") if r.strip()] if run_ids else []
+
+    # ── Optionally store file in MinIO ────────────────────────────────────────
+    minio_path = ""
+    if store_in_minio:
+        try:
+            import io
+            from minio import Minio
+            from minio.error import S3Error
+
+            minio_endpoint  = os.getenv("MINIO_ENDPOINT",   "minio:9000")
+            minio_access    = os.getenv("MINIO_ACCESS_KEY", "minio_admin")
+            minio_secret    = os.getenv("MINIO_SECRET_KEY", "minio_secret123")
+            minio_bucket    = "simulation-results"
+
+            client = Minio(minio_endpoint, access_key=minio_access,
+                           secret_key=minio_secret, secure=False)
+            try:
+                client.make_bucket(minio_bucket)
+            except S3Error:
+                pass
+
+            object_name = f"references/{ref_id}/{file.filename or 'document'}"
+            client.put_object(
+                minio_bucket, object_name,
+                io.BytesIO(content), length=len(content),
+                content_type=file.content_type or "application/octet-stream",
+            )
+            minio_path = f"{minio_bucket}/{object_name}"
+        except Exception as exc:
+            # Non-fatal — we still ingest the text even without MinIO
+            minio_path = f"[MinIO upload failed: {exc}]"
+
+    # ── Add to knowledge graph ────────────────────────────────────────────────
+    try:
+        from knowledge_graph.graph import get_kg
+        kg = get_kg()
+        if not kg.available:
+            raise HTTPException(status_code=503, detail="Neo4j not available")
+
+        result = kg.add_uploaded_reference(
+            ref_id         = ref_id,
+            title          = title,
+            text           = text,
+            source         = source,
+            url            = url,
+            subject        = subject,
+            ref_type       = ref_type,
+            file_name      = file.filename or "",
+            minio_path     = minio_path,
+            run_ids        = run_id_list if run_id_list else None,
+            auto_link_top_k= auto_link_top_k if not run_id_list else 0,
+        )
+        return {
+            "status":        "success",
+            "ref_id":        ref_id,
+            "title":         title,
+            "file_name":     file.filename,
+            "minio_path":    minio_path,
+            "text_length":   len(text),
+            "runs_linked":   result.get("runs_linked", 0),
+            "run_ids":       result.get("run_ids", []),
+            "link_method":   result.get("method", "none"),
+            "embedded":      result.get("embedded", False),
+        }
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@app.post("/references/{ref_id}/link/{run_id}")
+async def link_reference_to_run(ref_id: str, run_id: str):
+    """Manually link an existing reference to a specific run."""
+    try:
+        from knowledge_graph.graph import get_kg
+        kg = get_kg()
+        if not kg.available:
+            raise HTTPException(status_code=503, detail="Neo4j not available")
+        ok = kg.link_reference_to_run(ref_id, run_id)
+        if not ok:
+            raise HTTPException(status_code=404, detail="Reference or run not found")
+        return {"status": "linked", "ref_id": ref_id, "run_id": run_id}
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@app.get("/references/uploaded")
+async def list_uploaded_references(limit: int = 50):
+    """List user-uploaded Reference nodes with their linked run counts."""
+    try:
+        from knowledge_graph.graph import get_kg
+        kg = get_kg()
+        if not kg.available:
+            raise HTTPException(status_code=503, detail="Neo4j not available")
+        return kg.list_uploaded_references(limit=limit)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@app.get("/kg/run/{run_id}/references")
+async def run_references(run_id: str):
+    """Return all references (uploaded + structural) linked to a run."""
+    try:
+        from knowledge_graph.graph import get_kg
+        kg = get_kg()
+        if not kg.available:
+            raise HTTPException(status_code=503, detail="Neo4j not available")
+        return kg.get_references_for_run(run_id)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
