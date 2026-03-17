@@ -24,8 +24,7 @@ run:
 	@echo "  Dashboard  : http://localhost:8050"
 	@echo "  Agents API : http://localhost:8000"
 	@echo "  JupyterLab : http://localhost:8888"
-	@echo "  MLflow     : http://localhost:5000"
-	@echo "  MinIO      : http://localhost:9001"
+	@echo "  MinIO      : http://localhost:9002 (SSH tunnel)"
 
 infra:
 	$(COMPOSE) up -d postgres redis minio ollama
@@ -50,7 +49,7 @@ logs-ollama:
 
 clean:
 	$(COMPOSE) down -v --remove-orphans
-	rm -rf results/* meshes/* mlflow_data/*
+	rm -rf results/* meshes/*
 	@echo "Cleaned all volumes and result directories."
 
 # ─── Simulations ──────────────────────────────────────────────────────────────
@@ -177,7 +176,6 @@ health:
 	@curl -sf http://localhost:8000/health | python3 -m json.tool || echo "Agents API: DOWN"
 	@curl -sf http://localhost:11434/api/tags | python3 -c "import sys,json; d=json.load(sys.stdin); print(f'Ollama: OK  ({len(d[\"models\"])} models)')" || echo "Ollama: DOWN"
 	@curl -sf http://localhost:8050 > /dev/null && echo "Dashboard: OK" || echo "Dashboard: DOWN"
-	@curl -sf http://localhost:5000 > /dev/null && echo "MLflow: OK" || echo "MLflow: DOWN"
 	@curl -sf http://localhost:9000/minio/health/live > /dev/null && echo "MinIO: OK" || echo "MinIO: DOWN"
 
 # ─── NeoDash ──────────────────────────────────────────────────────────────────

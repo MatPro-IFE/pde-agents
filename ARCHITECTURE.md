@@ -18,8 +18,7 @@
 9. [MinIO — Object Storage](#9-minio--object-storage)
 10. [Redis — Message Broker](#10-redis--message-broker)
 11. [Plotly Dash — Visualization Dashboard](#11-plotly-dash--visualization-dashboard)
-12. [MLflow — Experiment Tracking](#12-mlflow--experiment-tracking)
-13. [Neo4j — Simulation Knowledge Graph](#13-neo4j--simulation-knowledge-graph)
+12. [Neo4j — Simulation Knowledge Graph](#12-neo4j--simulation-knowledge-graph)
 14. [How Everything Works Together — End to End](#14-how-everything-works-together--end-to-end)
 15. [The Four-Layer Architecture](#15-the-four-layer-architecture)
 
@@ -65,7 +64,6 @@ in a restrictive firewall). Nginx routes by URL prefix:
 | URL path | Routes to | Service |
 |----------|-----------|---------|
 | `/` | `dashboard:8050` | Plotly Dash (main UI) |
-| `/mlflow/` | `mlflow:5000` | MLflow experiment tracking |
 | `/agents/` | `agents:8000` | FastAPI REST + Swagger UI |
 | `/browser/` | `neo4j:7474` | Neo4j Browser UI |
 | `/neo4j-bolt` | `neo4j:7687` | Neo4j Bolt WebSocket |
@@ -83,8 +81,7 @@ MinIO console (`port 9001`) is accessed **directly** — see the note in
 | `pde-fenics` | 8080 | 8080 | FEM simulation REST API |
 | `pde-agents` | 8000 | 8000 | Orchestrator + agent REST API (also via `/agents/`) |
 | `pde-dashboard` | 8050 | — | Plotly Dash (internal only, accessed via nginx `/`) |
-| `pde-mlflow` | 5000 | — | MLflow (internal only, accessed via nginx `/mlflow/`) |
-| `pde-minio` | 9000/9001 | 9000/9001 | S3 API / console (direct access on 9001) |
+| `pde-minio` | 9000/9001 | 9000/9002 | S3 API / MinIO console (SSH tunnel to 9002) |
 | `pde-postgres` | 5432 | 5432 | PostgreSQL |
 | `pde-redis` | 6379 | 6379 | Redis |
 | `pde-neo4j` | 7687 / 7474 | 7687 / 7474 | Bolt (driver) / Browser (also via nginx `/browser/`) |
@@ -113,7 +110,7 @@ redis    ──▶ agents (waits for Redis to be healthy)
 ollama   ──▶ agents (waits for Ollama to be healthy)
 neo4j    ──▶ agents (waits for Neo4j to be healthy — ~40 s on first boot)
 agents   ──▶ dashboard
-dashboard, mlflow, agents, fenics-runner, neo4j ──▶ nginx (soft dep)
+dashboard, agents, fenics-runner, neo4j ──▶ nginx (soft dep)
 ```
 
 This ensures agents never start before all dependencies are ready.
@@ -948,10 +945,9 @@ function(href) {
     var boltUrl = encodeURIComponent('bolt://' + host + ':7687');
     return [
         '/agents/docs',                              // API Docs  — via nginx
-        '/mlflow/',                                  // MLflow    — via nginx
-        'http://' + host + ':9002',                  // MinIO     — direct port (moved from 9001)
+        'http://' + host + ':9002',                  // MinIO     — direct port
         'http://' + host + ':7474/browser/?connectURL=' + boltUrl, // Neo4j
-        'http://' + host + ':9001',                  // NeoDash   — reuses ex-MinIO port
+        'http://' + host + ':9001',                  // NeoDash
     ];
 }
 ```
@@ -1032,41 +1028,7 @@ Store change triggers main callback:
 
 ---
 
-## 12. MLflow — Experiment Tracking
-
-### What it is
-
-MLflow is an open-source platform for managing machine learning and scientific
-computing experiments. It logs parameters, metrics, and artifacts for every run,
-making it easy to compare them later.
-
-### How it's used here
-
-Every simulation run is logged as an MLflow experiment:
-
-```python
-with mlflow.start_run(run_name=run_id):
-    # Parameters
-    mlflow.log_params({"k": 50.0, "nx": 64, "ny": 64, "dt": 0.1, ...})
-
-    # Metrics
-    mlflow.log_metrics({"T_max": 500.0, "T_min": 300.0, "wall_time": 0.16})
-
-    # Artifacts
-    mlflow.log_artifact("result.json")
-    mlflow.log_artifact("config.json")
-```
-
-### What you see at http://`host`:8050/mlflow/
-
-- A table of all runs with their parameters and metrics
-- Side-by-side comparison charts: k vs T_max, mesh size vs wall time
-- Artifact browser: download result JSONs, view configs
-- Run reproducibility: every config is stored, so any run can be exactly repeated
-
----
-
-## 13. Neo4j — Simulation Knowledge Graph (GraphRAG)
+## 12. Neo4j — Simulation Knowledge Graph (GraphRAG)
 
 ### What it is
 
@@ -1347,7 +1309,7 @@ RETURN r, m, b, d, collect(nb) AS neighbours
 
 ---
 
-## 14. How Everything Works Together — End to End
+## 13. How Everything Works Together — End to End
 
 Below is the **complete flow** for a single user request typed into the dashboard
 chat: *"Run a 2D heat equation on a 2 cm × 4 cm steel plate, compare to aluminum,
@@ -1530,7 +1492,7 @@ Dashboard:
 
 ---
 
-## 15. The Four-Layer Architecture
+## 14. The Four-Layer Architecture
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
@@ -1589,16 +1551,14 @@ Dashboard:
 ┌──────────────────────────▼─────────────────────────────────────────┐
 │                     PRESENTATION LAYER                             │
 │                                                                    │
-│   Plotly Dash + MLflow + FastAPI                                   │
+│   Plotly Dash + FastAPI                                            │
 │                                                                    │
-│   • Visualises temperature fields (heatmap/surface/volume/anim.)   │
+│   • Visualises temperature fields (heatmap/surface/surface/anim.)  │
 │   • Run Explorer: browse runs, agent timeline, files, recs         │
 │   • Exposes async REST API + /kg/* + /explorer/* endpoints         │
-│   • Tracks experiment parameters and metrics (MLflow)              │
 │   • Natural language chat (Enter-key submit, quick-prompt buttons) │
 │                                                                    │
-│   Components: visualization/dashboard.py, orchestrator/api.py,    │
-│               MLflow server                                        │
+│   Components: visualization/dashboard.py, orchestrator/api.py     │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -1629,7 +1589,6 @@ Bolt protocol, and file formats). This means:
 |-----|---------|
 | http://`host`:8050/ | Dashboard (all tabs — proxied via nginx) |
 | http://`host`:8050/agents/docs | FastAPI Swagger UI |
-| http://`host`:8050/mlflow/ | MLflow experiment tracking |
 | http://`host`:7474 | Neo4j Browser (direct) |
 | http://`host`:9001 | NeoDash — open-source graph explorer (reuses ex-MinIO console port) |
 | http://`host`:9002 | MinIO object storage console (moved from 9001; SSH tunnel recommended) |

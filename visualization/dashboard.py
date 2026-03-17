@@ -563,7 +563,6 @@ def make_header():
             dbc.NavbarBrand("🔬 PDE Agents Dashboard", style={"fontSize": "1.4rem", "fontWeight": "bold"}),
             dbc.Nav([
                 dbc.NavItem(dbc.NavLink("API Docs",      href="#", target="_blank", external_link=True, id="nav-link-docs")),
-                dbc.NavItem(dbc.NavLink("MLflow",        href="#", target="_blank", external_link=True, id="nav-link-mlflow")),
                 dbc.NavItem(dbc.NavLink("MinIO",         href="#", target="_blank", external_link=True, id="nav-link-minio")),
                 dbc.NavItem(dbc.NavLink("Neo4j Browser", href="#", target="_blank", external_link=True,
                     style={"color": "#6fd672"}, id="nav-link-neo4j")),
@@ -1160,21 +1159,18 @@ app.clientside_callback(
     function(href) {
         var host = window.location.hostname;
 
-        var docs   = '/agents/docs';
-        var mlflow = '/mlflow/';
-        var minio  = 'http://' + host + ':9002';  // MinIO console moved to 9002 (9001 is NeoDash)
+        var docs    = '/agents/docs';
+        var minio   = 'http://' + host + ':9002';  // MinIO console on 9002 (9001 is NeoDash)
 
         var boltUrl = encodeURIComponent('bolt://' + host + ':7687');
         var neo4j   = 'http://' + host + ':7474/browser/?connectURL=' + boltUrl;
 
-        // NeoDash runs on port 9001 (reuses the MinIO console slot — no new port needed)
         var neodash = 'http://' + host + ':9001';
 
-        return [docs, mlflow, minio, neo4j, neodash];
+        return [docs, minio, neo4j, neodash];
     }
     """,
     Output("nav-link-docs",    "href"),
-    Output("nav-link-mlflow",  "href"),
     Output("nav-link-minio",   "href"),
     Output("nav-link-neo4j",   "href"),
     Output("nav-link-neodash", "href"),

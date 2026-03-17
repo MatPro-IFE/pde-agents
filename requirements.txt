@@ -40,8 +40,6 @@ dash-bootstrap-components>=1.6.0
 plotly>=5.24.0
 
 # ─── Experiment Tracking ──────────────────────────────────────────────────────
-mlflow>=2.18.0
-
 # ─── Utilities ────────────────────────────────────────────────────────────────
 pyyaml>=6.0.2
 python-dotenv>=1.0.1

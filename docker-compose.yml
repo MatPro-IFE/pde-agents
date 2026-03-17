@@ -279,34 +279,9 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - dashboard
-      - mlflow
       - minio
       - fenics-runner
       - neo4j
-
-  # ─── MLflow Experiment Tracking ────────────────────────────────────────────
-
-  mlflow:
-    image: ghcr.io/mlflow/mlflow:latest
-    container_name: pde-mlflow
-    restart: unless-stopped
-    networks: [pde-net]
-    ports:
-      - "5000:5000"
-    volumes:
-      - ./mlflow_data:/mlflow
-    environment:
-      - MLFLOW_BACKEND_STORE_URI=postgresql://${POSTGRES_USER:-pde_user}:${POSTGRES_PASSWORD:-pde_secret}@postgres:5432/${POSTGRES_DB:-pde_simulations}
-      - MLFLOW_DEFAULT_ARTIFACT_ROOT=/mlflow/artifacts
-    depends_on:
-      postgres:
-        condition: service_healthy
-    command: >
-      mlflow server
-        --backend-store-uri postgresql://${POSTGRES_USER:-pde_user}:${POSTGRES_PASSWORD:-pde_secret}@postgres:5432/${POSTGRES_DB:-pde_simulations}
-        --default-artifact-root /mlflow/artifacts
-        --host 0.0.0.0 --port 5000
-        --static-prefix /mlflow
 
   # ─── NeoDash — open-source KG dashboard (Neo4j Labs, Apache 2.0) ───────────
   # Provides a no-code graph visualization UI for Neo4j.

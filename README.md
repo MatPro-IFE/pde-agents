@@ -28,8 +28,8 @@ A multi-agent ecosystem built on open-source LLMs running locally to solve PDEs 
   ┌──────────────┐  ┌──────────────┐  ┌───────────────────────────────┐
   │  FEniCSx     │  │  NumPy       │  │  Neo4j Knowledge Graph (GraphRAG)│
   │  DOLFINx     │  │  Plotly Dash │  │  ─────────────────────────────│
-  │  2D/3D FEM   │  │  MLflow      │  │  Run nodes + 768-dim embeddings│
-  │  Gmsh meshes │  │  PostgreSQL  │  │  SIMILAR_TO KNN edges          │
+  │  2D/3D FEM   │  │  PostgreSQL  │  │  Run nodes + 768-dim embeddings│
+  │  Gmsh meshes │  │  FastAPI     │  │  SIMILAR_TO KNN edges          │
   └──────────────┘  └──────────────┘  │  Reference nodes (physics KB)  │
                                        │  Semantic vector search (HNSW) │
                                        └───────────────────────────────┘
@@ -53,7 +53,6 @@ All browser-facing UIs are accessed through a single **nginx reverse proxy on po
 | **nginx** | `:8050` | Reverse proxy — single entry point for all web UIs |
 | Dashboard | `:8050/` (via nginx) | Plotly Dash visualization, agent chat, KG explorer |
 | Agents API | `:8050/agents/` or `:8000` | FastAPI REST + Swagger UI |
-| MLflow | `:8050/mlflow/` (via nginx) | Experiment tracking UI |
 | Neo4j Browser | `:7474` (direct) | Knowledge graph browser |
 | **NeoDash** | `:9001` (direct) | Open-source graph dashboard — reuses ex-MinIO console port |
 | MinIO Console | `:9002` → SSH tunnel | Object storage browser (moved to port 9002) |
@@ -134,7 +133,6 @@ All services are accessible from the dashboard navbar or directly:
 |-----|-------------|
 | http://localhost:8050/ | Dashboard (all tabs) |
 | http://localhost:8050/agents/docs | API Swagger UI |
-| http://localhost:8050/mlflow/ | MLflow |
 | http://localhost:7474 | Neo4j Browser |
 | http://localhost:9001 | NeoDash (graph explorer — reuses MinIO console port) |
 | via SSH tunnel | MinIO console (see note below) |
