@@ -4,12 +4,14 @@ SimulationKnowledgeGraph — Phase 2 implementation with vector embeddings.
 Graph schema
 ────────────
 Nodes
-  (:Run)          — one per simulation run  (embedding: 768-dim vector)
-  (:Material)     — engineering materials with thermal properties
-  (:KnownIssue)   — documented failure patterns
-  (:BCConfig)     — boundary-condition pattern (dirichlet, neumann, robin combos)
-  (:Domain)       — physical domain size class (micro / component / panel / structural)
-  (:ThermalClass) — material conductivity class (high / medium / low / insulator)
+  (:Run)              — one per simulation run  (embedding: 768-dim vector)
+  (:Material)         — engineering materials with thermal properties
+  (:KnownIssue)       — documented failure patterns
+  (:BCConfig)         — boundary-condition pattern (dirichlet, neumann, robin combos)
+  (:Domain)           — physical domain size class (micro / component / panel / structural)
+  (:ThermalClass)     — material conductivity class (high / medium / low / insulator)
+  (:Reference)        — curated or uploaded external reference document
+  (:ReferenceChunk)   — a single structured chunk from a parsed Reference document
 
 Relationships
   (:Run)-[:USES_MATERIAL {confidence}]->(:Material)
@@ -20,12 +22,16 @@ Relationships
   (:Run)-[:SPAWNED_FROM]->(:Run)           — created from a suggestion
   (:Run)-[:IMPROVED_OVER {metric}]->(:Run) — better result than parent
   (:Run)-[:SIMILAR_TO {score}]->(:Run)     — KNN semantic similarity (Feature 2)
+  (:Reference)-[:HAS_CHUNK]->(:ReferenceChunk)
+  (:ReferenceChunk)-[:CROSS_REFS {score}]->(:Run)
+  (:ReferenceChunk)-[:RELATES_TO]->(:Material | :BCConfig | :Domain)
 
 Vector search
 ─────────────
 Each Run node stores an `embedding` property (768-dim float list) produced
 by nomic-embed-text via Ollama.  A Neo4j HNSW vector index on Run.embedding
 enables sub-millisecond semantic similarity search.
+ReferenceChunk nodes also carry embeddings for fine-grained chunk↔run matching.
 
 get_similar_runs() uses vector search when Ollama + the index are available,
 and falls back transparently to the Cypher parameter-distance query.
@@ -660,6 +666,227 @@ class SimulationKnowledgeGraph:
             """,
             limit=limit,
         )
+
+    # ── Structured chunk storage (Docling pipeline) ──────────────────────────
+
+    def ensure_chunk_vector_index(self) -> None:
+        """Create HNSW vector index on ReferenceChunk.embedding if it doesn't exist."""
+        try:
+            self._run(
+                """
+                CREATE VECTOR INDEX chunk_embedding_index IF NOT EXISTS
+                FOR (c:ReferenceChunk) ON (c.embedding)
+                OPTIONS {indexConfig: {
+                    `vector.dimensions`: 768,
+                    `vector.similarity_function`: 'cosine'
+                }}
+                """
+            )
+        except Exception as exc:
+            log.debug("chunk_embedding_index not created (non-fatal): %s", exc)
+
+    def ingest_document_chunks(
+        self,
+        ref_id: str,
+        chunks: list,
+        auto_link_top_k: int = 5,
+        min_score: float = 0.78,
+    ) -> dict:
+        """
+        Store structured chunks as (:ReferenceChunk) nodes linked to a
+        (:Reference) parent, then cross-reference each chunk to the most
+        similar simulation runs and to matching KG entity nodes.
+
+        Parameters
+        ----------
+        ref_id          The parent Reference node's ref_id.
+        chunks          List of DocumentChunk dataclass instances.
+        auto_link_top_k Top-K similar runs to link per chunk.
+        min_score       Minimum cosine similarity for auto-linking.
+
+        Returns
+        -------
+        dict with counts: chunks_stored, chunks_embedded, cross_refs_created.
+        """
+        if not self._available:
+            return {"error": "Neo4j unavailable"}
+
+        now = datetime.now(timezone.utc).isoformat()
+        stored = 0
+        embedded = 0
+        cross_refs = 0
+
+        self.ensure_chunk_vector_index()
+
+        for chunk in chunks:
+            chunk_id = f"{ref_id}__chunk_{chunk.chunk_index}"
+            text = chunk.text or ""
+            heading = chunk.heading or ""
+            classification = getattr(chunk, "classification", "general")
+            confidence = getattr(chunk, "confidence", 0.0)
+            chunk_type = getattr(chunk, "chunk_type", "text")
+            page = getattr(chunk, "page", 0)
+
+            self._run(
+                """
+                MATCH (ref:Reference {ref_id: $ref_id})
+                MERGE (c:ReferenceChunk {chunk_id: $chunk_id})
+                SET c.text           = $text,
+                    c.heading        = $heading,
+                    c.chunk_type     = $chunk_type,
+                    c.classification = $classification,
+                    c.confidence     = $confidence,
+                    c.page           = $page,
+                    c.chunk_index    = $chunk_index,
+                    c.created_at     = $now
+                MERGE (ref)-[:HAS_CHUNK]->(c)
+                """,
+                ref_id=ref_id, chunk_id=chunk_id,
+                text=text[:4000], heading=heading,
+                chunk_type=chunk_type, classification=classification,
+                confidence=confidence, page=page,
+                chunk_index=chunk.chunk_index, now=now,
+            )
+            stored += 1
+
+            # Store embedding on the chunk node
+            vec = getattr(chunk, "embedding", None)
+            if vec:
+                self._run(
+                    "MATCH (c:ReferenceChunk {chunk_id: $cid}) SET c.embedding = $vec",
+                    cid=chunk_id, vec=vec,
+                )
+                embedded += 1
+
+                # Cross-reference chunk → similar Runs
+                if auto_link_top_k > 0:
+                    try:
+                        rows = self._run(
+                            """
+                            CALL db.index.vector.queryNodes(
+                                'run_embedding_index', $k, $vec
+                            ) YIELD node AS r, score
+                            WHERE r.status = 'success' AND score >= $min_score
+                            RETURN r.run_id AS run_id, score
+                            ORDER BY score DESC
+                            """,
+                            k=auto_link_top_k, vec=vec, min_score=min_score,
+                        )
+                        for row in rows:
+                            self._run(
+                                """
+                                MATCH (c:ReferenceChunk {chunk_id: $cid})
+                                MATCH (r:Run {run_id: $rid})
+                                MERGE (c)-[rel:CROSS_REFS]->(r)
+                                SET rel.score      = $score,
+                                    rel.linked_at  = $now
+                                """,
+                                cid=chunk_id, rid=row["run_id"],
+                                score=round(row["score"], 4), now=now,
+                            )
+                            cross_refs += 1
+                    except Exception as exc:
+                        log.debug("Chunk→Run cross-ref failed for %s: %s", chunk_id, exc)
+
+            # Link chunk to matching KG entities by classification
+            self._link_chunk_to_entities(chunk_id, classification, text)
+
+        log.info(
+            "Ingested %d chunks for ref %s: %d embedded, %d cross-refs",
+            stored, ref_id, embedded, cross_refs,
+        )
+        return {
+            "chunks_stored": stored,
+            "chunks_embedded": embedded,
+            "cross_refs_created": cross_refs,
+        }
+
+    def _link_chunk_to_entities(self, chunk_id: str, classification: str, text: str):
+        """Link a ReferenceChunk to matching Material/BCConfig/Domain nodes."""
+        try:
+            if classification == "material":
+                self._run(
+                    """
+                    MATCH (c:ReferenceChunk {chunk_id: $cid})
+                    MATCH (m:Material)
+                    WHERE toLower(c.text) CONTAINS toLower(m.name)
+                    MERGE (c)-[:RELATES_TO]->(m)
+                    """,
+                    cid=chunk_id,
+                )
+            elif classification == "bc":
+                self._run(
+                    """
+                    MATCH (c:ReferenceChunk {chunk_id: $cid})
+                    MATCH (b:BCConfig)
+                    WHERE toLower(c.text) CONTAINS toLower(b.pattern)
+                    MERGE (c)-[:RELATES_TO]->(b)
+                    """,
+                    cid=chunk_id,
+                )
+            elif classification == "domain":
+                self._run(
+                    """
+                    MATCH (c:ReferenceChunk {chunk_id: $cid})
+                    MATCH (d:Domain)
+                    WHERE toLower(c.text) CONTAINS toLower(d.label)
+                    MERGE (c)-[:RELATES_TO]->(d)
+                    """,
+                    cid=chunk_id,
+                )
+        except Exception as exc:
+            log.debug("Entity linking for chunk %s failed: %s", chunk_id, exc)
+
+    def get_chunks_for_reference(self, ref_id: str) -> list[dict]:
+        """Return all ReferenceChunk nodes for a given Reference, with cross-ref stats."""
+        return self._run(
+            """
+            MATCH (ref:Reference {ref_id: $ref_id})-[:HAS_CHUNK]->(c:ReferenceChunk)
+            OPTIONAL MATCH (c)-[cr:CROSS_REFS]->(r:Run)
+            OPTIONAL MATCH (c)-[:RELATES_TO]->(entity)
+            RETURN c.chunk_id       AS chunk_id,
+                   c.chunk_index    AS chunk_index,
+                   c.heading        AS heading,
+                   c.text           AS text,
+                   c.chunk_type     AS chunk_type,
+                   c.classification AS classification,
+                   c.confidence     AS confidence,
+                   c.page           AS page,
+                   count(DISTINCT r)       AS cross_ref_runs,
+                   collect(DISTINCT r.run_id)[..5] AS top_run_ids,
+                   collect(DISTINCT labels(entity)[0]) AS entity_types
+            ORDER BY c.chunk_index
+            """,
+            ref_id=ref_id,
+        )
+
+    def search_chunks_by_query(self, query_embedding: list[float],
+                                top_k: int = 10, min_score: float = 0.75) -> list[dict]:
+        """Semantic search across all ReferenceChunk nodes."""
+        try:
+            return self._run(
+                """
+                CALL db.index.vector.queryNodes(
+                    'chunk_embedding_index', $k, $vec
+                ) YIELD node AS c, score
+                WHERE score >= $min_score
+                MATCH (ref:Reference)-[:HAS_CHUNK]->(c)
+                RETURN c.chunk_id       AS chunk_id,
+                       c.heading        AS heading,
+                       c.text           AS text,
+                       c.classification AS classification,
+                       c.chunk_type     AS chunk_type,
+                       c.page           AS page,
+                       ref.ref_id       AS ref_id,
+                       ref.title        AS ref_title,
+                       score
+                ORDER BY score DESC
+                """,
+                k=top_k, vec=query_embedding, min_score=min_score,
+            )
+        except Exception as exc:
+            log.warning("Chunk vector search failed: %s", exc)
+            return []
 
     def get_references_for_config(self, config: dict) -> list[dict]:
         """

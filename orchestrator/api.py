@@ -860,6 +860,33 @@ def _ref_id_from_title(title: str) -> str:
     return f"upload_{slug}_{ts}"
 
 
+def _store_in_minio(ref_id: str, filename: str, content: bytes,
+                     content_type: str = "application/octet-stream") -> str:
+    """Upload file bytes to MinIO. Returns the object path or an error string."""
+    try:
+        import io
+        from minio import Minio
+        from minio.error import S3Error
+
+        endpoint  = os.getenv("MINIO_ENDPOINT",   "minio:9000")
+        access    = os.getenv("MINIO_ACCESS_KEY", "minio_admin")
+        secret    = os.getenv("MINIO_SECRET_KEY", "minio_secret123")
+        bucket    = "simulation-results"
+
+        client = Minio(endpoint, access_key=access, secret_key=secret, secure=False)
+        try:
+            client.make_bucket(bucket)
+        except S3Error:
+            pass
+
+        object_name = f"references/{ref_id}/{filename}"
+        client.put_object(bucket, object_name, io.BytesIO(content),
+                          length=len(content), content_type=content_type)
+        return f"{bucket}/{object_name}"
+    except Exception as exc:
+        return f"[MinIO upload failed: {exc}]"
+
+
 @app.post("/references/upload")
 async def upload_reference(
     file: UploadFile                     = File(..., description="PDF, TXT, or Markdown document"),
@@ -873,14 +900,12 @@ async def upload_reference(
     store_in_minio:  bool                = Form(True, description="Also save the file in MinIO"),
 ):
     """
-    Upload an external document (PDF, TXT, Markdown) into the knowledge graph.
+    Upload an external document into the knowledge graph with structured extraction.
 
-    The document text is embedded with nomic-embed-text and the resulting
-    768-dim vector is used to automatically link the reference to the most
-    semantically similar simulation runs (top-K by cosine similarity).
-
-    You can also supply a comma-separated list of run_ids to create explicit
-    (manual) citations regardless of semantic similarity.
+    Processing pipeline:
+      1. Quick: extract text preview, create Reference node, link to runs (immediate)
+      2. Async (Celery): Docling structured parsing → chunking → per-chunk embedding →
+         chunk-level cross-referencing to Runs, Materials, BCs, Domains
     """
     content = await file.read()
     if not content:
@@ -890,38 +915,14 @@ async def upload_reference(
     ref_id   = _ref_id_from_title(title)
     run_id_list = [r.strip() for r in run_ids.split(",") if r.strip()] if run_ids else []
 
-    # ── Optionally store file in MinIO ────────────────────────────────────────
     minio_path = ""
     if store_in_minio:
-        try:
-            import io
-            from minio import Minio
-            from minio.error import S3Error
+        minio_path = _store_in_minio(
+            ref_id, file.filename or "document", content,
+            file.content_type or "application/octet-stream",
+        )
 
-            minio_endpoint  = os.getenv("MINIO_ENDPOINT",   "minio:9000")
-            minio_access    = os.getenv("MINIO_ACCESS_KEY", "minio_admin")
-            minio_secret    = os.getenv("MINIO_SECRET_KEY", "minio_secret123")
-            minio_bucket    = "simulation-results"
-
-            client = Minio(minio_endpoint, access_key=minio_access,
-                           secret_key=minio_secret, secure=False)
-            try:
-                client.make_bucket(minio_bucket)
-            except S3Error:
-                pass
-
-            object_name = f"references/{ref_id}/{file.filename or 'document'}"
-            client.put_object(
-                minio_bucket, object_name,
-                io.BytesIO(content), length=len(content),
-                content_type=file.content_type or "application/octet-stream",
-            )
-            minio_path = f"{minio_bucket}/{object_name}"
-        except Exception as exc:
-            # Non-fatal — we still ingest the text even without MinIO
-            minio_path = f"[MinIO upload failed: {exc}]"
-
-    # ── Add to knowledge graph ────────────────────────────────────────────────
+    # ── Immediate: create Reference node + doc-level linking ──────────────────
     try:
         from knowledge_graph.graph import get_kg
         kg = get_kg()
@@ -941,22 +942,59 @@ async def upload_reference(
             run_ids        = run_id_list if run_id_list else None,
             auto_link_top_k= auto_link_top_k if not run_id_list else 0,
         )
-        return {
-            "status":        "success",
-            "ref_id":        ref_id,
-            "title":         title,
-            "file_name":     file.filename,
-            "minio_path":    minio_path,
-            "text_length":   len(text),
-            "runs_linked":   result.get("runs_linked", 0),
-            "run_ids":       result.get("run_ids", []),
-            "link_method":   result.get("method", "none"),
-            "embedded":      result.get("embedded", False),
-        }
+
+        # Mark processing status as 'queued'
+        kg._run(
+            "MATCH (ref:Reference {ref_id: $rid}) SET ref.process_status = 'queued'",
+            rid=ref_id,
+        )
     except HTTPException:
         raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
+
+    # ── Async: enqueue structured ingestion via Celery ────────────────────────
+    task_id = None
+    try:
+        from knowledge_graph.tasks import ingest_document_task
+        task = ingest_document_task.apply_async(
+            kwargs={
+                "ref_id":           ref_id,
+                "file_bytes_hex":   content.hex(),
+                "filename":         file.filename or "document.txt",
+                "auto_link_top_k":  auto_link_top_k,
+            },
+            queue="document_ingestion",
+        )
+        task_id = task.id
+    except Exception as exc:
+        # Celery unavailable — fall back to synchronous processing
+        try:
+            from knowledge_graph.document_processor import parse_document, embed_chunks
+            parsed = parse_document(content, file.filename or "document.txt")
+            embed_chunks(parsed.chunks)
+            kg.ingest_document_chunks(ref_id=ref_id, chunks=parsed.chunks)
+            kg._run(
+                "MATCH (ref:Reference {ref_id: $rid}) SET ref.process_status = 'completed'",
+                rid=ref_id,
+            )
+        except Exception:
+            pass
+
+    return {
+        "status":           "success",
+        "ref_id":           ref_id,
+        "title":            title,
+        "file_name":        file.filename,
+        "minio_path":       minio_path,
+        "text_length":      len(text),
+        "runs_linked":      result.get("runs_linked", 0),
+        "run_ids":          result.get("run_ids", []),
+        "link_method":      result.get("method", "none"),
+        "embedded":         result.get("embedded", False),
+        "task_id":          task_id,
+        "processing":       "async" if task_id else "sync",
+    }
 
 
 @app.post("/references/{ref_id}/link/{run_id}")
@@ -1001,6 +1039,76 @@ async def run_references(run_id: str):
         if not kg.available:
             raise HTTPException(status_code=503, detail="Neo4j not available")
         return kg.get_references_for_run(run_id)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+# ─── Structured chunk endpoints ────────────────────────────────────────────────
+
+@app.get("/references/{ref_id}/chunks")
+async def reference_chunks(ref_id: str):
+    """Return all structured chunks for a reference with cross-ref stats."""
+    try:
+        from knowledge_graph.graph import get_kg
+        kg = get_kg()
+        if not kg.available:
+            raise HTTPException(status_code=503, detail="Neo4j not available")
+        return kg.get_chunks_for_reference(ref_id)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@app.get("/references/{ref_id}/status")
+async def reference_processing_status(ref_id: str):
+    """Check the processing status of a document ingestion job."""
+    try:
+        from knowledge_graph.graph import get_kg
+        kg = get_kg()
+        if not kg.available:
+            raise HTTPException(status_code=503, detail="Neo4j not available")
+        rows = kg._run(
+            """
+            MATCH (ref:Reference {ref_id: $ref_id})
+            RETURN ref.process_status  AS status,
+                   ref.process_error   AS error,
+                   ref.n_pages         AS n_pages,
+                   ref.n_chunks        AS n_chunks,
+                   ref.n_tables        AS n_tables,
+                   ref.parse_method    AS parse_method,
+                   ref.chunks_stored   AS chunks_stored,
+                   ref.chunks_embedded AS chunks_embedded,
+                   ref.cross_refs      AS cross_refs
+            """,
+            ref_id=ref_id,
+        )
+        if not rows:
+            raise HTTPException(status_code=404, detail="Reference not found")
+        return rows[0]
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@app.get("/references/search-chunks")
+async def search_reference_chunks(query: str, top_k: int = 10):
+    """Semantic search across all document chunks in the knowledge graph."""
+    try:
+        from knowledge_graph.graph import get_kg
+        from knowledge_graph.embeddings import get_embedder
+        kg = get_kg()
+        if not kg.available:
+            raise HTTPException(status_code=503, detail="Neo4j not available")
+
+        vec = get_embedder().embed_text(query)
+        if not vec:
+            raise HTTPException(status_code=503, detail="Embedding service unavailable")
+
+        return kg.search_chunks_by_query(vec, top_k=top_k)
     except HTTPException:
         raise
     except Exception as exc:

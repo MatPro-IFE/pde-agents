@@ -226,7 +226,8 @@ services:
         condition: service_healthy
       neo4j:
         condition: service_healthy
-    command: uvicorn orchestrator.api:app --host 0.0.0.0 --port 8000 --reload --root-path /agents
+    command: >
+      bash -c "celery -A knowledge_graph.tasks:celery_app worker --loglevel=info --concurrency=2 -Q document_ingestion,celery --detach --pidfile=/tmp/celery.pid --logfile=/tmp/celery.log && exec uvicorn orchestrator.api:app --host 0.0.0.0 --port 8000 --reload --root-path /agents"
 
   # ─── Visualization Dashboard ───────────────────────────────────────────────
 

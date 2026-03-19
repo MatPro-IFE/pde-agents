@@ -26,7 +26,11 @@ minio>=7.2.11
 
 # ─── Knowledge Graph ──────────────────────────────────────────────────────────
 neo4j>=5.26.0
-pypdf>=4.0.0            # PDF text extraction for reference document upload
+pypdf>=4.0.0            # lightweight PDF text extraction (fallback)
+
+# ─── Document Intelligence ───────────────────────────────────────────────────
+docling>=2.80.0          # IBM structured PDF/DOCX extraction w/ table & layout models
+docling-core>=2.70.0     # DoclingDocument representation + HybridChunker
 
 # ─── Message Queue ────────────────────────────────────────────────────────────
 redis>=5.2.1

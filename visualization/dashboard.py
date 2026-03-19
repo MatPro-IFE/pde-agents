@@ -1234,9 +1234,38 @@ app.layout = dbc.Container([
                         ),
                     ]),
                     html.Div(id="kg-reference-browser",
-                             style={"maxHeight": "680px", "overflowY": "auto"}),
+                             style={"maxHeight": "400px", "overflowY": "auto"}),
                 ], width=8),
             ], className="mt-2"),
+
+            # ── Chunk-level search (full width row below) ─────────────────────
+            html.Hr(style={"borderColor": "#2a2a3e", "margin": "16px 0 8px"}),
+            dbc.Row([
+                dbc.Col([
+                    html.H6("🔬 Semantic Chunk Search",
+                             style={"color": ACCENT, "marginBottom": "6px"}),
+                    html.P(
+                        "Search across all extracted document chunks. "
+                        "Each chunk is independently embedded — this finds the most "
+                        "relevant paragraphs, tables, and sections across all uploaded documents.",
+                        className="text-muted", style={"fontSize": "0.78rem"},
+                    ),
+                    dbc.InputGroup([
+                        dbc.Input(
+                            id="chunk-search-input",
+                            placeholder="e.g. thermal conductivity of steel at high temperature",
+                            type="text",
+                            style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
+                                   "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
+                        ),
+                        dbc.Button("🔍 Search Chunks", id="chunk-search-btn",
+                                   color="primary", n_clicks=0),
+                    ], className="mb-2"),
+                ], width=12),
+            ]),
+            html.Div(id="chunk-search-results",
+                     style={"maxHeight": "350px", "overflowY": "auto",
+                            "marginBottom": "12px"}),
         ]),
         # ── Tab 7: Run Explorer ──────────────────────────────────────────────
         dbc.Tab(label="🔎 Run Explorer", tab_id="tab-explorer", children=[
@@ -1981,10 +2010,11 @@ def fetch_doi_metadata(n_clicks, doi):
 
 
 def _build_uploaded_docs_list():
-    """Fetch and render the uploaded documents list from the KG."""
+    """Fetch uploaded documents with processing status and chunk details."""
+    import requests as _req
+    agents_url = os.environ.get("AGENTS_API_URL", "http://agents:8000")
+
     try:
-        import requests as _req
-        agents_url = os.environ.get("AGENTS_API_URL", "http://agents:8000")
         resp = _req.get(f"{agents_url}/references/uploaded?limit=30", timeout=10)
         resp.raise_for_status()
         docs = resp.json()
@@ -1997,17 +2027,39 @@ def _build_uploaded_docs_list():
 
     rows = []
     for d in docs:
-        title      = d.get("title") or d.get("subject") or d.get("ref_id", "—")
+        ref_id     = d.get("ref_id", "")
+        title      = d.get("title") or d.get("subject") or ref_id or "—"
         n_runs     = d.get("linked_runs", 0)
         ref_type   = d.get("type", "uploaded")
         uploaded   = (d.get("uploaded_at") or "")[:10]
         doc_url    = d.get("url") or ""
-        file_name  = d.get("file_name") or ""
 
         type_badge_color = {
             "paper": "primary", "report": "info",
             "handbook": "warning", "standard": "secondary",
         }.get(ref_type, "light")
+
+        # Fetch processing status for this ref
+        proc_status = ""
+        n_chunks = 0
+        n_xrefs  = 0
+        try:
+            sr = _req.get(f"{agents_url}/references/{ref_id}/status", timeout=5)
+            if sr.status_code == 200:
+                sd = sr.json()
+                proc_status = sd.get("status") or ""
+                n_chunks    = sd.get("chunks_stored") or 0
+                n_xrefs     = sd.get("cross_refs") or 0
+        except Exception:
+            pass
+
+        status_badge_map = {
+            "completed": ("success", "✓ processed"),
+            "embedding": ("warning", "⏳ embedding…"),
+            "queued":    ("info",    "⏳ queued"),
+            "failed":    ("danger",  "✗ failed"),
+        }
+        sb_color, sb_text = status_badge_map.get(proc_status, ("secondary", proc_status or "pending"))
 
         title_el = (
             html.A(title, href=doc_url, target="_blank",
@@ -2016,34 +2068,115 @@ def _build_uploaded_docs_list():
             if doc_url else html.Span(title, style={"fontSize": "0.8rem"})
         )
 
-        rows.append(dbc.ListGroupItem(
+        chunks_detail = ""
+        if n_chunks:
+            chunks_detail = f"📑 {n_chunks} chunks · 🔗 {n_xrefs} cross-refs"
+
+        rows.append(dbc.ListGroupItem([
             dbc.Row([
                 dbc.Col([
                     title_el,
                     html.Br(),
-                    html.Small(file_name, className="text-muted"),
-                ], width=7),
+                    html.Small(chunks_detail or uploaded,
+                               className="text-muted",
+                               style={"fontSize": "0.73rem"}),
+                ], width=5),
                 dbc.Col(
                     dbc.Badge(ref_type, color=type_badge_color, pill=True,
-                              style={"fontSize": "0.7rem"}),
+                              style={"fontSize": "0.68rem"}),
                     width=2, className="d-flex align-items-center",
                 ),
                 dbc.Col(
-                    html.Small(f"🔗 {n_runs} runs", className="text-muted",
-                               style={"fontSize": "0.75rem"}),
+                    html.Small(f"🔗 {n_runs} runs",
+                               style={"fontSize": "0.73rem", "color": "#90e0ef"}),
                     width=2,
                 ),
                 dbc.Col(
-                    html.Small(uploaded, className="text-muted",
-                               style={"fontSize": "0.72rem"}),
-                    width=1,
+                    dbc.Badge(sb_text, color=sb_color, pill=True,
+                              style={"fontSize": "0.65rem"}),
+                    width=3, className="d-flex align-items-center justify-content-end",
                 ),
             ], align="center"),
-            style={"backgroundColor": "#11112a", "borderColor": "#1e2a3a",
-                   "padding": "6px 10px"},
-        ))
+        ], style={"backgroundColor": "#11112a", "borderColor": "#1e2a3a",
+                  "padding": "6px 10px", "cursor": "default"})
+        )
 
     return dbc.ListGroup(rows, flush=True)
+
+
+@app.callback(
+    Output("chunk-search-results", "children"),
+    Input("chunk-search-btn",      "n_clicks"),
+    State("chunk-search-input",    "value"),
+    prevent_initial_call=True,
+)
+def search_chunks(n_clicks, query):
+    """Semantic search across all document chunks via the agents API."""
+    import requests as _req
+    if not query or not query.strip():
+        return html.P("Enter a search query above.", className="text-muted",
+                      style={"fontSize": "0.8rem"})
+    try:
+        agents_url = os.environ.get("AGENTS_API_URL", "http://agents:8000")
+        resp = _req.get(
+            f"{agents_url}/references/search-chunks",
+            params={"query": query.strip(), "top_k": 8},
+            timeout=30,
+        )
+        resp.raise_for_status()
+        results = resp.json()
+    except Exception as exc:
+        return dbc.Alert(f"Search failed: {exc}", color="danger",
+                        style={"fontSize": "0.82rem"})
+
+    if not results:
+        return html.P("No matching chunks found.", className="text-muted",
+                      style={"fontSize": "0.8rem"})
+
+    cards = []
+    for r in results:
+        cls         = r.get("classification", "general")
+        chunk_type  = r.get("chunk_type", "text")
+        heading     = r.get("heading") or ""
+        text        = (r.get("text") or "")[:400]
+        score       = r.get("score", 0)
+        ref_title   = r.get("ref_title") or r.get("ref_id", "")
+        page        = r.get("page", 0)
+
+        cls_colors = {
+            "material": "#4ecdc4", "bc": "#ff6b6b",
+            "solver": "#45b7d1", "domain": "#96ceb4", "general": "#888",
+        }
+        cls_color = cls_colors.get(cls, "#888")
+
+        header_parts = []
+        if heading:
+            header_parts.append(html.Strong(heading, style={"fontSize": "0.82rem"}))
+        header_parts.append(
+            html.Span(f" — {ref_title}", style={"fontSize": "0.75rem", "color": "#999"})
+        )
+
+        cards.append(dbc.Card([
+            dbc.CardBody([
+                html.Div(header_parts, style={"marginBottom": "4px"}),
+                html.P(text, style={"fontSize": "0.78rem", "color": "#ccc",
+                                    "marginBottom": "6px", "lineHeight": "1.4"}),
+                html.Div([
+                    dbc.Badge(cls, style={"backgroundColor": cls_color,
+                                          "fontSize": "0.65rem", "marginRight": "6px"}),
+                    dbc.Badge(chunk_type, color="dark",
+                              style={"fontSize": "0.65rem", "marginRight": "6px"}),
+                    html.Small(f"p.{page}" if page else "",
+                               style={"fontSize": "0.7rem", "color": "#666",
+                                      "marginRight": "8px"}),
+                    html.Small(f"score: {score:.3f}",
+                               style={"fontSize": "0.7rem", "color": "#90e0ef"}),
+                ]),
+            ], style={"padding": "8px 12px"}),
+        ], style={"backgroundColor": "#11112a", "border": "1px solid #1e2a3a",
+                  "marginBottom": "6px"}))
+
+    return html.Div(cards)
 
 
 @app.callback(
