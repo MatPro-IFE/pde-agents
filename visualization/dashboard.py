@@ -2291,45 +2291,102 @@ def search_chunks(n_clicks, n_submit, query):
         return html.P("No matching chunks found.", className="text-muted",
                       style={"fontSize": "0.8rem"})
 
+    cls_colors = {
+        "material": "#4ecdc4", "bc": "#ff6b6b",
+        "solver": "#45b7d1", "domain": "#96ceb4", "general": "#888",
+    }
+    ref_icons = {
+        "paper": "📄", "report": "📋", "handbook": "📚",
+        "standard": "🏛️", "web_resource": "🌐", "web_page": "🌐",
+    }
+
     cards = []
     for r in results:
-        cls         = r.get("classification", "general")
-        chunk_type  = r.get("chunk_type", "text")
-        heading     = r.get("heading") or ""
-        text        = (r.get("text") or "")[:400]
-        score       = r.get("score", 0)
-        ref_title   = r.get("ref_title") or r.get("ref_id", "")
-        page        = r.get("page", 0)
+        cls          = r.get("classification", "general")
+        chunk_type   = r.get("chunk_type", "text")
+        heading      = r.get("heading") or ""
+        text         = (r.get("text") or "")[:400]
+        score        = r.get("score", 0)
+        ref_title    = r.get("ref_title") or r.get("ref_id", "")
+        parent_title = r.get("parent_title") or ref_title
+        page         = r.get("page", 0)
+        ref_url      = r.get("ref_url") or ""
+        ref_type     = r.get("ref_type") or ""
+        is_web       = r.get("is_web", False)
 
-        cls_colors = {
-            "material": "#4ecdc4", "bc": "#ff6b6b",
-            "solver": "#45b7d1", "domain": "#96ceb4", "general": "#888",
-        }
-        cls_color = cls_colors.get(cls, "#888")
+        cls_color  = cls_colors.get(cls, "#888")
+        source_icon = ref_icons.get(ref_type, "🌐" if is_web else "📄")
 
+        # ── Header: heading + source title ──────────────────────────
         header_parts = []
         if heading:
-            header_parts.append(html.Strong(heading, style={"fontSize": "0.82rem"}))
+            header_parts.append(
+                html.Strong(heading, style={"fontSize": "0.82rem", "color": "#e0e0e0"})
+            )
         header_parts.append(
-            html.Span(f" — {ref_title}", style={"fontSize": "0.75rem", "color": "#999"})
+            html.Span(f" — {parent_title if parent_title != ref_title else ref_title}",
+                      style={"fontSize": "0.75rem", "color": "#999"})
         )
+
+        # ── Source link row ─────────────────────────────────────────
+        source_parts = []
+        if ref_url:
+            is_doi = ref_url.startswith("10.") or "doi.org" in ref_url
+            if is_doi and not ref_url.startswith("http"):
+                link_href = f"https://doi.org/{ref_url.lstrip('/')}"
+            else:
+                link_href = ref_url
+
+            link_label = (
+                "🔗 Open page" if (is_web or ref_url.startswith("http"))
+                else "📄 View source"
+            )
+            source_parts.append(
+                html.A(
+                    link_label,
+                    href=link_href,
+                    target="_blank",
+                    rel="noopener noreferrer",
+                    style={
+                        "fontSize": "0.72rem",
+                        "color": "#90e0ef",
+                        "textDecoration": "none",
+                        "marginRight": "10px",
+                        "borderBottom": "1px dotted #90e0ef",
+                    },
+                )
+            )
+        else:
+            # no URL — show a faint label so the row is consistent
+            source_parts.append(
+                html.Span(f"{source_icon} {ref_title}",
+                          style={"fontSize": "0.72rem", "color": "#555"})
+            )
+
+        if page and int(page) > 0:
+            source_parts.append(
+                html.Span(f"p. {page}",
+                          style={"fontSize": "0.72rem", "color": "#666",
+                                 "marginRight": "8px"})
+            )
 
         cards.append(dbc.Card([
             dbc.CardBody([
-                html.Div(header_parts, style={"marginBottom": "4px"}),
+                html.Div(header_parts, className="mb-1"),
                 html.P(text, style={"fontSize": "0.78rem", "color": "#ccc",
                                     "marginBottom": "6px", "lineHeight": "1.4"}),
+                # ── Footer: badges + link ──────────────────────────────
                 html.Div([
                     dbc.Badge(cls, style={"backgroundColor": cls_color,
                                           "fontSize": "0.65rem", "marginRight": "6px"}),
                     dbc.Badge(chunk_type, color="dark",
-                              style={"fontSize": "0.65rem", "marginRight": "6px"}),
-                    html.Small(f"p.{page}" if page else "",
-                               style={"fontSize": "0.7rem", "color": "#666",
-                                      "marginRight": "8px"}),
+                              style={"fontSize": "0.65rem", "marginRight": "8px"}),
                     html.Small(f"score: {score:.3f}",
-                               style={"fontSize": "0.7rem", "color": "#90e0ef"}),
-                ]),
+                               style={"fontSize": "0.7rem", "color": "#90e0ef",
+                                      "marginRight": "12px"}),
+                    *source_parts,
+                ], style={"display": "flex", "alignItems": "center",
+                           "flexWrap": "wrap", "gap": "2px"}),
             ], style={"padding": "8px 12px"}),
         ], style={"backgroundColor": "#11112a", "border": "1px solid #1e2a3a",
                   "marginBottom": "6px"}))

@@ -871,14 +871,19 @@ class SimulationKnowledgeGraph:
                 ) YIELD node AS c, score
                 WHERE score >= $min_score
                 MATCH (ref:Reference)-[:HAS_CHUNK]->(c)
-                RETURN c.chunk_id       AS chunk_id,
-                       c.heading        AS heading,
-                       c.text           AS text,
-                       c.classification AS classification,
-                       c.chunk_type     AS chunk_type,
-                       c.page           AS page,
-                       ref.ref_id       AS ref_id,
-                       ref.title        AS ref_title,
+                OPTIONAL MATCH (parent:Reference)-[:HAS_PAGE]->(ref)
+                RETURN c.chunk_id        AS chunk_id,
+                       c.heading         AS heading,
+                       c.text            AS text,
+                       c.classification  AS classification,
+                       c.chunk_type      AS chunk_type,
+                       c.page            AS page,
+                       ref.ref_id        AS ref_id,
+                       ref.title         AS ref_title,
+                       coalesce(ref.url, parent.url)   AS ref_url,
+                       coalesce(ref.type, parent.type) AS ref_type,
+                       coalesce(parent.title, ref.title) AS parent_title,
+                       ref.is_web        AS is_web,
                        score
                 ORDER BY score DESC
                 """,
