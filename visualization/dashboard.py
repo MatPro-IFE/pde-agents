@@ -2295,10 +2295,11 @@ def search_chunks(n_clicks, n_submit, query):
         "material": "#4ecdc4", "bc": "#ff6b6b",
         "solver": "#45b7d1", "domain": "#96ceb4", "general": "#888",
     }
-    ref_icons = {
-        "paper": "📄", "report": "📋", "handbook": "📚",
-        "standard": "🏛️", "web_resource": "🌐", "web_page": "🌐",
-    }
+
+    def _resolve_href(url: str) -> str:
+        if url.startswith("10.") or ("doi.org" in url and not url.startswith("http")):
+            return f"https://doi.org/{url.lstrip('/')}"
+        return url
 
     cards = []
     for r in results:
@@ -2310,83 +2311,92 @@ def search_chunks(n_clicks, n_submit, query):
         ref_title    = r.get("ref_title") or r.get("ref_id", "")
         parent_title = r.get("parent_title") or ref_title
         page         = r.get("page", 0)
-        ref_url      = r.get("ref_url") or ""
-        ref_type     = r.get("ref_type") or ""
-        is_web       = r.get("is_web", False)
+        ref_url      = (r.get("ref_url") or "").strip()
+        is_web       = bool(r.get("is_web")) or r.get("ref_type") in ("web_resource", "web_page")
 
-        cls_color  = cls_colors.get(cls, "#888")
-        source_icon = ref_icons.get(ref_type, "🌐" if is_web else "📄")
+        cls_color = cls_colors.get(cls, "#888")
+        href      = _resolve_href(ref_url) if ref_url else None
 
-        # ── Header: heading + source title ──────────────────────────
-        header_parts = []
-        if heading:
-            header_parts.append(
-                html.Strong(heading, style={"fontSize": "0.82rem", "color": "#e0e0e0"})
+        # ── Header: clickable title when URL exists ──────────────────
+        display_title = parent_title if parent_title and parent_title != ref_title else ref_title
+        if href:
+            title_node = html.A(
+                display_title,
+                href=href,
+                target="_blank",
+                rel="noopener noreferrer",
+                style={
+                    "fontSize": "0.78rem",
+                    "fontWeight": "600",
+                    "color": "#90e0ef",
+                    "textDecoration": "underline",
+                    "textUnderlineOffset": "3px",
+                    "cursor": "pointer",
+                },
             )
-        header_parts.append(
-            html.Span(f" — {parent_title if parent_title != ref_title else ref_title}",
-                      style={"fontSize": "0.75rem", "color": "#999"})
-        )
-
-        # ── Source link row ─────────────────────────────────────────
-        source_parts = []
-        if ref_url:
-            is_doi = ref_url.startswith("10.") or "doi.org" in ref_url
-            if is_doi and not ref_url.startswith("http"):
-                link_href = f"https://doi.org/{ref_url.lstrip('/')}"
-            else:
-                link_href = ref_url
-
-            link_label = (
-                "🔗 Open page" if (is_web or ref_url.startswith("http"))
-                else "📄 View source"
+        else:
+            title_node = html.Span(
+                display_title,
+                style={"fontSize": "0.78rem", "fontWeight": "600", "color": "#b0b0c0"},
             )
-            source_parts.append(
+
+        header_children = []
+        if heading and heading != display_title:
+            header_children.append(
+                html.Span(heading + "  ", style={"fontSize": "0.8rem", "color": "#e0e0e0"})
+            )
+        header_children.append(title_node)
+
+        # ── Footer: badges + optional open-link button ───────────────
+        footer_children = [
+            dbc.Badge(cls, style={"backgroundColor": cls_color,
+                                   "fontSize": "0.65rem", "marginRight": "4px"}),
+            dbc.Badge(chunk_type, color="dark",
+                      style={"fontSize": "0.65rem", "marginRight": "8px"}),
+            html.Small(f"score: {score:.3f}",
+                       style={"fontSize": "0.7rem", "color": "#90e0ef",
+                              "marginRight": "10px"}),
+        ]
+        if page and int(page) > 0:
+            footer_children.append(
+                html.Small(f"p. {page}",
+                           style={"fontSize": "0.7rem", "color": "#888",
+                                  "marginRight": "10px"})
+            )
+        if href:
+            icon  = "🌐" if is_web else "📄"
+            label = "Open page" if is_web else "View source"
+            footer_children.append(
                 html.A(
-                    link_label,
-                    href=link_href,
+                    [icon, f" {label}"],
+                    href=href,
                     target="_blank",
                     rel="noopener noreferrer",
                     style={
                         "fontSize": "0.72rem",
                         "color": "#90e0ef",
                         "textDecoration": "none",
-                        "marginRight": "10px",
-                        "borderBottom": "1px dotted #90e0ef",
+                        "border": "1px solid #2e4a6a",
+                        "borderRadius": "4px",
+                        "padding": "1px 7px",
+                        "cursor": "pointer",
                     },
                 )
             )
         else:
-            # no URL — show a faint label so the row is consistent
-            source_parts.append(
-                html.Span(f"{source_icon} {ref_title}",
-                          style={"fontSize": "0.72rem", "color": "#555"})
-            )
-
-        if page and int(page) > 0:
-            source_parts.append(
-                html.Span(f"p. {page}",
-                          style={"fontSize": "0.72rem", "color": "#666",
-                                 "marginRight": "8px"})
+            footer_children.append(
+                dbc.Badge("no source URL", color="secondary",
+                          style={"fontSize": "0.62rem", "opacity": "0.5"}),
             )
 
         cards.append(dbc.Card([
             dbc.CardBody([
-                html.Div(header_parts, className="mb-1"),
+                html.Div(header_children, className="mb-1"),
                 html.P(text, style={"fontSize": "0.78rem", "color": "#ccc",
                                     "marginBottom": "6px", "lineHeight": "1.4"}),
-                # ── Footer: badges + link ──────────────────────────────
-                html.Div([
-                    dbc.Badge(cls, style={"backgroundColor": cls_color,
-                                          "fontSize": "0.65rem", "marginRight": "6px"}),
-                    dbc.Badge(chunk_type, color="dark",
-                              style={"fontSize": "0.65rem", "marginRight": "8px"}),
-                    html.Small(f"score: {score:.3f}",
-                               style={"fontSize": "0.7rem", "color": "#90e0ef",
-                                      "marginRight": "12px"}),
-                    *source_parts,
-                ], style={"display": "flex", "alignItems": "center",
-                           "flexWrap": "wrap", "gap": "2px"}),
+                html.Div(footer_children,
+                         style={"display": "flex", "alignItems": "center",
+                                "flexWrap": "wrap", "gap": "4px"}),
             ], style={"padding": "8px 12px"}),
         ], style={"backgroundColor": "#11112a", "border": "1px solid #1e2a3a",
                   "marginBottom": "6px"}))
