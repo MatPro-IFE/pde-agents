@@ -17,6 +17,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import re
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
@@ -1113,3 +1114,109 @@ async def search_reference_chunks(query: str, top_k: int = 10):
         raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
+
+
+# ─── Web resource ingestion ───────────────────────────────────────────────────
+
+class FetchURLRequest(BaseModel):
+    url: str
+    title: str = ""
+    max_pages: int = 50
+    auto_link_top_k: int = 5
+    ref_type: str = "web_resource"
+    source: str = ""
+    subject: str = ""
+
+
+@app.post("/references/fetch-url")
+async def fetch_url_resource(req: FetchURLRequest):
+    """
+    Fetch and index a web-based resource (tutorial, ebook, docs).
+
+    Crawls the URL and linked pages within the same path, extracts
+    structured content via Docling, embeds each chunk, and cross-references
+    to simulation runs in the knowledge graph.
+
+    Processing is async via Celery — returns immediately with a task_id.
+    """
+    from datetime import datetime, timezone
+
+    if not req.url or not req.url.startswith("http"):
+        raise HTTPException(status_code=400, detail="Invalid URL")
+
+    title = req.title or req.url
+    slug = re.sub(r"[^a-z0-9]+", "_", title.lower())[:40].strip("_")
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+    ref_id = f"web_{slug}_{ts}"
+
+    try:
+        from knowledge_graph.graph import get_kg
+        kg = get_kg()
+        if not kg.available:
+            raise HTTPException(status_code=503, detail="Neo4j not available")
+
+        now = datetime.now(timezone.utc).isoformat()
+        kg._run(
+            """
+            MERGE (ref:Reference {ref_id: $ref_id})
+            SET ref.title          = $title,
+                ref.url            = $url,
+                ref.type           = $ref_type,
+                ref.source         = $source,
+                ref.subject        = $subject,
+                ref.is_uploaded    = true,
+                ref.is_web         = true,
+                ref.max_pages      = $max_pages,
+                ref.process_status = 'queued',
+                ref.uploaded_at    = $now
+            """,
+            ref_id=ref_id, title=title, url=req.url,
+            ref_type=req.ref_type, source=req.source,
+            subject=req.subject, max_pages=req.max_pages, now=now,
+        )
+
+        # Generate doc-level embedding from title + subject
+        try:
+            from knowledge_graph.embeddings import get_embedder
+            vec = get_embedder().embed_text(f"{title}\n{req.subject}\n{req.url}")
+            if vec:
+                kg._run(
+                    "MATCH (ref:Reference {ref_id: $rid}) SET ref.embedding = $vec",
+                    rid=ref_id, vec=vec,
+                )
+        except Exception:
+            pass
+
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+    # Enqueue async crawl + ingest
+    task_id = None
+    try:
+        from knowledge_graph.tasks import ingest_web_resource_task
+        task = ingest_web_resource_task.apply_async(
+            kwargs={
+                "ref_id": ref_id,
+                "root_url": req.url,
+                "title": title,
+                "max_pages": req.max_pages,
+                "auto_link_top_k": req.auto_link_top_k,
+            },
+            queue="document_ingestion",
+        )
+        task_id = task.id
+    except Exception as exc:
+        # Celery unavailable — mark as queued, user can retry
+        pass
+
+    return {
+        "status": "queued",
+        "ref_id": ref_id,
+        "title": title,
+        "url": req.url,
+        "max_pages": req.max_pages,
+        "task_id": task_id,
+        "processing": "async" if task_id else "queued_no_worker",
+    }

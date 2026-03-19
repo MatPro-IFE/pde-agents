@@ -641,12 +641,12 @@ app.layout = dbc.Container([
                     html.Div([
                         html.P("Inspect Run", className="mt-3 mb-1",
                                style={"fontWeight": "600", "fontSize": "0.95rem"}),
-                        dcc.Dropdown(
-                            id="run-selector",
-                            options=[],
+                    dcc.Dropdown(
+                        id="run-selector",
+                        options=[],
                             placeholder="Select a run…",
-                            style={"color": "#000"},
-                        ),
+                        style={"color": "#000"},
+                    ),
                         html.Div(id="run-detail-card", className="mt-2"),
                     ]),
 
@@ -1199,6 +1199,59 @@ app.layout = dbc.Container([
                     ], style={"border": "1px solid #1e2a3a", "marginTop": "12px",
                               "marginBottom": "16px"}),
 
+                    # ── Fetch web resource ────────────────────────────────────
+                    dbc.Card([
+                        dbc.CardHeader(
+                            html.Span("🌐 Fetch Web Resource",
+                                      style={"fontWeight": "600", "fontSize": "0.9rem"}),
+                            style={"backgroundColor": "#141428", "padding": "6px 14px"},
+                        ),
+                        dbc.CardBody([
+                            html.P(
+                                "Index a web-based tutorial, ebook, or docs site. "
+                                "Pages are crawled, structured with Docling, and "
+                                "cross-referenced to simulation runs.",
+                                className="text-muted mb-2",
+                                style={"fontSize": "0.78rem"},
+                            ),
+                            dbc.Row([
+                                dbc.Col(dbc.Input(
+                                    id="web-fetch-url",
+                                    placeholder="https://jsdokken.com/dolfinx-tutorial/",
+                                    type="url",
+                                    style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
+                                           "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
+                                ), width=12, className="mb-2"),
+                                dbc.Col(dbc.Input(
+                                    id="web-fetch-title",
+                                    placeholder="Title  (e.g. FEniCSx Tutorial)",
+                                    type="text",
+                                    style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
+                                           "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
+                                ), width=6, className="mb-2"),
+                                dbc.Col(dbc.Input(
+                                    id="web-fetch-subject",
+                                    placeholder="Subject / keywords",
+                                    type="text",
+                                    style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
+                                           "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
+                                ), width=3, className="mb-2"),
+                                dbc.Col(dbc.Input(
+                                    id="web-fetch-max-pages",
+                                    placeholder="Max pages",
+                                    type="number", min=1, max=100, value=50,
+                                    style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
+                                           "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
+                                ), width=3, className="mb-2"),
+                            ]),
+                            dbc.Button(
+                                "🌐 Fetch & Index", id="web-fetch-btn",
+                                color="info", className="w-100", n_clicks=0,
+                            ),
+                            html.Div(id="web-fetch-status", className="mt-2"),
+                        ], style={"backgroundColor": "#0d0d1f", "padding": "10px 14px"}),
+                    ], style={"border": "1px solid #1e2a3a", "marginBottom": "12px"}),
+
                     # ── Uploaded documents list ──────────────────────────────
                     dbc.Row([
                         dbc.Col(html.H6("📚 Uploaded Documents",
@@ -1502,8 +1555,8 @@ def update_overview_charts(n):
             xaxis_title="Thermal conductivity k",
             yaxis_title="T_max [K]",
             xaxis_tickangle=-35,
-            **PLOT_LAYOUT,
-        )
+        **PLOT_LAYOUT,
+    )
     else:
         tmax_fig = _make_empty_fig("No temperature data yet")
         tmax_fig.update_layout(title="Peak Temperature by Conductivity",
@@ -2105,6 +2158,56 @@ def _build_uploaded_docs_list():
 
 
 @app.callback(
+    Output("web-fetch-status", "children"),
+    Input("web-fetch-btn",     "n_clicks"),
+    State("web-fetch-url",     "value"),
+    State("web-fetch-title",   "value"),
+    State("web-fetch-subject", "value"),
+    State("web-fetch-max-pages", "value"),
+    prevent_initial_call=True,
+)
+def handle_web_fetch(n_clicks, url, title, subject, max_pages):
+    """Queue a web resource for crawling and indexing."""
+    import requests as _req
+
+    if not url or not url.strip().startswith("http"):
+        return dbc.Alert("Please enter a valid URL.", color="warning",
+                        style={"fontSize": "0.82rem"})
+
+    try:
+        agents_url = os.environ.get("AGENTS_API_URL", "http://agents:8000")
+        resp = _req.post(
+            f"{agents_url}/references/fetch-url",
+            json={
+                "url": url.strip(),
+                "title": (title or "").strip() or url.strip(),
+                "subject": (subject or "").strip(),
+                "max_pages": int(max_pages) if max_pages else 50,
+                "ref_type": "web_resource",
+            },
+            timeout=15,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+
+        return dbc.Alert([
+            html.Strong(f"✅ Queued: {data.get('title', url)}"),
+            html.Br(),
+            html.Span(
+                f"Crawling up to {data.get('max_pages', '?')} pages. "
+                f"Processing: {data.get('processing', '?')}. "
+                f"Refresh the docs list to track progress.",
+                style={"fontSize": "0.78rem"},
+            ),
+        ], color="success", className="py-2 mt-1",
+            style={"fontSize": "0.85rem"})
+
+    except Exception as exc:
+        return dbc.Alert(f"Failed: {exc}", color="danger",
+                        style={"fontSize": "0.82rem"})
+
+
+@app.callback(
     Output("chunk-search-results", "children"),
     Input("chunk-search-btn",      "n_clicks"),
     State("chunk-search-input",    "value"),
@@ -2113,6 +2216,7 @@ def _build_uploaded_docs_list():
 def search_chunks(n_clicks, query):
     """Semantic search across all document chunks via the agents API."""
     import requests as _req
+    from dash.exceptions import PreventUpdate
     if not query or not query.strip():
         return html.P("Enter a search query above.", className="text-muted",
                       style={"fontSize": "0.8rem"})
