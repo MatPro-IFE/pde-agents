@@ -1068,189 +1068,239 @@ app.layout = dbc.Container([
 
                 # ── Right: Upload + Reference browser ──────────────────────
                 dbc.Col([
-                    # ── Document Upload panel ───────────────────────────────
+                    # ── Unified "Add Knowledge" panel ────────────────────────
                     dbc.Card([
                         dbc.CardHeader(
-                            html.Span("📎 Upload External Document",
+                            html.Span("➕ Add to Knowledge Graph",
                                       style={"fontWeight": "600", "fontSize": "0.95rem"}),
                             style={"backgroundColor": "#141428", "padding": "8px 14px"},
                         ),
                         dbc.CardBody([
-                            html.P(
-                                "Upload a PDF, TXT, or Markdown document. The text will be "
-                                "embedded and automatically linked to the most similar "
-                                "simulation runs in the knowledge graph.",
-                                className="text-muted mb-2",
-                                style={"fontSize": "0.8rem"},
-                            ),
-                            # ── DOI quick-fill ─────────────────────────────
-                            dbc.InputGroup([
-                                dbc.InputGroupText(
-                                    "DOI", style={"backgroundColor": "#1a1a2e",
-                                                  "color": "#90e0ef",
-                                                  "borderColor": "#2e4a6a",
-                                                  "fontSize": "0.8rem",
-                                                  "fontWeight": "600"},
-                                ),
-                                dbc.Input(
-                                    id="ref-doi-input",
-                                    placeholder="10.xxxx/…  — paste a DOI to auto-fill metadata",
-                                    type="text",
-                                    style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
-                                           "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
-                                ),
-                                dbc.Button(
-                                    "Fetch", id="ref-doi-fetch-btn",
-                                    color="info", size="sm", n_clicks=0,
-                                    style={"fontSize": "0.8rem"},
-                                ),
-                            ], className="mb-1"),
-                            html.Div(id="ref-doi-status",
-                                     style={"fontSize": "0.77rem", "minHeight": "18px"},
-                                     className="mb-2 text-muted"),
-                            html.Hr(style={"borderColor": "#2a2a3e", "margin": "8px 0 10px"}),
-                            dcc.Upload(
-                                id="ref-upload-file",
-                                children=html.Div([
-                                    html.Span("📄 ", style={"fontSize": "1.4rem"}),
-                                    html.Span("Drag & drop or "),
-                                    html.A("browse", style={"color": ACCENT,
-                                                             "cursor": "pointer"}),
-                                    html.Br(),
-                                    html.Small("PDF · TXT · Markdown",
-                                               style={"color": "#888", "fontSize": "0.75rem"}),
+                            dbc.Tabs([
+                                # ── Tab 1: Upload file ─────────────────────
+                                dbc.Tab(label="📎 Upload File", tab_id="add-kg-file", children=[
+                                    html.Div([
+                                        html.P(
+                                            "Upload a PDF, TXT, or Markdown document. The text will be "
+                                            "embedded and automatically linked to the most similar "
+                                            "simulation runs in the knowledge graph.",
+                                            className="text-muted mt-2 mb-2",
+                                            style={"fontSize": "0.8rem"},
+                                        ),
+                                        # ── DOI quick-fill ─────────────────
+                                        dbc.InputGroup([
+                                            dbc.InputGroupText(
+                                                "DOI", style={"backgroundColor": "#1a1a2e",
+                                                              "color": "#90e0ef",
+                                                              "borderColor": "#2e4a6a",
+                                                              "fontSize": "0.8rem",
+                                                              "fontWeight": "600"},
+                                            ),
+                                            dbc.Input(
+                                                id="ref-doi-input",
+                                                placeholder="10.xxxx/…  — paste a DOI and press Enter",
+                                                type="text",
+                                                debounce=False,
+                                                style={"backgroundColor": "#1a1a2e",
+                                                       "color": TEXT_COLOR,
+                                                       "borderColor": "#2e4a6a",
+                                                       "fontSize": "0.82rem"},
+                                            ),
+                                            dbc.Button(
+                                                "Fetch", id="ref-doi-fetch-btn",
+                                                color="info", size="sm", n_clicks=0,
+                                                style={"fontSize": "0.8rem"},
+                                            ),
+                                        ], className="mb-1"),
+                                        html.Div(id="ref-doi-status",
+                                                 style={"fontSize": "0.77rem", "minHeight": "18px"},
+                                                 className="mb-2 text-muted"),
+                                        html.Hr(style={"borderColor": "#2a2a3e",
+                                                        "margin": "8px 0 10px"}),
+                                        dcc.Upload(
+                                            id="ref-upload-file",
+                                            children=html.Div([
+                                                html.Span("📄 ", style={"fontSize": "1.4rem"}),
+                                                html.Span("Drag & drop or "),
+                                                html.A("browse", style={"color": ACCENT,
+                                                                         "cursor": "pointer"}),
+                                                html.Br(),
+                                                html.Small("PDF · TXT · Markdown",
+                                                           style={"color": "#888",
+                                                                  "fontSize": "0.75rem"}),
+                                            ]),
+                                            style={
+                                                "width": "100%", "height": "80px",
+                                                "borderWidth": "1px", "borderStyle": "dashed",
+                                                "borderRadius": "6px", "borderColor": "#2e4a6a",
+                                                "textAlign": "center", "paddingTop": "16px",
+                                                "backgroundColor": "#11112a", "cursor": "pointer",
+                                            },
+                                            multiple=False,
+                                        ),
+                                        html.Div(id="ref-upload-filename-label",
+                                                 className="text-muted mt-1 mb-2",
+                                                 style={"fontSize": "0.78rem"}),
+                                        dbc.Row([
+                                            dbc.Col(dbc.Input(
+                                                id="ref-upload-title",
+                                                placeholder="Title *  (required)",
+                                                type="text",
+                                                style={"backgroundColor": "#1a1a2e",
+                                                       "color": TEXT_COLOR,
+                                                       "borderColor": "#2e4a6a",
+                                                       "fontSize": "0.82rem"},
+                                            ), width=12, className="mb-2"),
+                                            dbc.Col(dbc.Input(
+                                                id="ref-upload-source",
+                                                placeholder="Citation  (journal, year, pages…)",
+                                                type="text",
+                                                style={"backgroundColor": "#1a1a2e",
+                                                       "color": TEXT_COLOR,
+                                                       "borderColor": "#2e4a6a",
+                                                       "fontSize": "0.82rem"},
+                                            ), width=12, className="mb-2"),
+                                            dbc.Col(dbc.Input(
+                                                id="ref-upload-url",
+                                                placeholder="URL / DOI  (optional)",
+                                                type="text",
+                                                style={"backgroundColor": "#1a1a2e",
+                                                       "color": TEXT_COLOR,
+                                                       "borderColor": "#2e4a6a",
+                                                       "fontSize": "0.82rem"},
+                                            ), width=12, className="mb-2"),
+                                            dbc.Col(dbc.Input(
+                                                id="ref-upload-subject",
+                                                placeholder="Subject / keywords",
+                                                type="text",
+                                                style={"backgroundColor": "#1a1a2e",
+                                                       "color": TEXT_COLOR,
+                                                       "borderColor": "#2e4a6a",
+                                                       "fontSize": "0.82rem"},
+                                            ), width=8, className="mb-2"),
+                                            dbc.Col(dbc.Select(
+                                                id="ref-upload-type",
+                                                options=[
+                                                    {"label": "📄 Paper",    "value": "paper"},
+                                                    {"label": "📋 Report",   "value": "report"},
+                                                    {"label": "📚 Handbook", "value": "handbook"},
+                                                    {"label": "🏛️ Standard", "value": "standard"},
+                                                ],
+                                                value="paper",
+                                                style={"backgroundColor": "#1a1a2e",
+                                                       "color": TEXT_COLOR,
+                                                       "borderColor": "#2e4a6a",
+                                                       "fontSize": "0.82rem"},
+                                            ), width=4, className="mb-2"),
+                                            dbc.Col(dbc.Input(
+                                                id="ref-upload-run-ids",
+                                                placeholder="Pin to run IDs  (comma-separated, optional)",
+                                                type="text",
+                                                style={"backgroundColor": "#1a1a2e",
+                                                       "color": TEXT_COLOR,
+                                                       "borderColor": "#2e4a6a",
+                                                       "fontSize": "0.82rem"},
+                                            ), width=9, className="mb-2"),
+                                            dbc.Col(dbc.Input(
+                                                id="ref-upload-top-k",
+                                                placeholder="Auto-link top",
+                                                type="number", min=0, max=50, value=10,
+                                                style={"backgroundColor": "#1a1a2e",
+                                                       "color": TEXT_COLOR,
+                                                       "borderColor": "#2e4a6a",
+                                                       "fontSize": "0.82rem"},
+                                            ), width=3, className="mb-2"),
+                                        ]),
+                                        dbc.Button(
+                                            "📤 Upload & Link to Knowledge Graph",
+                                            id="ref-upload-submit-btn",
+                                            color="success", className="w-100 mt-1",
+                                            disabled=False,
+                                        ),
+                                        html.Div(id="ref-upload-status", className="mt-2"),
+                                    ]),
                                 ]),
-                                style={
-                                    "width": "100%", "height": "80px",
-                                    "borderWidth": "1px", "borderStyle": "dashed",
-                                    "borderRadius": "6px", "borderColor": "#2e4a6a",
-                                    "textAlign": "center", "paddingTop": "16px",
-                                    "backgroundColor": "#11112a", "cursor": "pointer",
-                                },
-                                multiple=False,
+
+                                # ── Tab 2: Fetch web resource ───────────────
+                                dbc.Tab(label="🌐 Web Resource URL", tab_id="add-kg-web",
+                                        children=[
+                                    html.Div([
+                                        html.P(
+                                            "Paste a URL to a tutorial, ebook, or documentation site. "
+                                            "Pages are crawled automatically, parsed with Docling, and "
+                                            "each section is cross-referenced to simulation runs.",
+                                            className="text-muted mt-2 mb-2",
+                                            style={"fontSize": "0.8rem"},
+                                        ),
+                                        dbc.InputGroup([
+                                            dbc.InputGroupText(
+                                                "URL",
+                                                style={"backgroundColor": "#1a1a2e",
+                                                       "color": "#90e0ef",
+                                                       "borderColor": "#2e4a6a",
+                                                       "fontSize": "0.8rem",
+                                                       "fontWeight": "600"},
+                                            ),
+                                            dbc.Input(
+                                                id="web-fetch-url",
+                                                placeholder="https://jsdokken.com/dolfinx-tutorial/  — press Enter or click Fetch",
+                                                type="url",
+                                                debounce=False,
+                                                style={"backgroundColor": "#1a1a2e",
+                                                       "color": TEXT_COLOR,
+                                                       "borderColor": "#2e4a6a",
+                                                       "fontSize": "0.82rem"},
+                                            ),
+                                            dbc.Button(
+                                                "Fetch", id="web-fetch-btn",
+                                                color="info", size="sm", n_clicks=0,
+                                                style={"fontSize": "0.8rem"},
+                                            ),
+                                        ], className="mb-2"),
+                                        dbc.Row([
+                                            dbc.Col(dbc.Input(
+                                                id="web-fetch-title",
+                                                placeholder="Title  (e.g. FEniCSx Tutorial) — optional",
+                                                type="text",
+                                                style={"backgroundColor": "#1a1a2e",
+                                                       "color": TEXT_COLOR,
+                                                       "borderColor": "#2e4a6a",
+                                                       "fontSize": "0.82rem"},
+                                            ), width=7, className="mb-2"),
+                                            dbc.Col(dbc.Input(
+                                                id="web-fetch-subject",
+                                                placeholder="Subject / keywords",
+                                                type="text",
+                                                style={"backgroundColor": "#1a1a2e",
+                                                       "color": TEXT_COLOR,
+                                                       "borderColor": "#2e4a6a",
+                                                       "fontSize": "0.82rem"},
+                                            ), width=3, className="mb-2"),
+                                            dbc.Col(dbc.Input(
+                                                id="web-fetch-max-pages",
+                                                placeholder="Pages",
+                                                type="number", min=1, max=100, value=50,
+                                                style={"backgroundColor": "#1a1a2e",
+                                                       "color": TEXT_COLOR,
+                                                       "borderColor": "#2e4a6a",
+                                                       "fontSize": "0.82rem"},
+                                            ), width=2, className="mb-2"),
+                                        ]),
+                                        html.Div(id="web-fetch-status", className="mt-1"),
+                                        html.P(
+                                            "💡 Examples: FEniCSx tutorial · ASHRAE Handbook · "
+                                            "FEniCS Book · OpenFOAM docs · any HTML-based ebook",
+                                            className="text-muted mt-2 mb-0",
+                                            style={"fontSize": "0.75rem"},
+                                        ),
+                                    ]),
+                                ]),
+                            ], id="add-kg-tabs", active_tab="add-kg-file",
+                               style={"marginBottom": "4px"},
                             ),
-                            html.Div(id="ref-upload-filename-label",
-                                     className="text-muted mt-1 mb-2",
-                                     style={"fontSize": "0.78rem"}),
-                            dbc.Row([
-                                dbc.Col(dbc.Input(
-                                    id="ref-upload-title",
-                                    placeholder="Title *  (required)",
-                                    type="text",
-                                    style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
-                                           "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
-                                ), width=12, className="mb-2"),
-                                dbc.Col(dbc.Input(
-                                    id="ref-upload-source",
-                                    placeholder="Citation  (journal, year, pages…)",
-                                    type="text",
-                                    style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
-                                           "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
-                                ), width=12, className="mb-2"),
-                                dbc.Col(dbc.Input(
-                                    id="ref-upload-url",
-                                    placeholder="URL / DOI  (optional)",
-                                    type="text",
-                                    style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
-                                           "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
-                                ), width=12, className="mb-2"),
-                                dbc.Col(dbc.Input(
-                                    id="ref-upload-subject",
-                                    placeholder="Subject / keywords  (e.g. robin bc, titanium)",
-                                    type="text",
-                                    style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
-                                           "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
-                                ), width=8, className="mb-2"),
-                                dbc.Col(dbc.Select(
-                                    id="ref-upload-type",
-                                    options=[
-                                        {"label": "📄 Paper",    "value": "paper"},
-                                        {"label": "📋 Report",   "value": "report"},
-                                        {"label": "📚 Handbook", "value": "handbook"},
-                                        {"label": "🏛️ Standard", "value": "standard"},
-                                    ],
-                                    value="paper",
-                                    style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
-                                           "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
-                                ), width=4, className="mb-2"),
-                                dbc.Col(dbc.Input(
-                                    id="ref-upload-run-ids",
-                                    placeholder="Pin to run IDs  (comma-separated, optional)",
-                                    type="text",
-                                    style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
-                                           "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
-                                ), width=9, className="mb-2"),
-                                dbc.Col(dbc.Input(
-                                    id="ref-upload-top-k",
-                                    placeholder="Auto-link top",
-                                    type="number", min=0, max=50, value=10,
-                                    style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
-                                           "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
-                                ), width=3, className="mb-2"),
-                            ]),
-                            dbc.Button(
-                                "📤 Upload & Link to Knowledge Graph",
-                                id="ref-upload-submit-btn",
-                                color="success", className="w-100 mt-1",
-                                disabled=False,
-                            ),
-                            html.Div(id="ref-upload-status", className="mt-2"),
-                        ], style={"backgroundColor": "#0d0d1f", "padding": "14px"}),
+                        ], style={"backgroundColor": "#0d0d1f", "padding": "8px 14px 14px"}),
                     ], style={"border": "1px solid #1e2a3a", "marginTop": "12px",
                               "marginBottom": "16px"}),
-
-                    # ── Fetch web resource ────────────────────────────────────
-                    dbc.Card([
-                        dbc.CardHeader(
-                            html.Span("🌐 Fetch Web Resource",
-                                      style={"fontWeight": "600", "fontSize": "0.9rem"}),
-                            style={"backgroundColor": "#141428", "padding": "6px 14px"},
-                        ),
-                        dbc.CardBody([
-                            html.P(
-                                "Index a web-based tutorial, ebook, or docs site. "
-                                "Pages are crawled, structured with Docling, and "
-                                "cross-referenced to simulation runs.",
-                                className="text-muted mb-2",
-                                style={"fontSize": "0.78rem"},
-                            ),
-                            dbc.Row([
-                                dbc.Col(dbc.Input(
-                                    id="web-fetch-url",
-                                    placeholder="https://jsdokken.com/dolfinx-tutorial/",
-                                    type="url",
-                                    style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
-                                           "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
-                                ), width=12, className="mb-2"),
-                                dbc.Col(dbc.Input(
-                                    id="web-fetch-title",
-                                    placeholder="Title  (e.g. FEniCSx Tutorial)",
-                                    type="text",
-                                    style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
-                                           "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
-                                ), width=6, className="mb-2"),
-                                dbc.Col(dbc.Input(
-                                    id="web-fetch-subject",
-                                    placeholder="Subject / keywords",
-                                    type="text",
-                                    style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
-                                           "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
-                                ), width=3, className="mb-2"),
-                                dbc.Col(dbc.Input(
-                                    id="web-fetch-max-pages",
-                                    placeholder="Max pages",
-                                    type="number", min=1, max=100, value=50,
-                                    style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
-                                           "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
-                                ), width=3, className="mb-2"),
-                            ]),
-                            dbc.Button(
-                                "🌐 Fetch & Index", id="web-fetch-btn",
-                                color="info", className="w-100", n_clicks=0,
-                            ),
-                            html.Div(id="web-fetch-status", className="mt-2"),
-                        ], style={"backgroundColor": "#0d0d1f", "padding": "10px 14px"}),
-                    ], style={"border": "1px solid #1e2a3a", "marginBottom": "12px"}),
 
                     # ── Uploaded documents list ──────────────────────────────
                     dbc.Row([
@@ -1306,8 +1356,9 @@ app.layout = dbc.Container([
                     dbc.InputGroup([
                         dbc.Input(
                             id="chunk-search-input",
-                            placeholder="e.g. thermal conductivity of steel at high temperature",
+                            placeholder="e.g. thermal conductivity of steel at high temperature — press Enter or click Search",
                             type="text",
+                            debounce=False,
                             style={"backgroundColor": "#1a1a2e", "color": TEXT_COLOR,
                                    "borderColor": "#2e4a6a", "fontSize": "0.82rem"},
                         ),
@@ -1995,11 +2046,12 @@ def handle_reference_upload(
     Output("ref-upload-subject", "value"),
     Output("ref-upload-type",    "value"),
     Output("ref-doi-status",     "children"),
-    Input("ref-doi-fetch-btn",   "n_clicks"),
-    State("ref-doi-input",       "value"),
+    Input("ref-doi-fetch-btn", "n_clicks"),
+    Input("ref-doi-input",     "n_submit"),
+    State("ref-doi-input",     "value"),
     prevent_initial_call=True,
 )
-def fetch_doi_metadata(n_clicks, doi):
+def fetch_doi_metadata(n_clicks, n_submit, doi):
     """Look up a DOI via CrossRef and auto-fill the upload form fields."""
     import requests as _req
     from dash.exceptions import PreventUpdate
@@ -2159,14 +2211,15 @@ def _build_uploaded_docs_list():
 
 @app.callback(
     Output("web-fetch-status", "children"),
-    Input("web-fetch-btn",     "n_clicks"),
+    Input("web-fetch-btn", "n_clicks"),
+    Input("web-fetch-url", "n_submit"),
     State("web-fetch-url",     "value"),
     State("web-fetch-title",   "value"),
     State("web-fetch-subject", "value"),
     State("web-fetch-max-pages", "value"),
     prevent_initial_call=True,
 )
-def handle_web_fetch(n_clicks, url, title, subject, max_pages):
+def handle_web_fetch(n_clicks, n_submit, url, title, subject, max_pages):
     """Queue a web resource for crawling and indexing."""
     import requests as _req
 
@@ -2209,11 +2262,12 @@ def handle_web_fetch(n_clicks, url, title, subject, max_pages):
 
 @app.callback(
     Output("chunk-search-results", "children"),
-    Input("chunk-search-btn",      "n_clicks"),
-    State("chunk-search-input",    "value"),
+    Input("chunk-search-btn",   "n_clicks"),
+    Input("chunk-search-input", "n_submit"),
+    State("chunk-search-input", "value"),
     prevent_initial_call=True,
 )
-def search_chunks(n_clicks, query):
+def search_chunks(n_clicks, n_submit, query):
     """Semantic search across all document chunks via the agents API."""
     import requests as _req
     from dash.exceptions import PreventUpdate
