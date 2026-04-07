@@ -26,7 +26,7 @@ env/
 secrets/
 
 # Simulation results & data (large binary, not versioned)
-results/
+/results/
 meshes/*.msh
 meshes/*.xdmf
 meshes/*.h5
@@ -62,3 +62,16 @@ logs/
 
 # Temporary scripts used during development
 /tmp/
+
+# LaTeX build artifacts
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.synctex.gz
+paper/*.fdb_latexmk
+paper/*.fls
+
+# Evaluation raw simulation outputs (large binary)
+evaluation/results/vv_runs/
