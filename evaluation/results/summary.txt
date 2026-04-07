@@ -1,0 +1,3 @@
+V&V: 3 cases, all_passed=True
+Ablation: KG On success=0.40, KG Off success=1.00
+Agent metrics: 1135 runs, success_rate=0.97

@@ -1,0 +1,94 @@
+{
+  "timestamp": "2026-04-07T10:59:32",
+  "db_stats": {
+    "total_runs": 1135,
+    "successful_runs": 1105,
+    "failed_runs": 30,
+    "overall_success_rate": 0.973568281938326,
+    "total_log_entries": 896,
+    "unique_tasks": 110,
+    "total_suggestions": 0
+  },
+  "task_metrics": {
+    "simulation": {
+      "n_tasks": 53,
+      "avg_steps_per_task": 7.943396226415095,
+      "min_steps": 2,
+      "max_steps": 14,
+      "median_steps": 8
+    },
+    "database": {
+      "n_tasks": 27,
+      "avg_steps_per_task": 6.222222222222222,
+      "min_steps": 2,
+      "max_steps": 20,
+      "median_steps": 5
+    },
+    "analytics": {
+      "n_tasks": 30,
+      "avg_steps_per_task": 10.233333333333333,
+      "min_steps": 5,
+      "max_steps": 36,
+      "median_steps": 8
+    }
+  },
+  "tool_metrics": {
+    "unknown": {
+      "calls": 228,
+      "successes": 99,
+      "failures": 127,
+      "success_rate": 0.4342105263157895
+    }
+  },
+  "suggestion_metrics": {
+    "total": 0,
+    "accepted": 0,
+    "rejected": 0,
+    "pending": 0,
+    "acceptance_rate": 0.0,
+    "priority_distribution": {}
+  },
+  "timing_metrics": {
+    "agent_step_timing": {
+      "analytics": {
+        "reasoning": {
+          "avg_ms": 5458.1,
+          "min_ms": 993,
+          "max_ms": 22968,
+          "n_samples": 110
+        }
+      },
+      "simulation": {
+        "reasoning": {
+          "avg_ms": 4304.607594936709,
+          "min_ms": 622,
+          "max_ms": 25259,
+          "n_samples": 158
+        }
+      },
+      "database": {
+        "reasoning": {
+          "avg_ms": 2372.523076923077,
+          "min_ms": 544,
+          "max_ms": 14204,
+          "n_samples": 65
+        }
+      }
+    },
+    "simulation_wall_time": {
+      "avg_s": 1.4632742594974981,
+      "min_s": 0.007785265799611807,
+      "max_s": 234.56,
+      "n_runs": 1109
+    }
+  },
+  "orchestrator_metrics": {
+    "n_orchestrated_tasks": 0,
+    "total_agent_messages": 0,
+    "note": "No orchestrator task logs found; agent messages available",
+    "total_sim_tasks": 33,
+    "single_attempt_tasks": 33,
+    "first_try_successes": 19,
+    "first_try_success_rate": 0.5757575757575758
+  }
+}

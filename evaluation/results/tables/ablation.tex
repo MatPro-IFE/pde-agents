@@ -1,0 +1,21 @@
+\begin{table}[htbp]
+\centering
+\caption{Ablation study: KG-augmented vs.\ baseline agent performance across 10 benchmark tasks of varying difficulty.  KG Off outperforms KG On on medium/hard tasks because the LLM's parametric knowledge suffices for standard materials, while the KG interaction overhead currently confuses the agent on complex requests---pointing to a clear integration improvement opportunity.}
+\label{tab:ablation}
+\begin{tabular}{lccc}
+\toprule
+Metric & KG On & KG Off & $\Delta$ \\
+\midrule
+  Success rate & 40.0\% & 100.0\% & $-60.0\%$ \\
+  First-try rate & 40.0\% & 100.0\% & $-60.0\%$ \\
+  Config quality & 0.26 & 0.75 & $-0.49$ \\
+  Avg.\ iterations & 4.70 & 3.10 & $+1.60$ \\
+  Avg.\ wall time (s) & 21.35 & 14.20 & $+7.16$ \\
+\midrule
+\multicolumn{4}{l}{\textit{Success rate by difficulty}} \\
+  \quad Easy & 100\% & 100\% & $+0\%$ \\
+  \quad Medium & 0\% & 100\% & $-100\%$ \\
+  \quad Hard & 25\% & 100\% & $-75\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
