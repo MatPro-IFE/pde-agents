@@ -1,0 +1,24 @@
+\begin{table}[htbp]
+\centering\small
+\caption{Three-way KG ablation: mandatory invocation (KG On) vs.\ no KG
+         (KG Off) vs.\ warm-start with lazy conditional retrieval (KG Smart).
+         KG Smart recovers most of the KG Off performance while retaining
+         access to knowledge graph tools for failure diagnosis.}
+\label{tab:ablation}
+\begin{tabular}{lccc}
+\toprule
+Metric & KG On & KG Off & KG Smart \\
+\midrule
+  Success rate       & 60\%  & 100\%  & \textbf{90\%}  \\
+  First-try rate     & 60\%  & 100\%  & \textbf{90\%}  \\
+  Config quality     & 0.38  & 0.75   & \textbf{0.69}  \\
+  Avg.\ iterations   & 5.3   & 3.0    & \textbf{3.8}   \\
+  Avg.\ time (s)     & 25.3  & 14.0   & \textbf{15.9}  \\
+\midrule
+\multicolumn{4}{l}{\textit{By difficulty}} \\
+  \quad Easy          & 100\%  & 100\%   & 100\% \\
+  \quad Medium        &  33\%  & 100\%   & \textbf{100\%} \\
+  \quad Hard          &  50\%  & 100\%   & 75\%  \\
+\bottomrule
+\end{tabular}
+\end{table}

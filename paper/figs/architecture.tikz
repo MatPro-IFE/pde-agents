@@ -1,0 +1,181 @@
+% PDE-Agents system architecture
+% Grid layout — all nodes given absolute (x,y) coords in cm
+% Total span: x in [-1, 17.8],  y in [-5.8, 6.5]
+% Resized to \textwidth in main.tex
+\begin{tikzpicture}[
+  font=\small,
+  >=Latex,
+  every node/.style={align=center},
+  %──── node style macros ────────────────────────────────────────────────────
+  svc/.style 2 args={draw, rounded corners=4pt,
+                     fill=#1!12, draw=#1!65,
+                     minimum width=#2, minimum height=0.78cm, thick,
+                     font=\scriptsize},
+  agent/.style 2 args={draw, rounded corners=5pt,
+                       fill=#1!18, draw=#1!75,
+                       minimum width=#2, minimum height=0.88cm,
+                       thick, font=\small\bfseries},
+  usr/.style={draw, ellipse, fill=yellow!25, draw=orange!70,
+              minimum width=1.6cm, minimum height=0.72cm, thick},
+  %──── arrow macros ─────────────────────────────────────────────────────────
+  fwd/.style={->, thick, #1},
+  bkd/.style={<-, thick, #1},
+  dsh/.style={->, dashed, thick, #1},
+]
+
+%══════════════════════════════════════════════════════════════════════════════
+%  NODE POSITIONS  (all coordinates are node centres in cm)
+%
+%  x:   0     2      5.5       10.5      15.5
+%  y:   5.5   (FEniCSx)        (Neo4j)
+%       3.5   (PostgreSQL)
+%       2.5              (Sim Agent)
+%       0     (User)    (Supervisor)      (DB Agent)
+%      -2.5              (Analytics)
+%      -3.5   (Ollama)
+%      -5.5   (MinIO)               (Legend box)
+%══════════════════════════════════════════════════════════════════════════════
+
+% ── Infrastructure — left column ─────────────────────────────────────────────
+\node[svc={nodegray}{2.2cm}] (pg)    at (0.0,  3.8)
+  {PostgreSQL\\{\tiny Metadata, Logs}};
+\node[usr]                   (user)  at (0.0,  0.0) {User\\NL Task};
+\node[svc={nodeblue}{2.1cm}] (ollama)at (0.0, -3.6)
+  {Ollama\\{\tiny :11434 · GPU}};
+\node[svc={nodegray}{2.2cm}] (minio) at (0.0, -6.0)
+  {MinIO\\{\tiny VTK / HDF5}};
+
+% ── Central orchestrator ──────────────────────────────────────────────────────
+\node[agent={nodeblue}{3.0cm}] (sup) at (5.5, 0.0)
+  {LangGraph Supervisor\\{\small\mdseries llama3.3:70b}};
+
+% ── Specialist agents — right column ─────────────────────────────────────────
+\node[agent={nodegreen}{2.9cm}] (sim)  at (10.5,  2.5)
+  {Simulation Agent\\{\small\mdseries qwen2.5-coder:32b}};
+\node[agent={nodeorange}{2.9cm}](anal) at (10.5, -2.5)
+  {Analytics Agent\\{\small\mdseries llama3.3:70b}};
+\node[agent={nodeblue}{2.9cm}]  (dba)  at (15.5,  0.0)
+  {Database Agent\\{\small\mdseries qwen2.5-coder:14b}};
+
+% ── Remote services — far right / top ────────────────────────────────────────
+\node[svc={nodegreen}{2.7cm}] (fenics)at (10.5,  5.8)
+  {FEniCSx Runner\\{\tiny DOLFINx 0.10 · FastAPI :8080}};
+\node[svc={nodered}{2.4cm}]   (kg)    at (15.5,  4.8)
+  {Neo4j KG\\{\tiny Materials, Runs}\\{\tiny HNSW vectors}};
+
+%══════════════════════════════════════════════════════════════════════════════
+%  ARROWS
+%══════════════════════════════════════════════════════════════════════════════
+
+% User ↔ Supervisor
+\draw[fwd=black]
+  (user.east) -- (sup.west)
+  node[midway, above, font=\scriptsize]{task};
+\draw[dsh=nodegray!80]
+  (sup.west) to[bend right=18]
+  node[midway, below, font=\scriptsize]{response}
+  (user.east);
+
+% Supervisor ↔ Ollama  (LLM calls — bidirectional)
+\draw[fwd=nodeblue!70, <->]
+  (sup.south) to[out=250,in=70]
+  node[right, font=\scriptsize, pos=0.45]{LLM}
+  (ollama.north east);
+
+% Supervisor → Simulation Agent
+\draw[fwd=nodegreen!80]
+  (sup.north east) to[out=40,in=210]
+  node[above left, font=\scriptsize, pos=0.6]{route}
+  (sim.south west);
+\draw[fwd=nodegreen!80]
+  (sim.south) to[out=240,in=50]
+  node[below right, font=\scriptsize, pos=0.45]{result}
+  (sup.north);
+
+% Supervisor → Analytics Agent
+\draw[fwd=nodeorange!80]
+  (sup.south east) to[out=320,in=150]
+  node[below left, font=\scriptsize, pos=0.6]{route}
+  (anal.north west);
+\draw[fwd=nodeorange!80]
+  (anal.north) to[out=130,in=310]
+  node[above right, font=\scriptsize, pos=0.45]{result}
+  (sup.south);
+
+% Supervisor ↔ Database Agent
+\draw[fwd=nodeblue!70]
+  (sup.east) to[out=5,in=175]
+  node[above, font=\scriptsize]{route}
+  (dba.west);
+\draw[fwd=nodeblue!70]
+  (dba.west) to[out=185,in=355]
+  node[below, font=\scriptsize]{result}
+  (sup.east);
+
+% Simulation Agent ↔ FEniCSx
+\draw[fwd=nodegreen!80]
+  (sim.north) -- (fenics.south)
+  node[right, font=\scriptsize, pos=0.5]{config};
+\draw[fwd=nodegreen!80]
+  (fenics.south) to[bend left=8]
+  node[left, font=\scriptsize, pos=0.5]{result}
+  (sim.north);
+
+% Simulation Agent ↔ Neo4j KG (dashed — KG query)
+\draw[dsh=nodered!80]
+  (sim.east) to[out=10,in=220]
+  node[above, font=\scriptsize, pos=0.5]{query}
+  (kg.south west);
+\draw[dsh=nodered!80]
+  (kg.south) to[out=200,in=30]
+  node[below, font=\scriptsize, pos=0.5]{context}
+  (sim.east);
+
+% Simulation Agent → Ollama (LLM call, dashed)
+\draw[dsh=nodeblue!55]
+  (sim.west) to[out=190,in=80] (ollama.north);
+
+% Analytics Agent → Ollama
+\draw[dsh=nodeblue!55]
+  (anal.west) to[out=190,in=60] (ollama.north west);
+
+% Database Agent → Ollama
+\draw[dsh=nodeblue!55]
+  (dba.south) to[out=270,in=0] (ollama.east);
+
+% Async logs → PostgreSQL (gray dashed)
+\draw[dsh=nodegray!70]
+  (sup.north west) to[out=140,in=310] (pg.south east);
+\draw[dsh=nodegray!70]
+  (sim.north west) to[out=170,in=0]   (pg.east);
+\draw[dsh=nodegray!70]
+  (dba.north)      to[out=90,in=350]  (pg.east);
+
+% FEniCSx → MinIO (large file storage)
+\draw[dsh=nodegray!70]
+  (fenics.west) to[out=180,in=90] (pg.north);
+\draw[dsh=nodegray!70]
+  (anal.west)   to[out=200,in=60] (minio.north east);
+
+%══════════════════════════════════════════════════════════════════════════════
+%  LEGEND  (bottom right, well below the Database Agent)
+%══════════════════════════════════════════════════════════════════════════════
+\begin{scope}[shift={(14.2,-4.4)}]
+  \draw[draw=gray!55, fill=white, rounded corners=3pt]
+    (0,0) rectangle (3.0, 2.8);
+  \node[font=\scriptsize\bfseries] at (1.5, 2.5) {Legend};
+  % data flow
+  \draw[fwd=nodegreen!80]      (0.2, 2.0) -- (0.9, 2.0);
+  \node[font=\scriptsize, anchor=west] at (1.0, 2.0) {data flow};
+  % async log
+  \draw[dsh=nodegray!70]       (0.2, 1.5) -- (0.9, 1.5);
+  \node[font=\scriptsize, anchor=west] at (1.0, 1.5) {async log};
+  % LLM call
+  \draw[fwd=nodeblue!70, <->]  (0.2, 1.0) -- (0.9, 1.0);
+  \node[font=\scriptsize, anchor=west] at (1.0, 1.0) {LLM call};
+  % KG query
+  \draw[dsh=nodered!80]        (0.2, 0.5) -- (0.9, 0.5);
+  \node[font=\scriptsize, anchor=west] at (1.0, 0.5) {KG query};
+\end{scope}
+
+\end{tikzpicture}

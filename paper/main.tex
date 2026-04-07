@@ -1,0 +1,675 @@
+% ─────────────────────────────────────────────────────────────────────────────
+% PDE-Agents: An LLM-Orchestrated Multi-Agent Framework for Automated
+% Finite Element Simulations with Knowledge Graph Augmentation
+%
+% Target journal: Engineering with Computers (Springer) — double-column format
+% ISSN 0177-0667 | IF ~8.7 | Scope: AI/ML applied to engineering computation
+%
+% Alternative targets (see journal_scope.md for full analysis):
+%   1. Computer Methods in Applied Mechanics and Engineering (CMAME), Elsevier
+%   2. Advanced Engineering Informatics, Elsevier
+% ─────────────────────────────────────────────────────────────────────────────
+
+\documentclass[twocolumn]{article}
+
+% ── Packages ──────────────────────────────────────────────────────────────────
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[a4paper, top=2.2cm, bottom=2.2cm, left=1.8cm, right=1.8cm]{geometry}
+\usepackage{amsmath,amssymb,bm}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{microtype}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[numbers,sort&compress]{natbib}
+
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, fit, backgrounds,
+                decorations.pathreplacing, calc}
+
+% ── Colour palette ────────────────────────────────────────────────────────────
+\definecolor{nodeblue}{RGB}{52,120,190}
+\definecolor{nodegreen}{RGB}{56,142,60}
+\definecolor{nodeorange}{RGB}{230,81,0}
+\definecolor{nodegray}{RGB}{97,97,97}
+\definecolor{nodered}{RGB}{183,28,28}
+\definecolor{lightgray}{RGB}{240,240,240}
+
+% ── Listings style ────────────────────────────────────────────────────────────
+\lstset{
+  basicstyle=\ttfamily\scriptsize,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{black!30},
+  backgroundcolor=\color{lightgray},
+  keywordstyle=\color{nodeblue}\bfseries,
+  commentstyle=\color{nodegray}\itshape,
+  stringstyle=\color{nodegreen},
+  numbers=left, numberstyle=\tiny\color{nodegray},
+  xleftmargin=1.5em, framexleftmargin=1.5em,
+}
+
+% ── Meta ──────────────────────────────────────────────────────────────────────
+\title{\textbf{PDE-Agents: An LLM-Orchestrated Multi-Agent\\
+       Framework for Automated Finite Element Simulations\\
+       with Knowledge Graph-Augmented Reasoning}}
+
+\author{%
+  [Author Names]\\
+  \small [Institution]\\
+  \small \texttt{[email]}
+}
+
+\date{\small Submitted: \today}
+
+% ═════════════════════════════════════════════════════════════════════════════
+\begin{document}
+\maketitle
+
+% ─────────────────────────────────────────────────────────────────────────────
+\begin{abstract}
+We present \textit{PDE-Agents}, a multi-agent ecosystem that automates the
+full lifecycle of finite element method (FEM) simulations through natural-language
+interaction.  The system combines three specialist large language model (LLM)
+agents—Simulation, Analytics, and Database—orchestrated via a LangGraph
+supervisor graph, with a locally-deployed open-source LLM stack
+(qwen2.5-coder:32b, llama3.3:70b) running on consumer-grade hardware.
+A central novelty is the integration of a \emph{GraphRAG} knowledge base
+(Neo4j + 768-dimensional vector embeddings) that enriches agents with curated
+material properties, known failure patterns, and prior run lineage.
+We report three empirical contributions: (i) a formal verification and
+validation (V\&V) study confirming second-order spatial convergence (\(\mathcal{O}(h^2)\))
+for all three benchmark cases on the heat equation solver; (ii) a three-way
+ablation study across 10 benchmark tasks revealing that mandatory KG
+invocation paradoxically \emph{reduces} success to 60\% versus a 100\%
+LLM-only baseline, but that our proposed \emph{KG Smart} integration---combining
+HNSW-based warm-start injection with lazy conditional retrieval---recovers
+90\% success while retaining knowledge graph access; and (iii) production-scale
+agent quality metrics from 1{,}135 real simulation runs showing 97.4\%
+overall success and a 57.6\% first-try rate.  All code, models, and
+evaluation artifacts are released openly.  Our findings demonstrate that
+\emph{integration pattern}, not knowledge content, determines whether
+GraphRAG augmentation helps or hinders LLM agents, and identify concrete
+design principles for autonomous FEM simulation assistants.
+
+\smallskip\noindent\textbf{Keywords:} Large language model agents; finite element
+method; knowledge graph; GraphRAG; multi-agent systems; scientific computing
+automation; verification and validation.
+\end{abstract}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Introduction}
+\label{sec:intro}
+
+Finite element method simulations are central to engineering analysis across
+structural mechanics, heat transfer, fluid dynamics, and electromagnetics.
+Yet the gap between a domain expert's intent—``what if I use aluminium instead
+of steel?''—and a running, verified simulation involves a sequence of error-prone
+manual steps: geometry creation, boundary condition specification, solver
+parameter selection, result interpretation, and iterative debugging.
+
+The recent emergence of \emph{reasoning-capable} LLMs \citep{brown2020gpt3,
+wei2022cot, yao2023react} has opened the possibility of agents that can
+autonomously traverse this workflow.  Prior work on ``AI for scientific
+computing'' has largely focused on surrogate modelling
+\citep{lagaris1998neural, raissi2019pinn, karniadakis2021physics}, operator
+learning \citep{li2021fno}, or dataset-specific fine-tuning
+\citep{jumper2021alphafold}.  Much less attention has been paid to
+\emph{procedural automation}—using LLMs to \emph{set up and manage} solvers
+rather than to replace them.
+
+Meanwhile, the \emph{retrieval-augmented generation} (RAG) paradigm
+\citep{lewis2020rag} has demonstrated that grounding LLM outputs with
+authoritative external knowledge dramatically reduces hallucination.  The
+graph-structured variant, GraphRAG \citep{edge2024graphrag}, further enables
+multi-hop reasoning over relational knowledge—particularly relevant in
+engineering contexts where material properties, mesh requirements, and solver
+stability rules form a rich, interconnected knowledge base.
+
+\textbf{In this paper we make the following contributions:}
+\begin{enumerate}
+  \item We design and implement \textit{PDE-Agents}, a complete, containerised
+        multi-agent ecosystem for automated FEM simulation
+        (\cref{sec:system}).
+  \item We describe a novel \emph{GraphRAG integration pattern} that encodes
+        material properties, known failure modes, and prior run lineage as a
+        Neo4j knowledge graph with HNSW vector-indexed embeddings
+        (\cref{sec:kg}).
+  \item We conduct a rigorous V\&V study that confirms $\mathcal{O}(h^2)$
+        spatial convergence for three closed-form benchmark cases, validating
+        the numerical kernel against analytical solutions
+        (\cref{sec:vv}).
+  \item We run a three-way ablation study isolating the KG contribution,
+        identify a paradoxical performance \emph{inversion} with mandatory
+        KG invocation, and propose a \emph{KG Smart} integration that
+        recovers 90\% success via warm-start injection and lazy retrieval
+        (\cref{sec:ablation}).
+  \item We report production-scale agent quality metrics derived from
+        1{,}135 real simulation runs (\cref{sec:metrics}).
+\end{enumerate}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Related Work}
+\label{sec:related}
+
+\paragraph{LLM agents for scientific computing.}
+ChemCrow \citep{bran2023chemcrow} demonstrated that equipping an LLM with
+chemistry tools (RDKit, reaction planners) enables autonomous laboratory-scale
+reasoning.  SciAgent \citep{ma2024sciagent} and similar systems extend this
+to broader scientific question answering.  Our work targets \emph{numerical
+simulation} rather than knowledge retrieval, requiring tool-call pipelines that
+produce and verify deterministic numerical outputs.
+
+\paragraph{Autonomous FEM systems.}
+FEniCS \citep{logg2012fenics} and its successor DOLFINx/FEniCSx
+\citep{barrata2023dolfinx} provide Python-scriptable FEM solvers that are
+amenable to LLM-driven automation.  Recent work on ``simulation copilots''
+\citep{bauer2023llm, jiang2024llm} shows that LLMs can generate solver
+scripts from natural language with moderate success, but these approaches are
+single-turn and lack closed-loop debugging.  PDE-Agents provides a
+multi-turn, self-correcting agent that can iteratively debug failed simulations.
+
+\paragraph{Multi-agent orchestration.}
+LangGraph \citep{langgraph2024} implements graph-structured agent workflows
+that support conditional routing and persistent state, enabling the supervisor
+pattern we adopt.  AutoGen \citep{wu2023autogen} and CrewAI \citep{crewai2024}
+offer related frameworks; we choose LangGraph for its explicit
+state graph semantics and tight LangChain integration.
+
+\paragraph{Retrieval-augmented generation for engineering.}
+RAG \citep{lewis2020rag} has been applied to engineering documentation
+retrieval \citep{liao2023rag}, code generation \citep{gao2023rag}, and more
+recently to simulation parameter suggestion \citep{yang2024rag}.  GraphRAG
+\citep{edge2024graphrag} adds structured relational traversal.
+Corrective RAG (CRAG) \citep{yan2024crag} introduces adaptive retrieval
+decisions based on document relevance scoring, and AriGraph
+\citep{arigraph2024} demonstrates episodic knowledge-graph memory for LLM
+agents.  Our \emph{KG Smart} pattern draws on both: warm-start injection
+from similar past runs (episodic memory) with lazy conditional tool
+invocation (corrective retrieval).  To our knowledge, ours is the first
+system to combine GraphRAG with a live, iterative FEM simulation loop.
+
+\paragraph{Knowledge graphs for materials science.}
+Materials-focused knowledge graphs (e.g.\ MatKG \citep{venugopal2022matkg},
+OPTIMADE \citep{andersen2021optimade}) encode material properties in RDF/OWL
+formats.  Our Neo4j KG is lighter-weight and purpose-built for run-time
+agent queries, prioritising latency over completeness.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{System Architecture}
+\label{sec:system}
+
+\begin{figure*}[htbp]
+  \centering
+  \resizebox{\textwidth}{!}{\input{figs/architecture.tikz}}
+  \caption{System architecture of PDE-Agents.  A central LangGraph
+    Supervisor routes natural-language tasks to three specialist agents.
+    The Simulation Agent interacts with the FEniCSx runner (DOLFINx)
+    and optionally queries the Neo4j Knowledge Graph.  All simulation
+    results and agent logs are persisted to PostgreSQL and MinIO.}
+  \label{fig:arch}
+\end{figure*}
+
+\subsection{Design Philosophy}
+
+PDE-Agents adopts four guiding principles:
+\begin{enumerate}
+  \item \textbf{Open and local:} All models run locally via Ollama on commodity
+        hardware, eliminating API costs and data-privacy concerns.
+  \item \textbf{Verifiable:} Every agent reasoning step, tool call, and result
+        is logged to a relational database, enabling post-hoc audit.
+  \item \textbf{Containerised:} All 11 services are orchestrated via
+        Docker Compose, ensuring reproducible deployment.
+  \item \textbf{Separation of concerns:} The FEM solver, LLM stack,
+        knowledge graph, and persistence layer are decoupled services
+        communicating over a private bridge network.
+\end{enumerate}
+
+\subsection{Agent Stack}
+
+\paragraph{Orchestrator.}
+A LangGraph \texttt{StateGraph} supervisor (\texttt{llama3.3:70b}) receives
+the user's natural-language request and routes it to one of three specialist
+agents via structured JSON decisions.  After each agent reports its result
+the supervisor either routes to another agent or synthesises a final response.
+
+\paragraph{Simulation Agent.}
+Uses \texttt{qwen2.5-coder:32b}, specialised for code and structured-output
+tasks.  Given a task description, the agent executes a ReAct loop
+\citep{yao2023react} with up to 15 reasoning steps, calling nine tools:
+\texttt{check\_config\_warnings},
+\texttt{query\_knowledge\_graph},
+\texttt{validate\_config},
+\texttt{run\_simulation},
+\texttt{modify\_config},
+\texttt{debug\_simulation},
+\texttt{list\_recent\_runs},
+\texttt{get\_run\_status},
+\texttt{run\_parametric\_sweep}.
+
+\paragraph{Analytics Agent.}
+Uses \texttt{llama3.3:70b} (max 12 iterations) and has tools for
+statistical comparison across runs, sensitivity analysis, and
+LLM-generated textual summaries.
+
+\paragraph{Database Agent.}
+Uses \texttt{qwen2.5-coder:14b} (max 10 iterations) and answers history
+queries against PostgreSQL, cataloguing results and tracing run lineage.
+
+\subsection{Tool-Call Compatibility}
+\label{sec:tool-compat}
+
+A non-trivial engineering challenge: \texttt{qwen2.5-coder} emits tool calls
+as JSON text in the \texttt{content} field rather than in the structured
+\texttt{tool\_calls} field expected by LangChain's \texttt{ToolNode}.  We
+implement a four-pass normalisation procedure in
+\texttt{BaseAgent.\_parse\_content\_tool\_call}:
+(1) attempt \texttt{json.loads} on the full content;
+(2) extract from markdown fences;
+(3) extract the first \texttt{\{...\}} block;
+(4) repair truncated JSON via progressive bracket-closing and regex fallback.
+Pass 4 was added specifically to handle cases where the model's output is
+cut off mid-token due to the nested JSON-in-JSON escaping overhead of
+config arguments.
+
+\subsection{FEM Solver: DOLFINx Heat Equation}
+
+The FEniCSx runner container exposes a FastAPI endpoint that accepts a
+\texttt{HeatConfig} JSON and returns a result including run metadata.
+The solver uses P1 (linear Lagrange) elements, with Backward Euler
+($\theta = 1$, unconditionally stable) as the default time integration
+scheme, supporting Dirichlet, Neumann, and Robin boundary conditions.
+Geometry is built with Gmsh \citep{geuzaine2009gmsh} for 2D and 3D domains
+from a library of nine parameterised geometry types.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Knowledge Graph Architecture}
+\label{sec:kg}
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{\columnwidth}{!}{\input{figs/kg_schema.tikz}}
+  \caption{Neo4j knowledge graph schema.  \texttt{Material} nodes encode
+    thermal properties; \texttt{Run} nodes record simulation provenance
+    and HNSW-indexed embeddings; \texttt{DocChunk} nodes index ingested
+    PDF/HTML literature.  \texttt{KnownIssue} nodes catalogue failure
+    patterns triggered by past runs.}
+  \label{fig:kg}
+\end{figure}
+
+The Neo4j knowledge graph (Neo4j 5 Community Edition) serves three
+functions:
+
+\begin{enumerate}
+  \item \textbf{Material property lookup.}  A curated library of materials
+        (metals, ceramics, polymers) with thermal conductivity $k$,
+        density $\rho$, and specific heat $c_p$ ranges, sourced from
+        engineering handbooks and validated against ASM International data.
+        Approximate values: steel $k \approx 50$\,W/mK, copper
+        $k \approx 390$\,W/mK, aluminium $k \approx 205$\,W/mK.
+
+  \item \textbf{Failure pattern catalogue.}  \texttt{KnownIssue} nodes
+        encode failure modes observed during system operation:
+        CFL-condition violations ($\Delta t > h^2/(2\alpha)$), zero or
+        near-zero thermal diffusivity, incompatible boundary condition
+        combinations, and excessive mesh size for available memory.
+        The rule engine (\texttt{rules.py}) augments these nodes with
+        analytical pre-checks.
+
+  \item \textbf{Run lineage and semantic retrieval.}  Each completed
+        \texttt{Run} node is embedded with \texttt{nomic-embed-text}
+        (768 dimensions) and indexed in an HNSW vector index.  The
+        Simulation Agent can query ``find similar past runs'' to retrieve
+        configurations with known outcomes, enabling few-shot in-context
+        learning from the system's own history.
+\end{enumerate}
+
+\paragraph{Document intelligence pipeline.}
+A Celery-backed ingestion pipeline processes PDF papers, standards documents,
+and HTML references using Docling \citep{docling2024} for structured
+extraction, splitting them into \texttt{DocumentChunk} nodes with
+overlapping 512-token windows and HNSW-indexed embeddings.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Verification and Validation}
+\label{sec:vv}
+
+We conduct a formal V\&V study following ASME V\&V 10-2006 guidelines
+\citep{asme2006vv}, comparing the DOLFINx FEM solver against closed-form
+analytical solutions on three benchmark cases.
+
+\subsection{Benchmark Cases}
+
+\paragraph{Case 1: 2D Steady-State Linear Profile.}
+Laplace equation on $\Omega = [0,1]^2$ with Dirichlet conditions
+$T|_{x=0} = 0$, $T|_{x=1} = 1$ and Neumann zero-flux on top/bottom.
+Analytical solution: $T(x,y) = x$.  P1 elements are nodally exact for
+linear solutions; we use UFL spatial-coordinate expressions in high-order
+quadrature (degree 8) to measure the true continuous $L^2$ error.
+
+\paragraph{Case 2: 2D Transient Fourier Mode Decay.}
+Heat equation $\partial_t T = \alpha \nabla^2 T$ with homogeneous Dirichlet
+on all boundaries and initial condition $T_0 = \sin(\pi x)\sin(\pi y)$.
+Analytical solution: $T(x,y,t) = e^{-2\alpha\pi^2 t}\sin(\pi x)\sin(\pi y)$.
+
+\paragraph{Case 3: 2D Steady-State Poisson with Constant Source.}
+$-k\nabla^2 T = f$ with $f = 1000$\,W/m$^3$, Dirichlet $T=0$ on left/right,
+Neumann on top/bottom.  Exact solution: $T(x) = f(x - x^2)/(2k)$.
+
+\subsection{Convergence Study Protocol}
+
+For each case we solve at five mesh resolutions $N \in \{8, 16, 32, 64, 128\}$
+(DOFs $\approx 81, 289, 1089, 4225, 16641$) and compute:
+\begin{equation}
+  \|e\|_{L^2} = \left(\int_\Omega (u_h - u_{\text{exact}})^2\,\mathrm{d}x\right)^{1/2}
+\end{equation}
+using degree-8 quadrature applied to UFL \texttt{SpatialCoordinate}
+expressions (not to interpolated nodal values, which would give spurious
+nodal exactness for Case 1).  The convergence rate is estimated by
+linear regression on the log-log plot.
+
+\begin{figure}[htbp]
+  \centering
+  \input{figs/convergence.tikz}
+  \caption{Spatial convergence study.  Cases 2 and 3 exhibit the expected
+    $\mathcal{O}(h^2)$ rate for P1 elements.  Case 1 is algebraically exact
+    (linear profile is represented exactly in the P1 space), with
+    $\|e\|_{L^2} \approx \mathcal{O}(10^{-9})$ attributable only to
+    floating-point rounding.}
+  \label{fig:convergence}
+\end{figure}
+
+\subsection{Results}
+
+\input{tables/vv_convergence.tex}
+
+All three cases pass: Cases 2 and 3 achieve rates of $2.04$ and $2.00$,
+consistent with the theoretical $\mathcal{O}(h^2)$ prediction for P1
+finite elements on uniform Cartesian meshes.  Case 1 achieves machine-precision
+errors (order $10^{-9}$) because the linear profile lies exactly in the P1
+polynomial space, confirming correct solver implementation.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Ablation Study: Knowledge Graph Contribution}
+\label{sec:ablation}
+
+\subsection{Experimental Design}
+
+We isolate the knowledge graph contribution using a controlled ablation
+across three conditions:
+\begin{itemize}
+  \item \textbf{KG On} (mandatory): Full system with
+        \texttt{check\_config\_warnings} and \texttt{query\_knowledge\_graph}
+        tools enabled and system prompt requiring their use before every run.
+  \item \textbf{KG Off} (baseline): Identical system with those two tools
+        removed and a system-prompt note directing the agent to skip straight
+        to validation and execution.
+  \item \textbf{KG Smart} (proposed): KG tools remain available but the
+        system prompt instructs \emph{lazy} use (only after failures or for
+        unknown materials).  Before the agent loop, the task description is
+        embedded via \texttt{nomic-embed-text} and the top-3 most similar
+        past successful runs are injected into the system prompt as
+        few-shot reference examples (warm-start).
+\end{itemize}
+
+Ten benchmark tasks span three difficulty levels:
+\begin{itemize}
+  \item \textbf{Easy (E1--E3)}: Explicit numerical parameters, straightforward setup.
+  \item \textbf{Medium (M1--M3)}: Material-by-name requests requiring
+        property lookup (AISI 1010 steel, copper, aluminium).
+  \item \textbf{Hard (H1--H4)}: Ambiguous descriptions, mixed BCs,
+        computationally expensive or 3D problems.
+\end{itemize}
+
+Each task is scored on: (i) binary success (simulation ran and completed),
+(ii) configuration quality $Q \in [0,1]$ measuring how closely the agent's
+chosen parameters match ground-truth ranges for material properties, mesh,
+and boundary conditions, (iii) number of agent iterations, and (iv) wall
+time.  Tasks are run in-process inside the agents container to eliminate
+HTTP overhead, with up to three retries per task to mitigate LLM
+non-determinism at temperature $T = 0.1$.
+
+\subsection{Results}
+
+\cref{tab:ablation} presents aggregate results across all three conditions
+and \cref{fig:ablation} visualises success rates by difficulty tier.
+We compare: (1)~KG~On (mandatory KG-first workflow), (2)~KG~Off (no KG
+tools), and (3)~KG~Smart (warm-start injection + lazy conditional retrieval).
+
+\input{tables/ablation.tex}
+
+\paragraph{Easy tasks (E1--E3).}
+All three conditions achieve 100\% success on easy tasks.  However,
+the efficiency gap is significant: KG On requires 5.3 iterations and
+25.3\,s on average, while KG Off and KG Smart converge in 3.0 and 3.8
+iterations (14.0\,s and 15.9\,s), respectively.  The 1.5$\times$ speed
+penalty for KG On arises from mandatory \texttt{check\_config\_warnings}
+and \texttt{query\_knowledge\_graph} calls before every simulation.
+KG Smart eliminates most of this overhead because its lazy prompt instructs
+the agent to skip KG tools unless needed.
+
+\paragraph{Medium tasks (M1--M3).}
+The mandatory KG pattern fails dramatically here: KG On succeeds on
+only 1/3 tasks (33\%) because the agent enters a KG-driven
+revise-and-recheck loop that exhausts its iteration budget.  Both KG Off
+and \emph{KG Smart achieve 100\% success}---a critical result showing
+that the warm-start + lazy pattern eliminates the failure mode entirely.
+KG Smart achieves quality scores of $Q \in \{0.75, 0.88, 0.83\}$
+(mean 0.82), identical to KG Off, while retaining access to KG tools
+for potential failure diagnosis.
+
+\paragraph{Hard tasks (H1--H4).}
+KG Off maintains 100\% success.  KG Smart succeeds on 3/4 hard tasks
+(75\%), up from 50\% for KG On.  The sole KG Smart failure is H4 (an
+ambiguously specified stainless steel transient with mixed BCs), where
+the agent completes only 3 iterations without issuing a
+\texttt{run\_simulation} call---likely because the warm-start context
+for this unique configuration was insufficiently specific.  KG On also
+fails H4, plus H3 (Crank-Nicolson titanium), demonstrating that the
+improvement is consistent.
+
+\paragraph{Overall: KG Smart as a middle path.}
+KG Smart achieves $90\%$ overall success with $\bar{Q} = 0.69$, compared
+to $60\%$ / $\bar{Q} = 0.38$ for KG On and $100\%$ / $\bar{Q} = 0.75$
+for KG Off.  The improvement from KG On $\to$ KG Smart is 30 percentage
+points in success rate and $1.8\times$ in quality---confirming that the
+integration pattern, not the KG content, was the bottleneck.  KG Smart's
+average iterations (3.8) are close to KG Off's (3.0), indicating that
+the warm-start context allows the agent to bypass most KG round-trips.
+
+\begin{figure}[htbp]
+  \centering
+  \input{figs/ablation_bar.tikz}
+  \caption{Success rate by difficulty level across three KG integration
+    strategies.  KG Smart (warm-start + lazy retrieval) recovers most of
+    the KG Off performance while retaining access to knowledge graph tools.}
+  \label{fig:ablation}
+\end{figure}
+
+\subsection{Analysis and Discussion}
+\label{sec:ablation-disc}
+
+The three-way comparison reveals that the \emph{integration pattern}
+determines whether a knowledge graph helps or hinders an LLM agent.
+Three mechanisms explain the mandatory KG pattern's failure:
+
+\paragraph{Parametric knowledge sufficiency.}
+\texttt{qwen2.5-coder:32b} was trained on large corpora that include
+materials engineering data.  For standard materials (steel, copper,
+aluminium), the model's parametric knowledge is already accurate---KG
+lookups add latency without adding information.
+
+\paragraph{KG overhead and attention dilution.}
+With mandatory KG calls, the agent spends 1--3 extra iterations processing
+KG results before attempting to run the simulation.  For complex tasks
+(medium/hard), the additional context from KG responses overwhelms the
+model's context window management, causing it to abandon the task before
+calling \texttt{run\_simulation}.
+
+\paragraph{Warning-induced conservatism.}
+The \texttt{check\_config\_warnings} tool occasionally returns pre-emptive
+warnings (e.g.\ ``CFL criterion may be violated'') that the model
+interprets as prohibitive, leading it to report a warning to the user
+instead of proceeding.  A warning that should trigger a \emph{modification}
+instead triggers a \emph{termination}.
+
+\paragraph{KG Smart: corrective retrieval + warm-start.}
+Motivated by CRAG \citep{yan2024crag} (corrective RAG with adaptive retrieval)
+and AriGraph \citep{arigraph2024} (episodic KG memory for agents), we
+implemented a \emph{KG Smart} integration that combines two strategies:
+
+\begin{enumerate}
+  \item \textbf{Warm-start injection.} Before the agent loop begins, we embed
+        the task description with \texttt{nomic-embed-text} and query the Neo4j
+        HNSW vector index for the top-3 most similar past successful runs.
+        Their configurations are injected directly into the system prompt as
+        few-shot reference examples---no tool call needed.
+  \item \textbf{Lazy conditional retrieval.} KG tools remain available but the
+        system prompt explicitly instructs the agent to use them \emph{only}
+        after a simulation failure or when material properties are genuinely
+        unknown.  This eliminates the mandatory KG-first workflow.
+\end{enumerate}
+
+As \cref{tab:ablation} shows, KG Smart achieves 90\% overall success
+(vs.\ 60\% for mandatory KG), recovers 100\% success on medium tasks, and
+reduces average iterations from 5.3 to 3.8.  The 30 percentage-point
+improvement confirms that the \emph{integration pattern}, not the KG
+content itself, was the bottleneck in the mandatory design.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Production Agent Quality Metrics}
+\label{sec:metrics}
+
+Beyond the controlled ablation, we analyse the system's behaviour across all
+1{,}135 simulation runs accumulated during development and testing.
+
+\input{tables/agent_metrics.tex}
+
+\subsection{Success and Failure Modes}
+
+The 97.4\% overall success rate (from PostgreSQL \texttt{agent\_run\_logs})
+demonstrates production-grade reliability for the full agent stack.  Of the
+2.6\% failures, the majority are attributable to invalid boundary condition
+combinations (e.g.\ pure Neumann systems without a reference point), mesh
+resolution requests exceeding GPU memory, and numerical divergence on
+stiff transients.
+
+\subsection{Iteration Efficiency}
+
+Mean reasoning steps per completed task: Simulation Agent 7.9,
+Analytics Agent 10.2, Database Agent 6.2.  The higher Analytics Agent
+count reflects its tendency to run multiple comparison queries before
+synthesising a recommendation.  The Database Agent's lower count
+reflects the relative simplicity of structured SQL-style queries over
+natural-language reasoning.
+
+\subsection{First-Try Rate}
+
+57.6\% of simulations run successfully on the first attempt (no
+debug/retry cycle).  The remaining 42.4\% require at least one
+modification-and-retry loop, typically for boundary condition corrections
+or CFL stability adjustments.  This is consistent with the complexity
+of translating free-form natural language to precise numerical
+configurations.
+
+\subsection{Comparison with Prior Work}
+
+\citet{bauer2023llm} report $\approx 60\%$ one-shot success for
+GPT-4-driven FEniCS script generation; our 57.6\% first-try rate is
+broadly comparable using a fully local, open-source model stack.
+Unlike their single-turn approach, PDE-Agents recovers from failures
+through multi-turn self-correction, achieving 97.4\% final success.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{System Limitations and Future Work}
+\label{sec:limitations}
+
+\paragraph{Solver scope.}
+The current solver supports only scalar heat equations.  Extension to
+vector mechanics (linear elasticity, Navier--Stokes) requires
+substantially richer tool schemas and system prompts.
+
+\paragraph{Model scale and open-source lag.}
+\texttt{qwen2.5-coder:32b} and \texttt{llama3.3:70b} are competitive
+open-source models but trail state-of-the-art closed models
+(GPT-4o, Claude~3.7~Sonnet) in complex multi-step reasoning.  As open
+models improve, PDE-Agents will benefit without architectural changes.
+
+\paragraph{KG integration.}
+The KG Smart pattern (\cref{sec:ablation-disc}) recovers most lost
+performance, but the 10\% failure gap versus KG Off suggests further
+improvements.  Future work will explore: (a) reinforcement learning
+from simulation outcomes to tune KG retrieval relevance,
+(b) dynamic confidence-based retrieval (only query KG when
+the LLM's self-assessed uncertainty exceeds a threshold), and
+(c) richer warm-start context that includes not just similar configs
+but also their failure diagnostics.
+
+\paragraph{Verification scope.}
+The V\&V study covers only steady-state and simple transient heat
+equation benchmarks.  A complete V\&V programme would include
+higher-order elements, singularity-containing domains, and
+time-dependent convergence rates.
+
+\paragraph{Parallelism and scalability.}
+The current architecture runs agents sequentially.  A task-level
+parallelism layer (e.g.\ running a parametric sweep as concurrent
+simulation agent calls) is under development.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Conclusion}
+\label{sec:conclusion}
+
+We have presented PDE-Agents, an open, containerised multi-agent ecosystem
+that automates finite element simulations through natural-language interaction
+with locally-deployed open-source LLMs.  The system achieves 97.4\% overall
+success across 1{,}135 production runs and demonstrates $\mathcal{O}(h^2)$
+spatial convergence validated against analytical solutions.
+
+Our three-way ablation study reveals an important and counter-intuitive
+finding: mandatory GraphRAG knowledge augmentation \emph{reduces} success
+on complex tasks (60\%) relative to the LLM-only baseline (100\%).
+However, our proposed \emph{KG Smart} integration---combining warm-start
+injection of similar past runs with lazy conditional retrieval---recovers
+90\% success while retaining access to knowledge graph tools for failure
+diagnosis.  This demonstrates that the \emph{integration pattern}, not
+the knowledge source, determines KG utility for LLM agents.
+
+The production metrics confirm that multi-turn self-correction is essential:
+the 57.6\% first-try rate improves to 97.4\% through iterative debugging,
+underscoring the value of agent-level orchestration over single-turn
+code generation.  PDE-Agents establishes both a working platform and a
+rigorous empirical baseline for the emerging field of LLM-driven
+autonomous simulation.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section*{Data Availability}
+All code, evaluation scripts, and result JSON files are available at
+\href{https://github.com/[repo]}{[repository URL]}.  The Neo4j knowledge
+graph seed data is included in the repository at \texttt{knowledge\_graph/seeder.py}.
+
+\section*{Author Contributions}
+[CRediT statement here.]
+
+\section*{Competing Interests}
+The authors declare no competing interests.
+
+\section*{Acknowledgements}
+[To be completed.]
+
+% ─────────────────────────────────────────────────────────────────────────────
+\bibliographystyle{unsrtnat}
+\bibliography{references}
+
+\end{document}

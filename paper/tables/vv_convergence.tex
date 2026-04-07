@@ -1,0 +1,15 @@
+\begin{table*}[htbp]
+\centering\small
+\caption{Verification: spatial convergence rates for the heat equation solver.
+         Expected rate is $\mathcal{O}(h^2)$ for $P_1$ elements.}
+\label{tab:vv-convergence}
+\begin{tabular}{llcccc}
+\toprule
+Benchmark Case & Description & DOFs (finest) & $\|e\|_{L^2}$ (finest) & Rate & Status \\
+\midrule
+  Steady Linear     & Linear $T(x,y)=x+2y$; exact in $P_1$ space          & 16\,641 & $2.47\times10^{-9}$ & \textit{exact} & \checkmark \\
+  Transient Fourier & $e^{-2\pi^2 t}\sin(\pi x)\sin(\pi y)$ decay mode    & 16\,641 & $1.50\times10^{-5}$ & 2.04            & \checkmark \\
+  Steady Poisson    & $-\nabla^2 u = 1$; exact soln.\ via Green's fn.     & 16\,641 & $5.57\times10^{-6}$ & 2.00            & \checkmark \\
+\bottomrule
+\end{tabular}
+\end{table*}
