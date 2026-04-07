@@ -1,0 +1,70 @@
+% Neo4j KG schema — 3-column layout, no overlapping decorations
+% Fits \columnwidth after \resizebox in main.tex
+\begin{tikzpicture}[
+  font=\small,
+  >=Latex,
+  every node/.style={align=center},
+  nd/.style 2 args={draw, rounded corners=5pt,
+                    fill=#1!15, draw=#1!70,
+                    minimum width=#2, minimum height=0.78cm, thick},
+  rel/.style={->, thick, font=\scriptsize, #1},
+  badge/.style={draw=#1!65, fill=#1!8, rounded corners=2pt,
+                font=\tiny, inner sep=2pt},
+]
+
+%──── Node layout (x, y) in cm ─────────────────────────────────────────────
+%
+%   Col 1 (x=0)        Col 2 (x=4.5)       Col 3 (x=9.0)
+%
+%   Material (y=0)  ── Run (y=0)  ────── SimParam (y=0)
+%   DocChunk (y=-3) ── KnownIssue(y=-3)
+%
+
+\node[nd={nodeblue}{2.4cm}] (mat) at (0.0, 0.0)
+  {\textbf{Material}\\{\scriptsize k, $\rho$, $c_p$, name}};
+
+\node[nd={nodegreen}{2.6cm}] (run) at (4.5, 0.0)
+  {\textbf{Run}\\{\scriptsize run\_id, config}\\{\scriptsize status, t\_solve}};
+
+\node[nd={nodegray}{2.4cm}] (param) at (9.0, 0.0)
+  {\textbf{SimParam}\\{\scriptsize nx, dt, $\theta$, BCs}};
+
+\node[nd={nodered}{2.4cm}] (doc) at (0.0, -3.0)
+  {\textbf{DocChunk}\\{\scriptsize text, page, source}};
+
+\node[nd={nodeorange}{2.4cm}] (issue) at (4.5, -3.0)
+  {\textbf{KnownIssue}\\{\scriptsize code, severity}\\{\scriptsize recommendation}};
+
+%──── HNSW badges (below each vector-indexed node) ─────────────────────────
+\node[badge={nodeblue}]   at (0.0,  -1.0)  {768-d HNSW};
+\node[badge={nodegreen}]  at (4.5,  -1.05) {768-d HNSW};
+\node[badge={nodered}]    at (0.0,  -4.05) {768-d HNSW};
+
+%──── Relationship arrows ───────────────────────────────────────────────────
+
+% Run  ─USES_MATERIAL→  Material
+\draw[rel=nodeblue]
+  (run.west) -- (mat.east)
+  node[midway, above, font=\tiny\itshape]{USES\_MATERIAL};
+
+% Run  ─HAS_PARAMS→  SimParam
+\draw[rel=nodegray]
+  (run.east) -- (param.west)
+  node[midway, above, font=\tiny\itshape]{HAS\_PARAMS};
+
+% Run  ─TRIGGERED→  KnownIssue
+\draw[rel=nodeorange]
+  (run.south) -- (issue.north)
+  node[midway, right, font=\tiny\itshape]{TRIGGERED};
+
+% DocChunk ─DESCRIBES→  Material
+\draw[rel=nodeblue]
+  (doc.north) -- (mat.south)
+  node[midway, left, font=\tiny\itshape]{DESCRIBES};
+
+% DocChunk ─REFERENCES→  KnownIssue
+\draw[rel=nodered]
+  (doc.east) -- (issue.west)
+  node[midway, above, font=\tiny\itshape]{REFERENCES};
+
+\end{tikzpicture}

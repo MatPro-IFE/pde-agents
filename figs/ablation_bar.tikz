@@ -1,0 +1,57 @@
+% 3-way ablation bar chart — KG On vs KG Off vs KG Smart
+% Data from 3-way ablation run 2026-04-07
+\begin{tikzpicture}
+\begin{axis}[
+  ybar,
+  bar width=9pt,
+  width=0.95\columnwidth,
+  height=0.65\columnwidth,
+  ylabel={Success rate (\%)},
+  ylabel style={font=\small},
+  symbolic x coords={Easy, Medium, Hard, Overall},
+  xtick=data,
+  xticklabel style={font=\small},
+  tick label style={font=\scriptsize},
+  ymin=0, ymax=119,
+  ytick={0,20,40,60,80,100},
+  enlarge x limits=0.22,
+  legend style={font=\scriptsize, at={(0.03,0.97)}, anchor=north west,
+                fill=white, draw=gray!60, rounded corners=2pt,
+                column sep=3pt},
+  legend columns=3,
+  nodes near coords,
+  nodes near coords align={vertical},
+  nodes near coords style={font=\tiny},
+  grid=major,
+  grid style={line width=0.3pt, draw=gray!30},
+]
+
+% KG On (mandatory) — blue
+\addplot[fill=nodeblue!55, draw=nodeblue!80] coordinates {
+  (Easy,   100)
+  (Medium,  33)
+  (Hard,    50)
+  (Overall, 60)
+};
+\addlegendentry{KG On}
+
+% KG Off (no KG) — green
+\addplot[fill=nodegreen!55, draw=nodegreen!80] coordinates {
+  (Easy,   100)
+  (Medium, 100)
+  (Hard,   100)
+  (Overall,100)
+};
+\addlegendentry{KG Off}
+
+% KG Smart (warm-start + lazy) — orange
+\addplot[fill=nodeorange!55, draw=nodeorange!80] coordinates {
+  (Easy,   100)
+  (Medium, 100)
+  (Hard,    75)
+  (Overall, 90)
+};
+\addlegendentry{KG Smart}
+
+\end{axis}
+\end{tikzpicture}

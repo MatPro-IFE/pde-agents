@@ -1,0 +1,72 @@
+% Spatial convergence plot — actual data from vv_results.json
+% x-axis: h decreasing left→right (coarse left, fine right), x dir=reverse
+\begin{tikzpicture}
+\begin{loglogaxis}[
+  width=0.93\columnwidth,
+  height=0.68\columnwidth,
+  xlabel={Mesh size $h = 1/N$},
+  ylabel={$\|e\|_{L^2}$},
+  xlabel style={font=\small},
+  ylabel style={font=\small},
+  tick label style={font=\scriptsize},
+  legend style={font=\scriptsize,
+                at={(0.03,0.03)}, anchor=south west,
+                fill=white, draw=gray!60,
+                rounded corners=2pt, row sep=1pt},
+  grid=major,
+  grid style={line width=0.4pt, draw=gray!35},
+  % coarse mesh (h=1/8) on LEFT, fine mesh (h=1/128) on RIGHT
+  xmin=0.006, xmax=0.18,
+  x dir=reverse,
+  ymin=1e-11, ymax=2e-2,
+  xtick={0.125, 0.0625, 0.03125, 0.015625, 0.0078125},
+  xticklabels={$\tfrac{1}{8}$, $\tfrac{1}{16}$,
+               $\tfrac{1}{32}$, $\tfrac{1}{64}$, $\tfrac{1}{128}$},
+]
+
+% ── Case 1: Steady Linear — algebraically exact (~machine precision) ─────────
+\addplot[
+  color=nodeblue, mark=square*, mark size=2pt, thick, dashed,
+] coordinates {
+  (0.125000,  4.2162e-11)
+  (0.062500,  3.6491e-09)
+  (0.031250,  3.8885e-10)
+  (0.015625,  1.1012e-09)
+  (0.007812,  2.4656e-09)
+};
+\addlegendentry{Steady Linear ($\sim\epsilon_\text{mach}$)}
+
+% ── Case 2: Transient Fourier — rate 2.04 ────────────────────────────────────
+\addplot[
+  color=nodegreen, mark=*, mark size=2.5pt, thick,
+] coordinates {
+  (0.125000,  4.3802e-03)
+  (0.062500,  9.4806e-04)
+  (0.031250,  2.3928e-04)
+  (0.015625,  5.9809e-05)
+  (0.007812,  1.4961e-05)
+};
+\addlegendentry{Transient Fourier (rate 2.04)}
+
+% ── Case 3: Steady Poisson — rate 2.00 ───────────────────────────────────────
+\addplot[
+  color=nodeorange, mark=triangle*, mark size=2.8pt, thick,
+] coordinates {
+  (0.125000,  1.4264e-03)
+  (0.062500,  3.5659e-04)
+  (0.031250,  8.9148e-05)
+  (0.015625,  2.2287e-05)
+  (0.007812,  5.5717e-06)
+};
+\addlegendentry{Steady Poisson (rate 2.00)}
+
+% ── Reference O(h^2) line — calibrated to pass through Fourier data ───────────
+% y = C*h^2,  C chosen so line passes through (0.125, 4.38e-3)
+% C = 4.38e-3 / 0.125^2 = 0.2803
+\addplot[
+  color=black, dashed, thick, domain=0.006:0.18, samples=50,
+] {0.2803 * x^2};
+\addlegendentry{$\mathcal{O}(h^2)$ reference}
+
+\end{loglogaxis}
+\end{tikzpicture}
