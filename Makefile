@@ -6,7 +6,8 @@
         pull-models list-models \
         db-shell db-init \
         jupyter shell-fenics shell-agents \
-        test lint
+        test lint \
+        eval-vv eval-ablation eval-ablation-smart eval-metrics eval-tables eval-all
 
 COMPOSE = docker compose
 AGENTS_API = http://localhost:8000
@@ -159,6 +160,31 @@ shell-agents:
 
 shell-ollama:
 	$(COMPOSE) exec ollama bash
+
+# ─── Evaluation (Paper) ───────────────────────────────────────────────────────
+
+eval-vv:
+	@echo "Running V&V convergence benchmarks inside fenics container..."
+	$(COMPOSE) exec fenics-runner python /workspace/evaluation/benchmarks/vv_runner.py
+
+eval-ablation:
+	@echo "Running KG ablation study inside agents container (this takes a while)..."
+	$(COMPOSE) exec -T agents python /app/evaluation/ablation/run_ablation.py
+
+eval-ablation-smart:
+	@echo "Running 3-way ablation (KG On vs Off vs Smart) inside agents container..."
+	$(COMPOSE) exec -T agents python /app/evaluation/ablation/run_ablation.py --include-smart
+
+eval-metrics:
+	@echo "Computing agent decision quality metrics..."
+	$(COMPOSE) exec agents python /app/evaluation/metrics/agent_quality.py
+
+eval-tables:
+	@echo "Generating LaTeX tables from results..."
+	python evaluation/generate_tables.py
+
+eval-all: eval-vv eval-ablation eval-metrics eval-tables
+	@echo "All evaluation experiments complete. Results in evaluation/results/"
 
 # ─── Testing ──────────────────────────────────────────────────────────────────
 

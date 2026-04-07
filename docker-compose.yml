@@ -151,6 +151,7 @@ services:
       - "8888:8888"  # JupyterLab (when enabled)
     volumes:
       - ./simulations:/workspace/simulations
+      - ./evaluation:/workspace/evaluation
       - simulation_results:/workspace/results
       - mesh_store:/workspace/meshes
     environment:
@@ -195,6 +196,7 @@ services:
       - ./database:/app/database
       - ./knowledge_graph:/app/knowledge_graph
       - ./scripts:/app/scripts
+      - ./evaluation:/app/evaluation
       - simulation_results:/workspace/results
       - mesh_store:/workspace/meshes
     environment:

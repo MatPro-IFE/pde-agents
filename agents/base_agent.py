@@ -142,6 +142,7 @@ class BaseAgent:
             base_url=self.ollama_url,
             temperature=self.temperature,
             num_ctx=8192,
+            num_predict=2048,  # allow longer tool-call JSON outputs
         ).bind_tools(self.tools)
 
         self.tool_node = ToolNode(self.tools)
@@ -219,6 +220,42 @@ class BaseAgent:
                     parsed = json.loads(m.group(1))
                 except json.JSONDecodeError:
                     pass
+
+        # ── Pass 4: truncated JSON — regex-extract name then attempt repair ─
+        # qwen2.5-coder sometimes outputs {"name":..., "arguments":{...}}
+        # but the inner JSON string is cut off mid-token.  We extract the tool
+        # name via regex and try to recover args from whatever JSON is present.
+        if parsed is None and content.startswith("{"):
+            name_m = re.search(r'"name"\s*:\s*"([^"]+)"', content)
+            if name_m and name_m.group(1) in known_tools:
+                # Attempt to close the broken JSON by appending '}' repeatedly
+                repaired = content
+                for _ in range(10):
+                    repaired += "}"
+                    try:
+                        parsed = json.loads(repaired)
+                        break
+                    except json.JSONDecodeError:
+                        pass
+                else:
+                    # Could not repair — build a minimal args dict from regex
+                    args_m = re.search(r'"arguments"\s*:\s*(\{)', content)
+                    if args_m:
+                        # Grab everything from the arguments opening brace
+                        frag = content[args_m.start(1):]
+                        # Close the fragment and attempt partial parse
+                        for _ in range(10):
+                            frag += "}"
+                            try:
+                                args_partial = json.loads(frag)
+                                parsed = {"name": name_m.group(1),
+                                          "arguments": args_partial}
+                                break
+                            except json.JSONDecodeError:
+                                pass
+                    if parsed is None:
+                        # Last resort: use empty args — tool still fires
+                        parsed = {"name": name_m.group(1), "arguments": {}}
 
         if parsed is None or not isinstance(parsed, dict):
             return response

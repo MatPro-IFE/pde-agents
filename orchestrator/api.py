@@ -107,7 +107,11 @@ def get_orchestrator() -> MultiAgentOrchestrator:
     return _orchestrator
 
 
-def get_sim_agent() -> SimulationAgent:
+def get_sim_agent(disable_kg: bool = False, smart_kg: bool = False) -> SimulationAgent:
+    if disable_kg:
+        return SimulationAgent(disable_kg=True)
+    if smart_kg:
+        return SimulationAgent(smart_kg=True)
     global _sim_agent
     if _sim_agent is None:
         _sim_agent = SimulationAgent()
@@ -137,7 +141,7 @@ class TaskRequest(BaseModel):
 
 
 class SimulateRequest(BaseModel):
-    config: dict
+    config: dict = {}
     description: str = ""
 
 
@@ -325,11 +329,15 @@ async def list_jobs():
 
 
 @app.post("/simulate", response_model=AgentResponse)
-async def simulate(request: SimulateRequest):
-    """Directly invoke the Simulation Agent."""
+async def simulate(request: SimulateRequest, disable_kg: bool = False):
+    """Directly invoke the Simulation Agent.
+
+    Query params:
+        disable_kg: If true, run without Knowledge Graph tools (for ablation study).
+    """
     request_id = uuid.uuid4().hex[:8]
     try:
-        agent = get_sim_agent()
+        agent = get_sim_agent(disable_kg=disable_kg)
         task = request.description or f"Run this simulation: {json.dumps(request.config)}"
         result = await asyncio.get_event_loop().run_in_executor(
             None,
