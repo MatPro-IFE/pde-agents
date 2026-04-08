@@ -329,15 +329,21 @@ async def list_jobs():
 
 
 @app.post("/simulate", response_model=AgentResponse)
-async def simulate(request: SimulateRequest, disable_kg: bool = False):
+async def simulate(
+    request: SimulateRequest,
+    disable_kg: bool = False,
+    smart_kg: bool = False,
+):
     """Directly invoke the Simulation Agent.
 
     Query params:
-        disable_kg: If true, run without Knowledge Graph tools (for ablation study).
+        disable_kg: If true, run without Knowledge Graph tools (KG Off mode).
+        smart_kg:   If true, use warm-start + lazy KG retrieval (KG Smart mode).
+                    Takes precedence over disable_kg if both are set.
     """
     request_id = uuid.uuid4().hex[:8]
     try:
-        agent = get_sim_agent(disable_kg=disable_kg)
+        agent = get_sim_agent(disable_kg=disable_kg, smart_kg=smart_kg)
         task = request.description or f"Run this simulation: {json.dumps(request.config)}"
         result = await asyncio.get_event_loop().run_in_executor(
             None,

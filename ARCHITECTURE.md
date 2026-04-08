@@ -226,7 +226,17 @@ START ──▶ reason_node ──▶ (has tool calls?) ──▶ YES ──▶ 
 ## 5. The Three Agents — Specialised Workers
 
 ### Agent-1: Simulation Agent (`qwen2.5-coder:32b`)
-**Tools:** `validate_config`, `run_simulation`, `modify_config`, `debug_simulation`, `list_recent_runs`, `get_run_status`, `run_parametric_sweep`
+**Tools:** `check_config_warnings`, `query_knowledge_graph`, `validate_config`, `run_simulation`, `modify_config`, `debug_simulation`, `list_recent_runs`, `get_run_status`, `run_parametric_sweep`
+
+The Simulation Agent supports three **KG integration modes**, set at construction time:
+
+| Mode | Constructor flag | Behaviour |
+|------|-----------------|-----------|
+| **KG On** (default) | — | Mandatory `check_config_warnings` + `query_knowledge_graph` calls before every run. System prompt requires KG-first workflow. |
+| **KG Off** | `disable_kg=True` | Both KG tools removed from tool list. System prompt directs agent to skip straight to `validate_config` → `run_simulation`. Used for ablation baseline. |
+| **KG Smart** | `smart_kg=True` | KG tools available but lazy. Before the agent loop, task description is embedded via `nomic-embed-text`, HNSW index is queried for top-3 similar successful past runs, and their configs are injected into the system prompt as few-shot examples. Agent only calls KG tools after a failure or for unknown materials. |
+
+KG Smart is inspired by **Corrective RAG** (adaptive retrieval) and **AriGraph** (episodic KG memory). 3-way ablation results across 10 benchmark tasks: KG On 60%, KG Off 100%, **KG Smart 90%** overall success.
 
 ### Agent-2: Analytics Agent (`llama3.3:70b`)
 **Tools:** `analyze_run`, `compare_runs`, `compare_study`, `get_steady_state_time`, `suggest_next_run`, `export_summary_report`
@@ -267,10 +277,13 @@ Routing decisions:
 | `GET` | `/runs/{run_id}` | Full details for one run |
 | `GET` | `/health` | Service health |
 | `WS` | `/ws/stream` | WebSocket for streaming agent output |
+| `POST` | `/simulate` | Direct Simulation Agent invoke — query params: `disable_kg=true` (KG Off mode) or `smart_kg=true` (KG Smart mode) |
 | `GET` | `/kg/stats` | Knowledge graph node counts |
 | `POST` | `/kg/seed` | Re-seed static knowledge |
 | `GET` | `/kg/material/{name}` | Material lookup |
-| `GET` | `/kg/run/{run_id}/similar` | Semantic similarity search |
+| `POST` | `/kg/search` | Semantic similarity search by description |
+| `POST` | `/kg/check` | Pre-run warnings + similar runs + physics refs |
+| `GET` | `/kg/run/{run_id}/similar` | Semantic similarity search for a run |
 | `GET` | `/kg/run/{run_id}/references` | All references linked to a run |
 | `POST` | `/references/upload` | Upload PDF/TXT/Markdown to KG |
 | `POST` | `/references/fetch-url` | Queue web resource crawl + index |
@@ -748,7 +761,8 @@ GET  /references/search-chunks     # semantic search over all chunks
 | **Phase 1** | ✅ Done | Neo4j container, Run/Material/KnownIssue nodes, `add_run`, similarity search, rule engine, agent tools, REST endpoints |
 | **Phase 2** | ✅ Done | BCConfig, Domain, ThermalClass nodes; vector embeddings; HNSW index; SIMILAR_TO KNN edges; Reference nodes; semantic search; dashboard KG tab; NeoDash integration |
 | **Phase 3** | ✅ Done | Uploaded document ingestion (Docling + Celery); ReferenceChunk nodes with chunk-level HNSW index; CROSS_REFS edges; web crawler for online tutorials; DOI auto-fill; Semantic Chunk Search in dashboard with clickable source links |
-| Phase 4 | Planned | Automated correlation miner across 800+ runs, `IMPROVED_OVER` relationships, agent reasoning cites specific chunk IDs from literature |
+| **Phase 4** | ✅ Done | **KG Smart mode:** warm-start injection of top-3 similar runs + lazy conditional KG tool use; 3-way ablation (KG On / Off / Smart); `evaluation/` framework for V&V + ablation + agent quality metrics |
+| Phase 5 | Planned | Automated correlation miner, `IMPROVED_OVER` relationships, agent cites specific ReferenceChunk IDs for full reasoning auditability |
 
 ---
 
@@ -949,6 +963,83 @@ User uploads document / pastes URL
 
 ---
 
-*Document updated: PDE Agents v3.0
+---
+
+## 16. Evaluation Framework (`evaluation/`)
+
+The `evaluation/` directory contains the research paper's experiment scripts. All experiments run against the live Docker stack.
+
+### Verification & Validation (`benchmarks/`)
+
+```
+benchmarks/analytical_solutions.py   ← 3 closed-form heat equation solutions
+benchmarks/vv_runner.py               ← V&V convergence study (5 mesh resolutions)
+```
+
+Runs FEM at mesh resolutions h ∈ {1/8, 1/16, 1/32, 1/64, 1/128} and computes L2 error vs analytical solution. Uses UFL `SpatialCoordinate` expressions and high-order Gaussian quadrature for accurate error integration.
+
+### KG Ablation (`ablation/`)
+
+```
+ablation/benchmark_tasks.py    ← 10 natural-language simulation tasks
+ablation/run_ablation.py       ← 3-way runner: KG On / KG Off / KG Smart
+```
+
+CLI flags:
+- `python run_ablation.py` — 2-way: KG On vs KG Off
+- `python run_ablation.py --include-smart` — 3-way: adds KG Smart
+- `python run_ablation.py --smart-only` — KG Smart alone
+
+### Agent Quality Metrics (`metrics/`)
+
+```
+metrics/agent_quality.py   ← mines PostgreSQL for tool-call patterns, success rates
+```
+
+Computes: first-attempt success rate, KG tool invocation frequency, avg iterations, avg wall time per task.
+
+### Table Generator
+
+```
+generate_tables.py   ← reads JSON from results/, outputs LaTeX fragments to results/tables/
+```
+
+### Makefile Targets
+
+```bash
+make eval-vv                # run V&V (runs inside fenics container via docker exec)
+make eval-ablation          # run 2-way KG ablation
+make eval-ablation-smart    # run 3-way KG ablation (includes KG Smart)
+make eval-metrics           # compute agent quality metrics
+make eval-tables            # generate LaTeX tables from JSON
+make eval-all               # eval-vv + eval-ablation + eval-metrics + eval-tables
+```
+
+---
+
+## 17. Paper Workflow (`paper/`)
+
+The `paper/` directory contains the full LaTeX research paper. It is synced with Overleaf via a dedicated GitHub repository using `git subtree`.
+
+```bash
+# Compile locally (requires texlive-full)
+make paper-pdf
+
+# Push local edits to GitHub so Overleaf can pull
+make paper-push
+
+# Pull Overleaf edits back to local
+make paper-pull
+
+# Check status
+make paper-status
+```
+
+Remote setup (one-time): `git remote add paper-origin git@github.com:ORG/pde-agents-paper.git`
+
+---
+
+*Document updated: PDE Agents v4.0
 FEniCSx 0.10.0.post2 · LangGraph · Ollama · nomic-embed-text · Plotly Dash ·
-PostgreSQL · Neo4j 5.x · Docling · Celery + Redis · NeoDash · MinIO · Nginx · Gmsh*
+PostgreSQL · Neo4j 5.x · Docling · Celery + Redis · NeoDash · MinIO · Nginx · Gmsh
+KG Smart (adaptive RAG) · Evaluation framework · LaTeX paper*

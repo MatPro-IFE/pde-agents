@@ -84,7 +84,8 @@ full lifecycle of finite element method (FEM) simulations through natural-langua
 interaction.  The system combines three specialist large language model (LLM)
 agents—Simulation, Analytics, and Database—orchestrated via a LangGraph
 supervisor graph, with a locally-deployed open-source LLM stack
-(qwen2.5-coder:32b, llama3.3:70b) running on consumer-grade hardware.
+(qwen2.5-coder:32b, llama3.3:70b) running on dual NVIDIA RTX PRO 6000
+Blackwell GPUs ($\approx$196\,GB combined VRAM).
 A central novelty is the integration of a \emph{GraphRAG} knowledge base
 (Neo4j + 768-dimensional vector embeddings) that enriches agents with curated
 material properties, known failure patterns, and prior run lineage.
@@ -225,8 +226,9 @@ agent queries, prioritising latency over completeness.
 
 PDE-Agents adopts four guiding principles:
 \begin{enumerate}
-  \item \textbf{Open and local:} All models run locally via Ollama on commodity
-        hardware, eliminating API costs and data-privacy concerns.
+  \item \textbf{Open and local:} All models run locally via Ollama on
+        dual NVIDIA RTX PRO 6000 Blackwell GPUs ($\approx$196\,GB VRAM,
+        CUDA 13.1), eliminating API costs and data-privacy concerns.
   \item \textbf{Verifiable:} Every agent reasoning step, tool call, and result
         is logged to a relational database, enabling post-hoc audit.
   \item \textbf{Containerised:} All 11 services are orchestrated via
@@ -285,13 +287,17 @@ config arguments.
 
 \subsection{FEM Solver: DOLFINx Heat Equation}
 
-The FEniCSx runner container exposes a FastAPI endpoint that accepts a
-\texttt{HeatConfig} JSON and returns a result including run metadata.
-The solver uses P1 (linear Lagrange) elements, with Backward Euler
-($\theta = 1$, unconditionally stable) as the default time integration
-scheme, supporting Dirichlet, Neumann, and Robin boundary conditions.
-Geometry is built with Gmsh \citep{geuzaine2009gmsh} for 2D and 3D domains
-from a library of nine parameterised geometry types.
+The FEniCSx runner container (DOLFINx 0.10.0.post2) exposes a FastAPI
+endpoint that accepts a \texttt{HeatConfig} JSON and returns a result
+including run metadata.  The solver uses P1 (linear Lagrange) elements,
+with Backward Euler ($\theta = 1$, unconditionally stable) as the default
+time integration scheme, supporting Dirichlet, Neumann, and Robin boundary
+conditions.  Geometry is built with Gmsh \citep{geuzaine2009gmsh} for 2D
+and 3D domains from a library of nine parameterised types: \texttt{rectangle},
+\texttt{l\_shape}, \texttt{circle}, \texttt{annulus}, \texttt{hollow\_rectangle},
+\texttt{t\_shape}, \texttt{stepped\_notch}, \texttt{box}, and \texttt{cylinder};
+Gmsh geometries use named physical groups for boundary identification,
+enabling arbitrary complex domain topologies.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Knowledge Graph Architecture}
@@ -300,11 +306,13 @@ from a library of nine parameterised geometry types.
 \begin{figure}[htbp]
   \centering
   \resizebox{\columnwidth}{!}{\input{figs/kg_schema.tikz}}
-  \caption{Neo4j knowledge graph schema.  \texttt{Material} nodes encode
-    thermal properties; \texttt{Run} nodes record simulation provenance
-    and HNSW-indexed embeddings; \texttt{DocChunk} nodes index ingested
-    PDF/HTML literature.  \texttt{KnownIssue} nodes catalogue failure
-    patterns triggered by past runs.}
+  \caption{Neo4j knowledge graph schema (actual implementation).
+    \texttt{Run} nodes carry 768-d HNSW embeddings for semantic search
+    and $k{=}5$ \texttt{SIMILAR\_TO} edges to nearest neighbours
+    (cosine $\ge 0.85$).  \texttt{ReferenceChunk} nodes (also HNSW-indexed)
+    bridge ingested literature to simulation runs via \texttt{CROSS\_REFS}
+    edges.  \texttt{BCConfig} encodes boundary condition patterns;
+    \texttt{KnownIssue} catalogues the nine pre-run failure codes.}
   \label{fig:kg}
 \end{figure}
 
@@ -317,29 +325,53 @@ functions:
         density $\rho$, and specific heat $c_p$ ranges, sourced from
         engineering handbooks and validated against ASM International data.
         Approximate values: steel $k \approx 50$\,W/mK, copper
-        $k \approx 390$\,W/mK, aluminium $k \approx 205$\,W/mK.
+        $k \approx 385$\,W/mK, aluminium $k \approx 200$\,W/mK.
 
   \item \textbf{Failure pattern catalogue.}  \texttt{KnownIssue} nodes
-        encode failure modes observed during system operation:
-        CFL-condition violations ($\Delta t > h^2/(2\alpha)$), zero or
-        near-zero thermal diffusivity, incompatible boundary condition
-        combinations, and excessive mesh size for available memory.
-        The rule engine (\texttt{rules.py}) augments these nodes with
-        analytical pre-checks.
+        encode failure modes observed during system operation.
+        A pure-Python rule engine (\texttt{rules.py}) fires nine
+        pre-run checks analytically before each simulation:
+
+        \smallskip\par
+        \resizebox{0.96\linewidth}{!}{%
+        \begin{tabular}{ll}
+        \toprule
+        Rule code & Trigger \\
+        \midrule
+        \texttt{INCONSISTENT\_IC}               & $|u_\text{init} - T_\text{BC,min}| > 100$\,K \\
+        \texttt{EXPLICIT\_CFL\_VIOLATION}        & $\theta < 0.5$ and $\Delta t > h^2/(2\alpha)$ \\
+        \texttt{NEAR\_EXPLICIT\_SCHEME}          & $0 \le \theta < 0.5$ \\
+        \texttt{COARSE\_MESH\_2D}               & $n_x < 10$ or $n_y < 10$ \\
+        \texttt{COARSE\_MESH\_3D}               & any direction $< 8$ \\
+        \texttt{SHORT\_SIMULATION}              & $t_\text{end} < 5\,\Delta t$ \\
+        \texttt{INVALID\_MATERIAL\_PROPS}        & $k$, $\rho$ or $c_p \le 0$ \\
+        \texttt{LARGE\_DT\_RELATIVE\_DIFFUSION}  & $\Delta t > 10\,h^2/\alpha$ \\
+        \texttt{NO\_BOUNDARY\_CONDITIONS}        & \texttt{bcs} list empty \\
+        \bottomrule
+        \end{tabular}%
+        }
 
   \item \textbf{Run lineage and semantic retrieval.}  Each completed
         \texttt{Run} node is embedded with \texttt{nomic-embed-text}
-        (768 dimensions) and indexed in an HNSW vector index.  The
-        Simulation Agent can query ``find similar past runs'' to retrieve
-        configurations with known outcomes, enabling few-shot in-context
-        learning from the system's own history.
+        (768 dimensions) and indexed in an HNSW vector index.  Up to
+        $k{=}5$ \texttt{SIMILAR\_TO} edges are created to the nearest
+        neighbours with cosine similarity $\ge 0.85$, precomputing the
+        neighbourhood graph for fast agent traversal.  The Simulation
+        Agent can query ``find similar past runs'' to retrieve configurations
+        with known outcomes, enabling few-shot in-context learning from
+        the system's own history.
 \end{enumerate}
 
 \paragraph{Document intelligence pipeline.}
 A Celery-backed ingestion pipeline processes PDF papers, standards documents,
 and HTML references using Docling \citep{docling2024} for structured
-extraction, splitting them into \texttt{DocumentChunk} nodes with
-overlapping 512-token windows and HNSW-indexed embeddings.
+extraction, splitting them into \texttt{ReferenceChunk} nodes with
+context-aware 256-token windows (overlap 32 tokens) and HNSW-indexed
+embeddings.  Each chunk is automatically cross-referenced to semantically
+similar \texttt{Run} nodes via \texttt{CROSS\_REFS} edges (cosine
+$\ge 0.78$), bridging literature knowledge to simulation history.
+As a representative scale point: indexing the 50-page FEniCSx tutorial
+produced 298 chunks and 1{,}073 cross-references.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Verification and Validation}
@@ -552,7 +584,12 @@ content itself, was the bottleneck in the mandatory design.
 \label{sec:metrics}
 
 Beyond the controlled ablation, we analyse the system's behaviour across all
-1{,}135 simulation runs accumulated during development and testing.
+1{,}135 simulation runs accumulated during development and testing.  Of these,
+805 originate from a comprehensive automated parameter sweep across 8 physics
+studies (geometry, material, boundary conditions, initial conditions,
+time-stepping, 3D geometry, Robin convection, and multi-material) run via
+\texttt{scripts/sweep\_full\_study.py}; the remainder are interactive and
+ablation runs accumulated through normal system use.
 
 \input{tables/agent_metrics.tex}
 
@@ -626,6 +663,16 @@ time-dependent convergence rates.
 The current architecture runs agents sequentially.  A task-level
 parallelism layer (e.g.\ running a parametric sweep as concurrent
 simulation agent calls) is under development.
+
+\paragraph{Knowledge graph evolution.}
+The 805-run parameter sweep has already created a dense graph with
+4{,}000+ \texttt{SIMILAR\_TO} edges.  Future work will mine this corpus
+for \texttt{IMPROVED\_OVER} relationships (did increasing mesh resolution
+reduce error without proportionally increasing wall time?), enabling the
+agent to autonomously suggest Pareto-optimal configurations.  A second
+planned enhancement is citation traceability: agents citing specific
+\texttt{ReferenceChunk} IDs from indexed literature when justifying
+parameter choices, providing a fully auditable reasoning trail.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Conclusion}

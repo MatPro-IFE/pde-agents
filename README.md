@@ -46,10 +46,27 @@ A multi-agent ecosystem built on open-source LLMs running locally to solve PDEs 
 
 | Agent | Model | Role |
 |-------|-------|------|
-| Simulation Agent | `qwen2.5-coder:32b` | Set up, validate (KG-aware), run, and debug FEM simulations |
+| Simulation Agent | `qwen2.5-coder:32b` | Set up, validate, run, and debug FEM simulations — three KG modes (see below) |
 | Analytics Agent  | `llama3.3:70b`      | Analyze results, compare runs, query the knowledge graph |
 | Database Agent   | `qwen2.5-coder:14b` | Store results, run SQL queries, catalog studies, search history |
 | Orchestrator     | `llama3.3:70b`      | Coordinate all agents, synthesise final report |
+
+#### Simulation Agent — KG integration modes
+
+The Simulation Agent supports three knowledge-graph integration modes, selectable via constructor flag or API query parameter:
+
+| Mode | Flag | Behaviour |
+|------|------|-----------|
+| **KG On** (default) | — | Mandatory `check_config_warnings` + `query_knowledge_graph` calls before every simulation |
+| **KG Off** | `disable_kg=True` | KG tools removed; agent skips straight to `validate_config` → `run_simulation` |
+| **KG Smart** | `smart_kg=True` | Warm-start injection of top-3 similar past runs (via HNSW) into system prompt; KG tools remain available but are only invoked after a failure or for unknown materials |
+
+**KG Smart warm-start:** Before the agent loop begins, the task description is embedded with `nomic-embed-text` and the Neo4j HNSW index is queried for the 3 most similar successful past runs. Their configurations are injected directly into the system prompt as few-shot reference examples — no tool call needed. This pattern is inspired by CRAG (corrective RAG) and AriGraph (episodic KG memory).
+
+Ablation results (10 benchmark tasks, 3 difficulty tiers):
+- KG On: 60% success, avg 5.3 iterations
+- KG Off: 100% success, avg 3.0 iterations
+- **KG Smart: 90% success, avg 3.8 iterations** — recovers most KG Off performance while retaining KG access
 
 ### Services
 
@@ -858,10 +875,30 @@ pde-agents/
 │
 ├── nginx/
 │   └── nginx.conf             # Nginx reverse proxy (subpath routing, WebSocket)
+│
+├── evaluation/                # Research paper evaluation framework
+│   ├── benchmarks/
+│   │   ├── analytical_solutions.py  # 3 closed-form V&V benchmark cases
+│   │   └── vv_runner.py             # V&V convergence study (5 mesh resolutions)
+│   ├── ablation/
+│   │   ├── benchmark_tasks.py       # 10 NL benchmark tasks (easy/medium/hard)
+│   │   └── run_ablation.py          # 3-way KG ablation runner (--include-smart)
+│   ├── metrics/
+│   │   └── agent_quality.py         # Production metrics from PostgreSQL
+│   ├── generate_tables.py           # LaTeX table generator from JSON results
+│   └── results/                     # JSON outputs + generated LaTeX tables
+│
+├── paper/                     # Research paper (LaTeX)
+│   ├── main.tex               # Main document (compile with pdflatex + bibtex)
+│   ├── references.bib         # BibTeX (29 entries incl. CRAG, AriGraph)
+│   ├── figs/                  # TikZ/PGFPlots figures
+│   └── tables/                # LaTeX table fragments (\input{} in main.tex)
+│
 ├── docker-compose.yml         # Full service stack incl. NeoDash (port 9001), Celery worker
+├── CLAUDE.md                  # Comprehensive project context file
 ├── env.example                # Environment variable template (copy to .env)
 ├── requirements.txt           # Python deps: LangGraph, FastAPI, neo4j, Docling, Celery, pypdf
-├── Makefile                   # Common commands
+├── Makefile                   # Common commands (incl. eval-* and paper-* targets)
 └── setup.sh                   # One-time setup script
 ```
 
@@ -918,6 +955,21 @@ make health          # check all service HTTP endpoints
 
 make test-solver     # quick FEniCSx solver smoke test (8×8 mesh)
 make clean           # ⚠ stop, DELETE all volumes, wipe results/
+
+# ── Evaluation (paper experiments) ──────────────────────────────────────────
+make eval-vv                # V&V convergence benchmarks (runs inside fenics container)
+make eval-ablation          # 2-way KG ablation: KG On vs KG Off
+make eval-ablation-smart    # 3-way KG ablation: KG On vs KG Off vs KG Smart
+make eval-metrics           # production agent quality metrics from PostgreSQL
+make eval-tables            # generate LaTeX tables from JSON results
+make eval-all               # run V&V + 2-way ablation + metrics + tables
+
+# ── Paper (Overleaf sync via GitHub subtree) ─────────────────────────────────
+# Setup (one-time): git remote add paper-origin git@github.com:ORG/pde-agents-paper.git
+make paper-push             # push local paper/ edits → GitHub → Overleaf pulls
+make paper-pull             # pull Overleaf edits ← GitHub → local paper/
+make paper-status           # show uncommitted paper changes + commits ahead of remote
+make paper-pdf              # compile paper/main.tex locally (requires texlive)
 ```
 
 ---

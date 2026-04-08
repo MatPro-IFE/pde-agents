@@ -184,8 +184,8 @@ eval-tables:
 	@echo "Generating LaTeX tables from results..."
 	python evaluation/generate_tables.py
 
-eval-all: eval-vv eval-ablation eval-metrics eval-tables
-	@echo "All evaluation experiments complete. Results in evaluation/results/"
+eval-all: eval-vv eval-ablation-smart eval-metrics eval-tables
+	@echo "All evaluation experiments complete (3-way ablation included). Results in evaluation/results/"
 
 # ─── Testing ──────────────────────────────────────────────────────────────────
 
