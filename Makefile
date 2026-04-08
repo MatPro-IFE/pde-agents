@@ -7,7 +7,8 @@
         db-shell db-init \
         jupyter shell-fenics shell-agents \
         test lint \
-        eval-vv eval-ablation eval-ablation-smart eval-metrics eval-tables eval-all
+        eval-vv eval-ablation eval-ablation-smart eval-metrics eval-tables eval-all \
+        paper-push paper-pull paper-status paper-pdf
 
 COMPOSE = docker compose
 AGENTS_API = http://localhost:8000
@@ -203,6 +204,46 @@ health:
 	@curl -sf http://localhost:11434/api/tags | python3 -c "import sys,json; d=json.load(sys.stdin); print(f'Ollama: OK  ({len(d[\"models\"])} models)')" || echo "Ollama: DOWN"
 	@curl -sf http://localhost:8050 > /dev/null && echo "Dashboard: OK" || echo "Dashboard: DOWN"
 	@curl -sf http://localhost:9000/minio/health/live > /dev/null && echo "MinIO: OK" || echo "MinIO: DOWN"
+
+# ─── Paper (Overleaf sync via GitHub subtree) ────────────────────────────────
+#
+# Setup (one-time, after creating github.com/YOU/pde-agents-paper):
+#   git remote add paper-origin git@github.com:YOUR_USERNAME/pde-agents-paper.git
+#   make paper-push   ← initial push
+#   Then: Overleaf → New Project → Import from GitHub → pde-agents-paper
+#
+# Daily workflow:
+#   make paper-push   ← push local paper/ edits → GitHub → Overleaf pulls
+#   make paper-pull   ← pull Overleaf edits ← GitHub → merge into paper/
+
+PAPER_REMOTE  ?= paper-origin
+PAPER_BRANCH  ?= main
+
+paper-push:
+	@echo "Pushing paper/ subtree to $(PAPER_REMOTE)/$(PAPER_BRANCH)..."
+	git subtree push --prefix=paper $(PAPER_REMOTE) $(PAPER_BRANCH)
+	@echo "Done. In Overleaf: Menu → GitHub → Pull to pick up changes."
+
+paper-pull:
+	@echo "Pulling Overleaf edits from $(PAPER_REMOTE)/$(PAPER_BRANCH)..."
+	git subtree pull --prefix=paper $(PAPER_REMOTE) $(PAPER_BRANCH) --squash -m "sync: pull paper edits from Overleaf via GitHub"
+	@echo "Done. paper/ is up to date."
+
+paper-status:
+	@echo "=== Local paper/ changes ==="
+	@git status paper/
+	@echo ""
+	@echo "=== Commits ahead of paper remote ==="
+	@git log $(PAPER_REMOTE)/$(PAPER_BRANCH)..HEAD --oneline -- paper/ 2>/dev/null || \
+	  echo "(run 'git fetch $(PAPER_REMOTE)' first)"
+
+paper-pdf:
+	@echo "Compiling paper/main.tex..."
+	cd paper && pdflatex -interaction=nonstopmode main.tex && \
+	  bibtex main && \
+	  pdflatex -interaction=nonstopmode main.tex && \
+	  pdflatex -interaction=nonstopmode main.tex
+	@echo "PDF ready: paper/main.pdf"
 
 # ─── NeoDash ──────────────────────────────────────────────────────────────────
 

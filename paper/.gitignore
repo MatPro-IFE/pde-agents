@@ -1,0 +1,27 @@
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.toc
+*.lot
+*.lof
+*.idx
+*.ind
+*.ilg
+*.nav
+*.snm
+*.vrb
+*.bcf
+*.run.xml
+*-blx.bib
+
+# Overleaf project metadata (created when you clone via Overleaf git bridge)
+.overleaf/
+
+# Compiled PDF is committed explicitly — exclude auto-generated intermediates
+# (keep main.pdf tracked so collaborators without LaTeX can read the paper)
