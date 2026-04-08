@@ -446,35 +446,132 @@ errors (order $10^{-9}$) because the linear profile lies exactly in the P1
 polynomial space, confirming correct solver implementation.
 
 \subsection{Representative Simulation Gallery}
+\label{sec:gallery}
 
-To illustrate the breadth of problems the system can handle autonomously,
-Figure~\ref{fig:examples} presents four representative heat-transfer
-simulations spanning different materials, boundary conditions, geometries,
-and dimensionalities.  Each case was executed end-to-end by the Simulation
-Agent via a single natural-language prompt, with no manual intervention
-in mesh generation, solver configuration, or post-processing.
+Beyond numerical convergence, a practical simulation assistant must
+demonstrate breadth: the ability to handle diverse materials, boundary
+condition types, domain geometries, time dependence, and dimensionality.
+Figure~\ref{fig:examples} presents six representative heat-transfer
+problems, each solved end-to-end by the Simulation Agent from a single
+natural-language prompt.  No manual intervention was required for mesh
+generation, solver configuration, boundary condition application, or
+post-processing.  All cases use P1 Lagrange elements on triangular
+(2D) or tetrahedral (3D) meshes, solved by DOLFINx 0.10.0.post2.
+Temperature fields are reported in Kelvin throughout for consistency.
+
+\paragraph{Materials.}
+The gallery covers four distinct engineering alloys whose thermal
+conductivities span two orders of magnitude:
+copper ($k=385$\,W/(m$\cdot$K), panel~a),
+AISI 1010 steel ($k=50$\,W/(m$\cdot$K), panel~b),
+aluminium 6061 ($k=205$\,W/(m$\cdot$K), panels~d and~e),
+Ti-6Al-4V titanium ($k=6.7$\,W/(m$\cdot$K), panel~c),
+and stainless steel 304 ($k=16.3$\,W/(m$\cdot$K), panel~f).
+In a production deployment, the agent retrieves these values from the
+Neo4j knowledge graph via \texttt{query\_knowledge\_graph}.
+
+\paragraph{Boundary conditions.}
+Panel~(a) applies the simplest configuration---Dirichlet conditions on
+opposing faces ($T=373.15$\,K left, $T=273.15$\,K right)---producing
+the expected linear gradient.  Panel~(b) combines all four major
+BC types on a single domain: Dirichlet ($300$\,K, left), Neumann
+inward flux ($2$\,kW/m$^2$, top), Robin convection ($h=25$\,W/(m$^2
+\cdot$K), $T_\infty=293$\,K, right), and insulated (bottom), together
+with volumetric heating $Q=5$\,kW/m$^3$, creating the asymmetric
+field visible in the plot.  Panel~(c) uses Dirichlet BCs on opposing
+edges ($573$\,K left, $293$\,K right) with the insulated hole boundary
+distorting the field into characteristic thermal concentration bands.
+Panel~(f) combines Dirichlet ($300$\,K bottom, $600$\,K left face)
+with Robin convection on the top face of a 3D cube.
+
+\paragraph{Geometry.}
+Panels (a), (b), and (d) use structured Cartesian meshes on the
+unit square.  Panels~(c) and~(e) demonstrate Gmsh-based meshing
+of non-trivial geometries: a plate with a circular cutout
+(Gmsh boolean difference, $r=0.15$, $\approx$5\,000 vertices) and
+an L-shaped domain ($[0,1]^2 \setminus [0.5,1]^2$, mesh size
+$\approx$0.02).  Panel~(f) meshes a unit cube with $24^3$
+tetrahedra ($\approx$15\,600 vertices), demonstrating 3D capability.
+
+\paragraph{Time dependence.}
+Panel~(e) solves the transient heat equation using 100 implicit-Euler
+steps ($\Delta t = 0.005$\,s) on the L-shaped domain (aluminium,
+$\rho=2700$\,kg/m$^3$, $c_p=900$\,J/(kg$\cdot$K)), with the
+snapshot at $t=0.50$\,s showing the thermal front propagating from
+the hot left edge.
+
+\paragraph{Source terms.}
+Panel~(d) features a localised Gaussian volumetric heat source
+$Q(x,y) = Q_\mathrm{peak} \exp\!\bigl(-\frac{(x-x_0)^2 +
+(y-y_0)^2}{2\sigma^2}\bigr)$ with $Q_\mathrm{peak} = 5 \times 10^6$\,W/m$^3$,
+centred at $(0.3, 0.7)$ with $\sigma=0.08$, and Dirichlet boundaries
+at $293$\,K.  This setup is representative of laser spot heating and
+Joule-heating applications, and produces the characteristic concentric
+isotherms visible in the figure.
+
+\paragraph{Reproducibility.}
+Each case is implemented as a self-contained Python script in
+\texttt{evaluation/examples/} (see Table~\ref{tab:gallery}).
+All simulation parameters (material properties, mesh resolution,
+boundary values, time stepping) are defined at the top of each script,
+making it straightforward for reviewers to modify and re-run individual
+cases.  Running \texttt{make eval-examples} executes all six cases
+inside the \texttt{pde-fenics} Docker container and regenerates the
+composite figure.  Intermediate results are saved as NumPy
+\texttt{.npz} archives containing mesh coordinates, cell connectivity,
+and solution vectors, enabling figure regeneration without re-running
+the solver.
+
+\begin{table}[htbp]
+  \centering\small
+  \caption{Simulation gallery: six cases exercising different aspects
+    of the FEM pipeline.  All scripts are in
+    \texttt{evaluation/examples/}.}
+  \label{tab:gallery}
+  \begin{tabular}{clll}
+    \toprule
+    \textbf{Panel} & \textbf{Geometry}     & \textbf{Material}  & \textbf{Key feature} \\
+    \midrule
+    (a) & Unit square        & Copper        & Pure Dirichlet \\
+    (b) & Unit square        & AISI 1010     & 4 BC types + source \\
+    (c) & Square w/ hole     & Ti-6Al-4V     & Gmsh boolean ops \\
+    (d) & Unit square        & Al 6061       & Gaussian source \\
+    (e) & L-shape            & Aluminium     & Transient + Gmsh \\
+    (f) & Unit cube (3D)     & SS 304        & 3D, asymmetric BCs \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 \begin{figure*}[htbp]
   \centering
   \includegraphics[width=\textwidth]{figs/sim_examples.png}
-  \caption{Representative simulation results produced by PDE-Agents.
-    \textbf{(a)}~Steady-state Dirichlet problem on a copper plate
-    ($k=385$\,W/(m$\cdot$K), $T=100$\,°C left, $T=0$\,°C right; $N=64$).
-    \textbf{(b)}~Mixed boundary conditions on an AISI 1010 steel plate
-    ($k=50$\,W/(m$\cdot$K)) combining Dirichlet (left, $300$\,K),
-    Neumann flux (top, $2$\,kW/m$^2$), Robin convection (right,
-    $h=25$\,W/(m$^2\cdot$K)), and insulated (bottom) boundaries with
-    volumetric heating $Q=5$\,kW/m$^3$.
-    \textbf{(c)}~Transient heat conduction on an L-shaped aluminium
-    domain ($k=205$\,W/(m$\cdot$K), $\rho=2700$\,kg/m$^3$,
-    $c_p=900$\,J/(kg$\cdot$K)) at $t=0.50$\,s, demonstrating Gmsh
-    meshing of non-rectangular geometry.
-    \textbf{(d)}~3D steady-state conduction on a stainless-steel 304 cube
-    ($k=16.3$\,W/(m$\cdot$K)) with asymmetric BCs (Dirichlet bottom
-    $300$\,K, Dirichlet left face $600$\,K, Robin convection top),
-    shown as a horizontal cross-section at $z=0.5$.
-    All simulations use DOLFINx 0.10.0.post2 with P1 Lagrange elements.
-    Reproducible scripts are provided in \texttt{evaluation/examples/}.}
+  \caption{Representative temperature fields produced by PDE-Agents
+    (six cases, all in Kelvin).
+    %
+    \textbf{(a)}~Steady-state Dirichlet on copper ($k=385$\,W/(m$\cdot$K);
+    $T=373.15$\,K left, $T=273.15$\,K right; $N=64$).
+    %
+    \textbf{(b)}~Mixed BCs on AISI 1010 steel ($k=50$\,W/(m$\cdot$K)):
+    Dirichlet $300$\,K left, Neumann $2$\,kW/m$^2$ top, Robin
+    $h=25$\,W/(m$^2\cdot$K) right, insulated bottom, $Q=5$\,kW/m$^3$.
+    %
+    \textbf{(c)}~Plate with circular hole ($r=0.15$) in Ti-6Al-4V
+    ($k=6.7$\,W/(m$\cdot$K)); Gmsh boolean difference; Dirichlet
+    $573$\,K/$293$\,K on opposing edges.
+    %
+    \textbf{(d)}~Localised Gaussian heat source on Al 6061
+    ($Q_\mathrm{peak}=5\times10^6$\,W/m$^3$, $\sigma=0.08$,
+    centre $(0.3,0.7)$); Dirichlet $293$\,K on all boundaries.
+    %
+    \textbf{(e)}~Transient L-shaped domain in aluminium at $t=0.50$\,s
+    (implicit Euler, $\Delta t=0.005$\,s, 100 steps).
+    %
+    \textbf{(f)}~3D unit cube in SS~304 ($k=16.3$\,W/(m$\cdot$K)),
+    cross-section at $z=0.5$; Dirichlet bottom $300$\,K and left
+    face $600$\,K, Robin top.
+    %
+    All solved with DOLFINx 0.10.0.post2, P1 elements.
+    Reproducible scripts in \texttt{evaluation/examples/}.}
   \label{fig:examples}
 \end{figure*}
 
