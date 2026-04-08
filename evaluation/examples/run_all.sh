@@ -22,6 +22,12 @@ python3 "$DIR/case_c_lshape_transient.py"
 echo "=== Case D: 3D Conduction ==="
 python3 "$DIR/case_d_3d_conduction.py"
 
+echo "=== Case E: Plate with Hole ==="
+python3 "$DIR/case_e_plate_with_hole.py"
+
+echo "=== Case F: Gaussian Heat Source ==="
+python3 "$DIR/case_f_gaussian_source.py"
+
 echo "=== Composite Figure ==="
 python3 "$DIR/plot_composite.py"
 

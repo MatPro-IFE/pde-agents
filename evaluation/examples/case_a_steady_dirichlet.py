@@ -2,8 +2,8 @@
 
   Domain : [0,1]²  (uniform triangular mesh, N=64)
   PDE    : -∇·(k ∇T) = 0,  k = 385 W/(m·K)  (copper)
-  BCs    : T = 100 °C on x=0 (left),  T = 0 °C on x=1 (right)
-  Exact  : T(x) = 100(1-x)  — linear gradient
+  BCs    : T = 373.15 K on x=0 (left),  T = 273.15 K on x=1 (right)
+  Exact  : T(x) = 373.15 − 100·x  — linear gradient
 
 Outputs
 -------
@@ -49,13 +49,16 @@ def left(x):
 def right(x):
     return np.isclose(x[0], 1.0)
 
+T_hot = 373.15
+T_cold = 273.15
+
 bc_left = dolfinx.fem.dirichletbc(
-    PETSc.ScalarType(100.0),
+    PETSc.ScalarType(T_hot),
     dolfinx.fem.locate_dofs_geometrical(V, left),
     V,
 )
 bc_right = dolfinx.fem.dirichletbc(
-    PETSc.ScalarType(0.0),
+    PETSc.ScalarType(T_cold),
     dolfinx.fem.locate_dofs_geometrical(V, right),
     V,
 )
@@ -78,13 +81,13 @@ np.savez(
     OUT / "case_a.npz",
     coords=coords, cells=tri_cells, values=vals,
     title="Steady Dirichlet (copper plate)",
-    description="T=100 left, T=0 right, k=385 W/(m·K), N=64",
+    description=f"T={T_hot}K left, T={T_cold}K right, k=385 W/(m·K), N=64",
 )
 
 triang = mtri.Triangulation(coords[:, 0], coords[:, 1], tri_cells)
 fig, ax = plt.subplots(figsize=(4.2, 3.6))
 tcf = ax.tricontourf(triang, vals, levels=32, cmap="inferno")
-fig.colorbar(tcf, ax=ax, label="Temperature (°C)", shrink=0.85)
+fig.colorbar(tcf, ax=ax, label="Temperature (K)", shrink=0.85)
 ax.set_xlabel("x (m)")
 ax.set_ylabel("y (m)")
 ax.set_title("(a) Steady Dirichlet — copper plate", fontsize=10)
