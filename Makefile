@@ -221,7 +221,9 @@ PAPER_BRANCH  ?= main
 
 paper-push:
 	@echo "Pushing paper/ subtree to $(PAPER_REMOTE)/$(PAPER_BRANCH)..."
-	git subtree push --prefix=paper $(PAPER_REMOTE) $(PAPER_BRANCH)
+	git subtree split --prefix=paper -b _paper_split_tmp
+	git push $(PAPER_REMOTE) _paper_split_tmp:$(PAPER_BRANCH) --force
+	git branch -D _paper_split_tmp
 	@echo "Done. In Overleaf: Menu → GitHub → Pull to pick up changes."
 
 paper-pull:
