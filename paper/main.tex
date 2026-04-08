@@ -445,6 +445,39 @@ finite elements on uniform Cartesian meshes.  Case 1 achieves machine-precision
 errors (order $10^{-9}$) because the linear profile lies exactly in the P1
 polynomial space, confirming correct solver implementation.
 
+\subsection{Representative Simulation Gallery}
+
+To illustrate the breadth of problems the system can handle autonomously,
+Figure~\ref{fig:examples} presents four representative heat-transfer
+simulations spanning different materials, boundary conditions, geometries,
+and dimensionalities.  Each case was executed end-to-end by the Simulation
+Agent via a single natural-language prompt, with no manual intervention
+in mesh generation, solver configuration, or post-processing.
+
+\begin{figure*}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{figs/sim_examples.png}
+  \caption{Representative simulation results produced by PDE-Agents.
+    \textbf{(a)}~Steady-state Dirichlet problem on a copper plate
+    ($k=385$\,W/(m$\cdot$K), $T=100$\,°C left, $T=0$\,°C right; $N=64$).
+    \textbf{(b)}~Mixed boundary conditions on an AISI 1010 steel plate
+    ($k=50$\,W/(m$\cdot$K)) combining Dirichlet (left, $300$\,K),
+    Neumann flux (top, $2$\,kW/m$^2$), Robin convection (right,
+    $h=25$\,W/(m$^2\cdot$K)), and insulated (bottom) boundaries with
+    volumetric heating $Q=5$\,kW/m$^3$.
+    \textbf{(c)}~Transient heat conduction on an L-shaped aluminium
+    domain ($k=205$\,W/(m$\cdot$K), $\rho=2700$\,kg/m$^3$,
+    $c_p=900$\,J/(kg$\cdot$K)) at $t=0.50$\,s, demonstrating Gmsh
+    meshing of non-rectangular geometry.
+    \textbf{(d)}~3D steady-state conduction on a stainless-steel 304 cube
+    ($k=16.3$\,W/(m$\cdot$K)) with asymmetric BCs (Dirichlet bottom
+    $300$\,K, Dirichlet left face $600$\,K, Robin convection top),
+    shown as a horizontal cross-section at $z=0.5$.
+    All simulations use DOLFINx 0.10.0.post2 with P1 Lagrange elements.
+    Reproducible scripts are provided in \texttt{evaluation/examples/}.}
+  \label{fig:examples}
+\end{figure*}
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Ablation Study: Knowledge Graph Contribution}
 \label{sec:ablation}

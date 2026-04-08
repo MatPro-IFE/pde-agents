@@ -7,7 +7,7 @@
         db-shell db-init \
         jupyter shell-fenics shell-agents \
         test lint \
-        eval-vv eval-ablation eval-ablation-smart eval-metrics eval-tables eval-all \
+        eval-vv eval-ablation eval-ablation-smart eval-metrics eval-tables eval-examples eval-all \
         paper-push paper-pull paper-status paper-pdf
 
 COMPOSE = docker compose
@@ -184,7 +184,13 @@ eval-tables:
 	@echo "Generating LaTeX tables from results..."
 	python evaluation/generate_tables.py
 
-eval-all: eval-vv eval-ablation-smart eval-metrics eval-tables
+eval-examples:
+	@echo "Running representative simulation examples in fenics container..."
+	docker exec pde-fenics bash /workspace/evaluation/examples/run_all.sh
+	cp evaluation/examples/output/sim_examples.png paper/figs/sim_examples.png
+	@echo "Done. Composite figure copied to paper/figs/sim_examples.png"
+
+eval-all: eval-vv eval-ablation-smart eval-metrics eval-tables eval-examples
 	@echo "All evaluation experiments complete (3-way ablation included). Results in evaluation/results/"
 
 # ─── Testing ──────────────────────────────────────────────────────────────────

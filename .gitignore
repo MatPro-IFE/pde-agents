@@ -75,3 +75,4 @@ paper/*.fls
 
 # Evaluation raw simulation outputs (large binary)
 evaluation/results/vv_runs/
+evaluation/examples/output/
