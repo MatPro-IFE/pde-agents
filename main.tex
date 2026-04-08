@@ -214,11 +214,19 @@ agent queries, prioritising latency over completeness.
 \begin{figure*}[htbp]
   \centering
   \resizebox{\textwidth}{!}{\input{figs/architecture.tikz}}
-  \caption{System architecture of PDE-Agents.  A central LangGraph
-    Supervisor routes natural-language tasks to three specialist agents.
-    The Simulation Agent interacts with the FEniCSx runner (DOLFINx)
-    and optionally queries the Neo4j Knowledge Graph.  All simulation
-    results and agent logs are persisted to PostgreSQL and MinIO.}
+  \caption{System architecture of PDE-Agents (four-tier layout).
+    \textit{Tier 1}: user natural-language interface.
+    \textit{Tier 2}: Multi-Agent Orchestration — a LangGraph Supervisor
+    routes tasks to three specialist agents (Simulation, Analytics,
+    Database), each backed by a locally-deployed LLM via Ollama.
+    \textit{Tier 3}: Execution \& Knowledge — FEniCSx FEM runner
+    (DOLFINx 0.10.0.post2), Neo4j GraphRAG Knowledge Graph
+    (HNSW-indexed 768-d embeddings), and persistent storage
+    (PostgreSQL + MinIO).
+    \textit{Tier 4}: shared Ollama LLM Backend (196\,GB VRAM,
+    CUDA 13.1).  Dashed red arrows represent the KG Smart
+    warm-start: the top-3 similar past runs are retrieved and injected
+    into the Simulation Agent's prompt before the reasoning loop begins.}
   \label{fig:arch}
 \end{figure*}
 
