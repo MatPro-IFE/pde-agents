@@ -10,9 +10,10 @@
   ylabel style={font=\small},
   tick label style={font=\scriptsize},
   legend style={font=\scriptsize,
-                at={(0.03,0.03)}, anchor=south west,
+                at={(0.5,-0.22)}, anchor=north,
                 fill=white, draw=gray!60,
-                rounded corners=2pt, row sep=1pt},
+                rounded corners=2pt, row sep=1pt,
+                legend columns=2},
   grid=major,
   grid style={line width=0.4pt, draw=gray!35},
   % coarse mesh (h=1/8) on LEFT, fine mesh (h=1/128) on RIGHT
