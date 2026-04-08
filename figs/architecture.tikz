@@ -1,66 +1,67 @@
-% PDE-Agents — Modern layered architecture diagram
-% Four clear tiers with grouped background boxes.
-% Resize with \resizebox{\textwidth}{!}{...} in main.tex
+% PDE-Agents — Clean 4-tier layered architecture
+% Columns: x = 2.0 (Sim), 7.5 (Analytics / KG), 13.0 (DB / Storage)
+% All inter-node arrow routes are explicitly planned to avoid overlaps.
+% Resize with  \resizebox{\textwidth}{!}{...}  in main.tex
 \begin{tikzpicture}[
   font=\small,
   >=Latex,
   every node/.style={align=center},
-  %─── Component node styles ────────────────────────────────────────────────
+  %─── Component styles ─────────────────────────────────────────────────────
   usrnd/.style={
-    draw=orange!65, fill=yellow!20, rounded corners=16pt,
-    thick, minimum width=3.2cm, minimum height=0.76cm,
+    draw=orange!60, fill=yellow!18, rounded corners=16pt,
+    thick, minimum width=3.6cm, minimum height=0.76cm,
     font=\small\bfseries},
   supnd/.style={
-    draw=nodeblue, fill=nodeblue!16, rounded corners=5pt,
-    very thick, minimum width=11.6cm, minimum height=0.88cm,
+    draw=nodeblue, fill=nodeblue!15, rounded corners=5pt,
+    very thick, minimum width=13.4cm, minimum height=0.9cm,
     font=\small\bfseries},
   agentnd/.style 2 args={
-    draw=#1!90, fill=#1!11, rounded corners=5pt,
-    thick, minimum width=3.4cm, minimum height=1.28cm, font=\small},
+    draw=#1!88, fill=#1!10, rounded corners=5pt, thick,
+    minimum width=3.4cm, minimum height=1.26cm, font=\small},
   svcnd/.style 2 args={
-    draw=#1!80, fill=#1!9, rounded corners=4pt,
-    thick, minimum width=3.4cm, minimum height=1.18cm, font=\small},
+    draw=#1!78, fill=#1!8, rounded corners=4pt, thick,
+    minimum width=3.4cm, minimum height=1.15cm, font=\small},
   storend/.style={
-    draw=nodegray!65, fill=nodegray!7, rounded corners=4pt,
-    thick, minimum width=3.2cm, minimum height=0.72cm, font=\footnotesize},
+    draw=nodegray!60, fill=nodegray!7, rounded corners=4pt, thick,
+    minimum width=3.4cm, minimum height=1.05cm, font=\small},
   llmnd/.style={
-    draw=nodeblue!60, fill=nodeblue!8, rounded corners=5pt,
-    very thick, minimum width=12.8cm, minimum height=1.05cm,
-    font=\footnotesize},
-  %─── Background layer box style (dashed, translucent fill) ───────────────
-  lbox/.style={
-    draw=#1!45, fill=#1!5, rounded corners=8pt,
-    thick, dashed, inner sep=0.44cm},
+    draw=nodeblue!58, fill=nodeblue!7, rounded corners=5pt, very thick,
+    minimum width=14.0cm, minimum height=1.05cm, font=\footnotesize},
+  %─── Background layer boxes ───────────────────────────────────────────────
+  lbox/.style={draw=#1!42, fill=#1!4, rounded corners=8pt, thick, dashed,
+               inner sep=0.42cm},
   %─── Arrow styles ─────────────────────────────────────────────────────────
-  arr/.style  ={->,    thick, color=#1},
-  biarr/.style={<->,   thick, color=#1},
-  darr/.style ={->,    thick, dashed, color=#1},
+  arr/.style  ={->,  thick, color=#1},
+  biarr/.style={<->, thick, color=#1},
+  darr/.style ={->,  thick, dashed, color=#1},
+  thindarr/.style={->, thin, dashed, color=#1},
 ]
 
 %══════════════════════════════════════════════════════════════════════════════
-%  TIER 0 — User
+%  NODES
 %══════════════════════════════════════════════════════════════════════════════
-\node[usrnd] (user) at (6.5, 11.8)
+
+% TIER 0 — User (centered on x=7.5)
+\node[usrnd] (user) at (7.5, 12.4)
   {User \quad / \quad Natural Language Task};
 
-%══════════════════════════════════════════════════════════════════════════════
-%  TIER 1 — Multi-Agent Orchestration
-%══════════════════════════════════════════════════════════════════════════════
+% TIER 1 — Orchestration
+\node[supnd] (sup) at (7.5, 10.6)
+  {LangGraph Supervisor
+   \quad {\normalfont\footnotesize llama3.3:70b
+   \enspace·\enspace router + synthesiser}};
 
-\node[supnd] (sup) at (6.5, 10.0)
-  {LangGraph Supervisor \quad {\normalfont\footnotesize llama3.3:70b \; (router + synthesiser)}};
-
-\node[agentnd={nodegreen}{}] (sim)  at (1.8, 7.6)
+\node[agentnd={nodegreen}{}] (sim)  at (2.0, 8.2)
   {\textbf{Simulation Agent}\\[2pt]
    {\footnotesize qwen2.5-coder:32b}\\
    {\tiny KG Smart warm-start}};
 
-\node[agentnd={nodeorange}{}] (anal) at (6.5, 7.6)
+\node[agentnd={nodeorange}{}] (anal) at (7.5, 8.2)
   {\textbf{Analytics Agent}\\[2pt]
    {\footnotesize llama3.3:70b}\\
    {\tiny compare · suggest}};
 
-\node[agentnd={nodeblue}{}] (dba)  at (11.2, 7.6)
+\node[agentnd={nodeblue}{}] (dba) at (13.0, 8.2)
   {\textbf{Database Agent}\\[2pt]
    {\footnotesize qwen2.5-coder:14b}\\
    {\tiny store · catalog · query}};
@@ -68,133 +69,143 @@
 \begin{scope}[on background layer]
   \node[lbox=nodeblue, fit=(sup)(sim)(anal)(dba)] (orch) {};
 \end{scope}
-\node[font=\scriptsize\bfseries, text=nodeblue!70,
-      anchor=north west, inner sep=2pt]
-  at (orch.north west) {Multi-Agent Orchestration \textrm{(LangGraph)}};
+\node[font=\scriptsize\bfseries, text=nodeblue!68,
+      anchor=north west, inner sep=3pt] at (orch.north west)
+  {Multi-Agent Orchestration \textrm{(LangGraph)}};
 
-%══════════════════════════════════════════════════════════════════════════════
-%  TIER 2 — Execution & Knowledge
-%══════════════════════════════════════════════════════════════════════════════
-
-\node[svcnd={nodegreen}{}] (fenics) at (1.8, 4.6)
+% TIER 2 — Execution & Knowledge
+\node[svcnd={nodegreen}{}] (fenics) at (2.0, 5.0)
   {\textbf{FEniCSx Runner}\\[2pt]
    {\footnotesize DOLFINx 0.10.0.post2}\\
    {\tiny 2D/3D FEM · Gmsh · PETSc · :8080}};
 
-\node[svcnd={nodered}{}] (kg) at (6.5, 4.6)
+\node[svcnd={nodered}{}] (kg) at (7.5, 5.0)
   {\textbf{Neo4j Knowledge Graph}\\[2pt]
    {\footnotesize GraphRAG + HNSW}\\
    {\tiny Materials · Runs · ReferenceChunks}};
 
-\node[storend] (pg)    at (11.2, 5.05)
-  {\textbf{PostgreSQL}\\{\tiny Metadata · Agent Logs}};
-\node[storend] (minio) at (11.2, 4.15)
-  {\textbf{MinIO}\\{\tiny VTK · HDF5 · PDFs}};
+% Combined storage node (avoids two separate boxes crossing KG)
+\node[storend] (storage) at (13.0, 5.0)
+  {\textbf{Data Storage}\\[2pt]
+   {\footnotesize PostgreSQL \enspace·\enspace MinIO}\\
+   {\tiny Metadata · VTK · HDF5}};
 
 \begin{scope}[on background layer]
-  \node[lbox=nodegray, fit=(fenics)(kg)(pg)(minio)] (exec) {};
+  \node[lbox=nodegray, fit=(fenics)(kg)(storage)] (exec) {};
 \end{scope}
-\node[font=\scriptsize\bfseries, text=nodegray!75,
-      anchor=north west, inner sep=2pt]
-  at (exec.north west) {Execution \& Knowledge Layer};
+\node[font=\scriptsize\bfseries, text=nodegray!72,
+      anchor=north west, inner sep=3pt] at (exec.north west)
+  {Execution \& Knowledge Layer};
 
-%══════════════════════════════════════════════════════════════════════════════
-%  TIER 3 — LLM Backend
-%══════════════════════════════════════════════════════════════════════════════
-
-\node[llmnd] (ollama) at (6.5, 1.85)
-  {\textbf{Ollama} \enspace :11434 \enspace · \enspace
-   2× RTX PRO 6000 Blackwell \enspace · \enspace CUDA 13.1 \enspace · \enspace 196 GB VRAM\\[3pt]
+% TIER 3 — LLM Backend (centered x=7.5)
+\node[llmnd] (ollama) at (7.5, 2.2)
+  {\textbf{Ollama} \enspace :11434 \enspace·\enspace
+   2× RTX PRO 6000 Blackwell \enspace·\enspace CUDA 13.1 \enspace·\enspace 196\,GB VRAM\\[3pt]
    {\small
     qwen2.5-coder:32b \enspace$|$\enspace
     llama3.3:70b \enspace$|$\enspace
     qwen2.5-coder:14b \enspace$|$\enspace
-    nomic-embed-text (768-d)}};
+    nomic-embed-text\;(768-d)}};
 
 \begin{scope}[on background layer]
-  \node[draw=nodeblue!42, fill=nodeblue!4, rounded corners=8pt,
-        thick, dashed, inner sep=0.28cm, fit=(ollama)] (llmbox) {};
+  \node[draw=nodeblue!40, fill=nodeblue!4, rounded corners=8pt,
+        thick, dashed, inner sep=0.3cm, fit=(ollama)] (llmbox) {};
 \end{scope}
-\node[font=\scriptsize\bfseries, text=nodeblue!65,
-      anchor=north west, inner sep=2pt]
-  at (llmbox.north west) {LLM Backend};
+\node[font=\scriptsize\bfseries, text=nodeblue!62,
+      anchor=north west, inner sep=3pt] at (llmbox.north west)
+  {LLM Backend};
 
 %══════════════════════════════════════════════════════════════════════════════
-%  INTER-TIER ARROWS
+%  ARROWS — explicit routes to prevent any overlap
 %══════════════════════════════════════════════════════════════════════════════
 
-%─── User ↔ Supervisor ───────────────────────────────────────────────────────
+%─── User ↔ Supervisor  (parallel vertical pair, offset ±4mm) ────────────────
 \draw[arr=black]
-  (user.south) -- (sup.north)
+  ([xshift=4mm]user.south) -- ([xshift=4mm]sup.north)
   node[midway, right=3pt, font=\scriptsize]{task};
-\draw[darr=nodegray!80]
-  (sup.north) to[bend right=16]
-  node[midway, left=3pt, font=\scriptsize]{response}
-  (user.south);
 
-%─── Supervisor ↔ Agents (bidirectional, labelled once per pair) ─────────────
-\draw[biarr=nodegreen!75]
-  (sup.south) to[out=238,in=88]
-  node[midway, left=2pt, font=\tiny]{route / result}
+\draw[darr=nodegray!75]
+  ([xshift=-4mm]sup.north) -- ([xshift=-4mm]user.south)
+  node[midway, left=3pt, font=\scriptsize]{response};
+
+%─── Supervisor ↔ Agents (clean angled bidirectional arrows) ─────────────────
+\draw[biarr=nodegreen!78]
+  (sup.south) to[out=242, in=88]
+  node[pos=0.38, left=2pt, font=\tiny]{route/result}
   (sim.north);
 
-\draw[biarr=nodeorange!75]
+\draw[biarr=nodeorange!78]
   (sup.south) -- (anal.north)
-  node[midway, right=2pt, font=\tiny]{route / result};
+  node[midway, right=2pt, font=\tiny]{route/result};
 
-\draw[biarr=nodeblue!75]
-  (sup.south) to[out=302,in=92]
-  node[midway, right=2pt, font=\tiny]{route / result}
+\draw[biarr=nodeblue!78]
+  (sup.south) to[out=298, in=92]
+  node[pos=0.38, right=2pt, font=\tiny]{route/result}
   (dba.north);
 
-%─── Simulation Agent ↔ FEniCSx ──────────────────────────────────────────────
-\draw[biarr=nodegreen!80]
+%─── Simulation Agent ↔ FEniCSx (vertical pair, same column) ────────────────
+\draw[biarr=nodegreen!82]
   (sim.south) -- (fenics.north)
-  node[midway, right=2pt, font=\tiny]{config / result};
+  node[midway, right=2pt, font=\tiny]{config/result};
 
-%─── Simulation Agent → KG  (Smart KG warm-start + optional lazy query) ──────
-\draw[darr=nodered!85]
-  (sim.south east) to[out=306, in=148]
-  node[pos=0.5, above, sloped, font=\tiny]{warm-start query}
-  (kg.north west);
+%─── Simulation Agent → KG  (warm-start)
+%    Route: from sim.east going nearly horizontal, arc DOWN to kg.north.
+%    Stays in the open band between agents (bottom y≈7.56)
+%    and services (top y≈5.58). Clears FEniCSx entirely.
+\draw[darr=nodered!88]
+  (sim.east) to[out=8, in=90]
+  node[pos=0.42, below=2pt, font=\tiny]{warm-start query}
+  (kg.north);
 
-%─── Analytics Agent → KG ────────────────────────────────────────────────────
-\draw[darr=nodered!70]
+%─── Analytics Agent → KG (vertical, same column) ───────────────────────────
+\draw[darr=nodered!72]
   (anal.south) -- (kg.north)
   node[midway, right=2pt, font=\tiny]{KG query};
 
-%─── Database Agent → Storage ────────────────────────────────────────────────
-\draw[arr=nodegray!75]
-  (dba.south) to[out=272, in=92]
-  node[midway, right=2pt, font=\tiny]{store}
-  (pg.north);
+%─── Database Agent → Data Storage (vertical, same column) ──────────────────
+\draw[arr=nodegray!78]
+  (dba.south) -- (storage.north)
+  node[midway, right=2pt, font=\tiny]{store};
 
-%─── FEniCSx → Storage (auto on run complete) ────────────────────────────────
-\draw[darr=nodegray!55]
-  (fenics.east) to[out=0, in=188] (pg.west);
-\draw[darr=nodegray!55]
-  (fenics.south east) to[out=318, in=182] (minio.west);
+%─── FEniCSx → Data Storage
+%    Manhattan route: up through the inter-tier gap → right → down.
+%    Horizontal run at y=6.55 sits between exec-box top (~6.02)
+%    and orch-box bottom (~7.14) — no node is touched.
+\draw[thindarr=nodegray!55]
+  (fenics.north) -- ++(0, 1.0) -| (storage.north)
+  node[pos=0.25, above=1pt, font=\tiny]{auto-save};
 
-%─── Orchestration Layer ↔ Ollama (central LLM backbone) ────────────────────
-\draw[biarr=nodeblue!65]
+%─── Orchestration Layer ↔ Ollama (central vertical, LLM backbone) ───────────
+\draw[biarr=nodeblue!68]
   (orch.south) -- (llmbox.north)
-  node[midway, right=3pt, font=\scriptsize]{LLM inference};
+  node[midway, right=4pt, font=\scriptsize]{LLM inference};
 
 %══════════════════════════════════════════════════════════════════════════════
-%  LEGEND  (inside bottom-right corner, outside all layer boxes)
+%  LEGEND — horizontal bar BELOW the LLM Backend box, no overlap
 %══════════════════════════════════════════════════════════════════════════════
-\begin{scope}[shift={(10.5, 0.2)}]
-  \draw[draw=gray!45, fill=white, rounded corners=4pt]
-    (-0.15, -0.15) rectangle (3.2, 2.05);
-  \node[font=\scriptsize\bfseries] at (1.5, 1.82) {Legend};
-  \draw[biarr=nodegray!70] (0.1,1.42)--(0.85,1.42);
-  \node[font=\scriptsize, anchor=west] at (0.95,1.42) {bidirectional flow};
-  \draw[arr=nodegray!70]   (0.1,1.02)--(0.85,1.02);
-  \node[font=\scriptsize, anchor=west] at (0.95,1.02) {data store};
-  \draw[darr=nodegray!60]  (0.1,0.62)--(0.85,0.62);
-  \node[font=\scriptsize, anchor=west] at (0.95,0.62) {async / metadata};
-  \draw[darr=nodered!80]   (0.1,0.22)--(0.85,0.22);
-  \node[font=\scriptsize, anchor=west] at (0.95,0.22) {KG query};
-\end{scope}
+\draw[draw=gray!42, fill=white, rounded corners=4pt]
+  (1.2, 0.60) rectangle (13.8, -0.75);
+
+\node[font=\scriptsize\bfseries] at (7.5, 0.40) {Legend};
+
+% Row 1
+\draw[biarr=nodegray!72]   (1.6,  0.05) -- (2.5,  0.05);
+\node[font=\scriptsize, anchor=west] at (2.65, 0.05)  {bidirectional flow};
+
+\draw[arr=nodegray!78]     (6.0,  0.05) -- (6.9,  0.05);
+\node[font=\scriptsize, anchor=west] at (7.05, 0.05)  {data store};
+
+\draw[thindarr=nodegray!55](10.4, 0.05) -- (11.3, 0.05);
+\node[font=\scriptsize, anchor=west] at (11.45, 0.05) {auto-save};
+
+% Row 2
+\draw[darr=nodered!85]     (1.6, -0.40) -- (2.5, -0.40);
+\node[font=\scriptsize, anchor=west] at (2.65,-0.40) {KG warm-start query};
+
+\draw[darr=nodered!68]     (6.0, -0.40) -- (6.9, -0.40);
+\node[font=\scriptsize, anchor=west] at (7.05,-0.40) {KG query};
+
+\draw[darr=nodegray!72]    (10.4,-0.40) -- (11.3,-0.40);
+\node[font=\scriptsize, anchor=west] at (11.45,-0.40){async / response};
 
 \end{tikzpicture}
