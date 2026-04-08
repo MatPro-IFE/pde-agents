@@ -2,8 +2,8 @@
 % x-axis: h decreasing left→right (coarse left, fine right), x dir=reverse
 \begin{tikzpicture}
 \begin{loglogaxis}[
-  width=0.93\columnwidth,
-  height=0.68\columnwidth,
+  width=0.88\columnwidth,
+  height=0.64\columnwidth,
   xlabel={Mesh size $h = 1/N$},
   ylabel={$\|e\|_{L^2}$},
   xlabel style={font=\small},
@@ -35,7 +35,7 @@
   (0.015625,  1.1012e-09)
   (0.007812,  2.4656e-09)
 };
-\addlegendentry{Steady Linear ($\sim\epsilon_\text{mach}$)}
+\addlegendentry{Linear ($\sim\!\epsilon_\text{mach}$)}
 
 % ── Case 2: Transient Fourier — rate 2.04 ────────────────────────────────────
 \addplot[
@@ -47,7 +47,7 @@
   (0.015625,  5.9809e-05)
   (0.007812,  1.4961e-05)
 };
-\addlegendentry{Transient Fourier (rate 2.04)}
+\addlegendentry{Fourier (rate 2.04)}
 
 % ── Case 3: Steady Poisson — rate 2.00 ───────────────────────────────────────
 \addplot[
@@ -59,7 +59,7 @@
   (0.015625,  2.2287e-05)
   (0.007812,  5.5717e-06)
 };
-\addlegendentry{Steady Poisson (rate 2.00)}
+\addlegendentry{Poisson (rate 2.00)}
 
 % ── Reference O(h^2) line — calibrated to pass through Fourier data ───────────
 % y = C*h^2,  C chosen so line passes through (0.125, 4.38e-3)
