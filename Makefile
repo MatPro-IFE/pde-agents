@@ -226,7 +226,7 @@ paper-push:
 
 paper-pull:
 	@echo "Pulling Overleaf edits from $(PAPER_REMOTE)/$(PAPER_BRANCH)..."
-	git subtree pull --prefix=paper $(PAPER_REMOTE) $(PAPER_BRANCH) --squash -m "sync: pull paper edits from Overleaf via GitHub"
+	git subtree pull --prefix=paper $(PAPER_REMOTE) $(PAPER_BRANCH) -m "sync: pull paper edits from Overleaf via GitHub"
 	@echo "Done. paper/ is up to date."
 
 paper-status:
