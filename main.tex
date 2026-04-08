@@ -224,9 +224,14 @@ agent queries, prioritising latency over completeness.
     (HNSW-indexed 768-d embeddings), and persistent storage
     (PostgreSQL + MinIO).
     \textit{Tier 4}: shared Ollama LLM Backend (196\,GB VRAM,
-    CUDA 13.1).  Dashed red arrows represent the KG Smart
-    warm-start: the top-3 similar past runs are retrieved and injected
-    into the Simulation Agent's prompt before the reasoning loop begins.}
+    CUDA 13.1).  The thick dashed red arrow (Simulation Agent
+    $\rightarrow$ Neo4j) represents the \textit{KG Smart warm-start}:
+    the top-3 similar past runs are retrieved via HNSW vector search
+    and injected into the agent's prompt before the reasoning loop.
+    The thin dashed red arrow (Analytics Agent $\rightarrow$ Neo4j)
+    is the standard lazy KG query path.  The blue bidirectional arrow
+    at right carries LLM inference traffic between the orchestration
+    layer and the shared Ollama backend.}
   \label{fig:arch}
 \end{figure*}
 
