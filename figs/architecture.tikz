@@ -161,14 +161,21 @@
   node[pos=0.15, right=2pt, font=\tiny]{config/result};
 
 %── Simulation Agent → KG  (warm-start)
-%   Manhattan route: depart 4 mm left of sim.south centre, go DOWN through
-%   the inter-tier gap at y = 6.55, then RIGHT, then UP into kg.west.
-%   Path never touches FEniCSx (right edge x=3.7) or Analytics Agent.
-\coordinate (wsA) at (1.6, 6.55);   % below sim, in inter-tier gap
-\coordinate (wsB) at (5.78, 6.55);  % just left of kg.west (x=5.8)
+%   Manhattan route:
+%     1. Depart 4 mm left of sim.south (avoids overlapping the sim↔fenics line)
+%     2. Drop DOWN through the inter-tier gap to y = 6.55
+%     3. Go RIGHT to x = 7.00  (5 mm left of kg.north centre at x=7.5)
+%     4. Drop DOWN into kg.north from above
+%   This keeps the label in the open horizontal corridor and enters KG
+%   from the top, clearly distinct from the Analytics→kg.north arrow (x=7.5).
+\coordinate (wsA) at (1.60, 6.55);   % inter-tier gap, below sim[-4mm]
+\coordinate (wsB) at (7.00, 6.55);   % horizontal run end — 5 mm left of kg.north
 \draw[kgwarm]
-  ([xshift=-4mm]sim.south) -- (wsA) -- (wsB) -- (kg.west)
-  node[pos=0.67, above=2pt, font=\tiny]{warm-start query};
+  ([xshift=-4mm]sim.south)
+  -- (wsA)
+  -- (wsB)
+  node[pos=0.38, above=2pt, font=\tiny]{warm-start query}
+  -- ([xshift=-5mm]kg.north);
 
 %── Analytics Agent → KG  (vertical) ─────────────────────────────────────────
 \draw[darr=nodered!72]
