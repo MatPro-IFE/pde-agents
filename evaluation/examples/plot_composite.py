@@ -93,20 +93,28 @@ def main():
     ax.tick_params(labelsize=7)
     ax.set_aspect("equal")
 
-    # ── (f) 3D cross-section at z=0.5 ────────────────────────────────────
-    d = np.load(outdir / "case_d.npz")
-    Xi, Yi = d["Xi"], d["Yi"]
-    Zi = d["z_0.5"]
+    # ── (f) 3D cutaway render ────────────────────────────────────────────
     ax = axes[2, 1]
-    cf = ax.contourf(Xi, Yi, Zi, levels=32, cmap="inferno")
-    cb = plt.colorbar(cf, ax=ax, shrink=0.82, pad=0.02)
-    cb.set_label("K", fontsize=8)
-    cb.ax.tick_params(labelsize=7)
-    ax.set_title("(f) 3D cube slice z=0.5 — SS 304", fontsize=9, pad=4)
-    ax.set_xlabel("x", fontsize=8)
-    ax.set_ylabel("y", fontsize=8)
-    ax.tick_params(labelsize=7)
-    ax.set_aspect("equal")
+    img_path = outdir / "case_d_3d.png"
+    if img_path.exists():
+        from matplotlib.image import imread
+        img = imread(str(img_path))
+        ax.imshow(img)
+        ax.set_title("(f) 3D cutaway — SS 304", fontsize=9, pad=4)
+        ax.set_axis_off()
+    else:
+        d = np.load(outdir / "case_d.npz")
+        Xi, Yi = d["Xi"], d["Yi"]
+        Zi = d["z_0.5"]
+        cf = ax.contourf(Xi, Yi, Zi, levels=32, cmap="inferno")
+        cb = plt.colorbar(cf, ax=ax, shrink=0.82, pad=0.02)
+        cb.set_label("K", fontsize=8)
+        cb.ax.tick_params(labelsize=7)
+        ax.set_title("(f) 3D cube slice z=0.5 — SS 304", fontsize=9, pad=4)
+        ax.set_xlabel("x", fontsize=8)
+        ax.set_ylabel("y", fontsize=8)
+        ax.tick_params(labelsize=7)
+        ax.set_aspect("equal")
 
     fig.tight_layout(h_pad=1.8, w_pad=1.5)
     for dest in [outdir / "figure_gallery.png",

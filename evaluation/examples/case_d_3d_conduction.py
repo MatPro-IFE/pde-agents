@@ -10,12 +10,16 @@
 
 The asymmetric BCs produce a genuinely 3D temperature field with
 gradients in both x and z, demonstrating the system's 3D FEM capability.
-We render three slices (z=0.0, z=0.5, z=1.0).
+We produce two visualisations:
+  1. A PyVista 3D cutaway render showing the outer surface + a diagonal
+     clip plane revealing the internal temperature field.
+  2. Matplotlib cross-section slices at z = {0.0, 0.5, 1.0}.
 
 Outputs
 -------
-  output/case_d.npz   — vertex coordinates, tetrahedra, solution values, slices
-  output/case_d.png   — 3-panel cross-section plot (z = 0.0, 0.5, 1.0)
+  output/case_d.npz      — vertex coordinates, solution values, slice grids
+  output/case_d.png      — 3-panel matplotlib cross-sections
+  output/case_d_3d.png   — PyVista 3D cutaway render (used in composite figure)
 """
 
 from __future__ import annotations
@@ -157,5 +161,54 @@ fig.suptitle("(d) 3D steady conduction — stainless steel cube, cross-sections"
              fontsize=11, y=1.02)
 fig.savefig(OUT / "case_d.png", dpi=200, bbox_inches="tight")
 plt.close(fig)
+
+# ── PyVista 3D cutaway render ─────────────────────────────────────────────
+import pyvista as pv
+
+pv.OFF_SCREEN = True
+try:
+    pv.start_xvfb()
+except OSError:
+    pass
+
+topology = mesh.topology
+topology.create_connectivity(topology.dim, 0)
+num_cells = topology.index_map(topology.dim).size_local
+cell_dofmap = mesh.geometry.dofmap
+vtk_cells = []
+for i in range(num_cells):
+    cell = cell_dofmap[i]
+    vtk_cells.append(len(cell))
+    vtk_cells.extend(cell)
+vtk_cells = np.array(vtk_cells, dtype=np.int64)
+celltypes = np.full(num_cells, pv.CellType.TETRA, dtype=np.uint8)
+
+grid = pv.UnstructuredGrid(vtk_cells, celltypes, coords)
+grid.point_data["Temperature (K)"] = vals
+
+sbar_args = {
+    "title": "T (K)", "title_font_size": 18, "label_font_size": 14,
+    "shadow": False, "n_labels": 5, "fmt": "%.0f", "color": "black",
+    "position_x": 0.84, "position_y": 0.18, "width": 0.08, "height": 0.64,
+}
+
+quarter = grid.clip(normal="x", origin=[0.5, 0.5, 0.5])
+quarter = quarter.clip(normal="y", origin=[0.5, 0.5, 0.5])
+
+pl = pv.Plotter(off_screen=True, window_size=[1200, 1000])
+pl.set_background("white")
+pl.add_mesh(
+    quarter, scalars="Temperature (K)", cmap="inferno",
+    show_edges=False, lighting=True, clim=[300, 600],
+    scalar_bar_args=sbar_args,
+)
+outer = grid.extract_surface()
+pl.add_mesh(outer, opacity=0.10, color="lightgray", show_edges=False)
+
+pl.camera_position = [(2.1, 2.1, 1.5), (0.5, 0.5, 0.5), (0, 0, 1)]
+pl.add_axes(line_width=2, labels_off=False, color="black")
+pl.screenshot(str(OUT / "case_d_3d.png"), scale=2)
+pl.close()
+
 print(f"Case D done — T range [{vals.min():.2f}, {vals.max():.2f}], "
-      f"{len(vals)} vertices")
+      f"{len(vals)} vertices, 3D render saved")

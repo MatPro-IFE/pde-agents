@@ -523,21 +523,21 @@ and solution vectors, enabling figure regeneration without re-running
 the solver.
 
 \begin{table}[htbp]
-  \centering\small
+  \centering\footnotesize
   \caption{Simulation gallery: six cases exercising different aspects
-    of the FEM pipeline.  All scripts are in
-    \texttt{evaluation/examples/}.}
+    of the FEM pipeline.  Scripts in \texttt{evaluation/examples/}.}
   \label{tab:gallery}
-  \begin{tabular}{clll}
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{cllp{2.5cm}}
     \toprule
-    \textbf{Panel} & \textbf{Geometry}     & \textbf{Material}  & \textbf{Key feature} \\
+    & \textbf{Geometry}  & \textbf{Material}  & \textbf{Key feature} \\
     \midrule
-    (a) & Unit square        & Copper        & Pure Dirichlet \\
-    (b) & Unit square        & AISI 1010     & 4 BC types + source \\
-    (c) & Square w/ hole     & Ti-6Al-4V     & Gmsh boolean ops \\
-    (d) & Unit square        & Al 6061       & Gaussian source \\
-    (e) & L-shape            & Aluminium     & Transient + Gmsh \\
-    (f) & Unit cube (3D)     & SS 304        & 3D, asymmetric BCs \\
+    (a) & Unit square     & Copper        & Pure Dirichlet \\
+    (b) & Unit square     & AISI 1010     & 4~BC types + source \\
+    (c) & Sq.\ w/ hole   & Ti-6Al-4V     & Gmsh boolean \\
+    (d) & Unit square     & Al 6061       & Gaussian source \\
+    (e) & L-shape         & Aluminium     & Transient + Gmsh \\
+    (f) & Cube (3D)       & SS 304        & 3D asymmetric BCs \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -566,9 +566,9 @@ the solver.
     \textbf{(e)}~Transient L-shaped domain in aluminium at $t=0.50$\,s
     (implicit Euler, $\Delta t=0.005$\,s, 100 steps).
     %
-    \textbf{(f)}~3D unit cube in SS~304 ($k=16.3$\,W/(m$\cdot$K)),
-    cross-section at $z=0.5$; Dirichlet bottom $300$\,K and left
-    face $600$\,K, Robin top.
+    \textbf{(f)}~3D unit cube in SS~304 ($k=16.3$\,W/(m$\cdot$K));
+    Dirichlet bottom $300$\,K and left face $600$\,K, Robin top;
+    quarter-cut PyVista render exposing the internal temperature field.
     %
     All solved with DOLFINx 0.10.0.post2, P1 elements.
     Reproducible scripts in \texttt{evaluation/examples/}.}
