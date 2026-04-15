@@ -89,14 +89,18 @@ Blackwell GPUs ($\approx$196\,GB combined VRAM).
 A central novelty is the integration of a \emph{GraphRAG} knowledge base
 (Neo4j + 768-dimensional vector embeddings) that enriches agents with curated
 material properties, known failure patterns, and prior run lineage.
-We report three empirical contributions: (i) a formal verification and
+We report four empirical contributions: (i) a formal verification and
 validation (V\&V) study confirming second-order spatial convergence (\(\mathcal{O}(h^2)\))
 for all three benchmark cases on the heat equation solver; (ii) a three-way
-ablation study across 10 benchmark tasks revealing that mandatory KG
-invocation paradoxically \emph{reduces} success to 60\% versus a 100\%
+ablation study across 13 benchmark tasks revealing that mandatory KG
+invocation paradoxically \emph{reduces} success to 69\% versus a 100\%
 LLM-only baseline, but that our proposed \emph{KG Smart} integration---combining
 HNSW-based warm-start injection with lazy conditional retrieval---recovers
-90\% success while retaining knowledge graph access; and (iii) production-scale
+92\% success while retaining knowledge graph access; (iii) a novel-material
+experiment using a fictional material (Novidium) whose properties exist only
+in the KG, demonstrating that KG Smart achieves $\bar{Q}{=}0.79$ configuration
+quality versus $\bar{Q}{=}0.42$ for the KG-free baseline---proving the KG's
+value for proprietary or unseen data; and (iv) production-scale
 agent quality metrics from 1{,}135 real simulation runs showing 97.4\%
 overall success and a 57.6\% first-try rate.  All code, models, and
 evaluation artifacts are released openly.  Our findings demonstrate that
@@ -154,8 +158,13 @@ stability rules form a rich, interconnected knowledge base.
   \item We run a three-way ablation study isolating the KG contribution,
         identify a paradoxical performance \emph{inversion} with mandatory
         KG invocation, and propose a \emph{KG Smart} integration that
-        recovers 90\% success via warm-start injection and lazy retrieval
+        recovers 92\% success via warm-start injection and lazy retrieval
         (\cref{sec:ablation}).
+  \item We introduce a \emph{novel-material experiment} using a fictional
+        material (Novidium) absent from any LLM training corpus,
+        demonstrating that KG Smart achieves $1.9\times$ higher
+        configuration quality than the KG-free baseline on
+        unseen-data tasks (\cref{sec:novidium}).
   \item We report production-scale agent quality metrics derived from
         1{,}135 real simulation runs (\cref{sec:metrics}).
 \end{enumerate}
@@ -598,13 +607,16 @@ across three conditions:
         few-shot reference examples (warm-start).
 \end{itemize}
 
-Ten benchmark tasks span three difficulty levels:
+Thirteen benchmark tasks span four difficulty levels:
 \begin{itemize}
   \item \textbf{Easy (E1--E3)}: Explicit numerical parameters, straightforward setup.
   \item \textbf{Medium (M1--M3)}: Material-by-name requests requiring
         property lookup (AISI 1010 steel, copper, aluminium).
   \item \textbf{Hard (H1--H4)}: Ambiguous descriptions, mixed BCs,
         computationally expensive or 3D problems.
+  \item \textbf{Novel (G1--G3)}: Tasks referencing a fictional material
+        (Novidium) whose properties exist \emph{only} in the KG,
+        testing retrieval of genuinely unseen data (see \cref{sec:novidium}).
 \end{itemize}
 
 Each task is scored on: (i) binary success (simulation ran and completed),
@@ -668,7 +680,9 @@ the warm-start context allows the agent to bypass most KG round-trips.
   \input{figs/ablation_bar.tikz}
   \caption{Success rate by difficulty level across three KG integration
     strategies.  KG Smart (warm-start + lazy retrieval) recovers most of
-    the KG Off performance while retaining access to knowledge graph tools.}
+    the KG Off performance while retaining access to knowledge graph tools.
+    The ``Novel'' category (G1--G3) uses a fictional material (Novidium)
+    whose properties exist only in the KG.}
   \label{fig:ablation}
 \end{figure}
 
@@ -721,6 +735,95 @@ As \cref{tab:ablation} shows, KG Smart achieves 90\% overall success
 reduces average iterations from 5.3 to 3.8.  The 30 percentage-point
 improvement confirms that the \emph{integration pattern}, not the KG
 content itself, was the bottleneck in the mandatory design.
+
+\subsection{Novel Material Experiment: Novidium}
+\label{sec:novidium}
+
+The ablation results in \cref{sec:ablation-disc} raise a natural
+question: if KG Off achieves 100\% success on standard tasks, does
+the knowledge graph provide any value at all?
+For well-known materials (steel, copper, aluminium), the LLM's
+pre-trained parametric knowledge is sufficient---material properties
+are widely documented in the training corpus.  To isolate the KG's
+contribution to \emph{genuinely novel} information, we introduce
+\textbf{Novidium}, a fictional ceramic-metallic composite whose
+properties exist \emph{only} inside the knowledge graph.
+
+\paragraph{Material design.}
+Novidium is seeded as a \texttt{Material} node with three linked
+\texttt{Reference} chunks:
+$k = 73$\,W/(m\,K),
+$\rho = 5420$\,kg/m$^3$,
+$c_p = 612$\,J/(kg\,K),
+$\alpha \approx 2.20 \times 10^{-5}$\,m$^2$/s.
+It exhibits non-linear behaviour outside its safe operating range
+(200--850\,K), making physically plausible but deliberately unretrievable
+by any pre-trained model.
+
+\paragraph{Benchmark tasks (G1--G3).}
+Three tasks of increasing complexity reference Novidium by name and
+instruct the agent to retrieve its properties:
+\begin{itemize}
+  \item \textbf{G1}: 2D steady-state Dirichlet (400\,K / 300\,K), 48$\times$48 mesh.
+  \item \textbf{G2}: 2D transient cooling (600\,K $\to$ 293\,K), 32$\times$32, $t_\text{end}=200$\,s.
+  \item \textbf{G3}: 2D mixed BCs (Dirichlet 700\,K + Robin $h{=}50$), 64$\times$64.
+\end{itemize}
+
+\paragraph{Results.}
+\cref{tab:novidium} summarises the outcome.  All three modes achieve
+100\% simulation \emph{completion}, but they differ starkly in
+configuration quality:
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{Novel material experiment (Novidium, G1--G3).  KG Smart
+  consistently retrieves the correct proprietary properties while KG Off
+  fabricates plausible but incorrect values.}
+\label{tab:novidium}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lccc}
+\toprule
+Metric & KG On & KG Off & KG Smart \\
+\midrule
+  Success rate          & 100\% & 100\%  & \textbf{100\%} \\
+  Config quality $\bar{Q}$ & 0.25 & 0.42  & \textbf{0.79} \\
+  Avg.\ iterations      & 7.3   & 3.0    & \textbf{5.0}   \\
+  Avg.\ time (s)        & 45.3  & 11.9   & \textbf{16.6}  \\
+\midrule
+  \multicolumn{4}{l}{\textit{Properties used (truth: $k$=73, $\rho$=5420, $c_p$=612)}} \\
+  \quad $k$ (W/m\,K)     & 73.0 & 10--50      & \textbf{73.0} \\
+  \quad $\rho$ (kg/m$^3$)& 5420 & 3000--8960  & \textbf{5420} \\
+  \quad $c_p$ (J/kg\,K)  & 612  & 390--500    & \textbf{612} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{KG Off} completes all simulations but invents entirely wrong
+material properties.  For G1, the LLM selects $k{=}10$, $\rho{=}3000$,
+$c_p{=}500$---far from Novidium's actual values.  Each task produces
+different fabricated values, confirming that the model has no parametric
+knowledge of this material and falls back to plausible-looking defaults.
+
+\textbf{KG Smart} retrieves the correct properties ($k{=}73$,
+$\rho{=}5420$, $c_p{=}612$) in all three tasks via its warm-start
+injection mechanism.  The warm-start query matches Novidium's
+\texttt{Reference} chunks in the HNSW vector index, and the few-shot
+context informs the LLM of the exact values before the agent loop
+begins.  The quality score ($\bar{Q} = 0.79$) reflects near-perfect
+property retrieval with minor differences in mesh or BC configuration.
+
+\textbf{KG On} retrieves correct properties for G1 ($Q{=}0.75$) but
+the mandatory KG-first workflow consumes more iterations (7.3 avg),
+and the config extraction from the verbose KG On responses was less
+reliable, yielding a lower overall quality score.
+
+This experiment confirms the KG's value proposition: for \emph{novel
+or proprietary data} absent from the LLM's training corpus, KG Smart
+provides accurate, consistent property retrieval while maintaining
+computational efficiency comparable to the KG Off baseline.
+The result directly addresses the concern that high KG Off success rates on
+standard materials render the knowledge graph unnecessary---they do not,
+provided the target domain contains proprietary or novel information.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Production Agent Quality Metrics}
@@ -788,10 +891,12 @@ models improve, PDE-Agents will benefit without architectural changes.
 
 \paragraph{KG integration.}
 The KG Smart pattern (\cref{sec:ablation-disc}) recovers most lost
-performance, but the 10\% failure gap versus KG Off suggests further
-improvements.  Future work will explore: (a) reinforcement learning
-from simulation outcomes to tune KG retrieval relevance,
-(b) dynamic confidence-based retrieval (only query KG when
+performance, but the 8\% failure gap versus KG Off suggests further
+improvements.  The novel-material experiment (\cref{sec:novidium})
+confirms the KG's value for proprietary data, but a broader evaluation
+with multiple unseen materials is needed.  Future work will explore:
+(a) reinforcement learning from simulation outcomes to tune KG retrieval
+relevance, (b) dynamic confidence-based retrieval (only query KG when
 the LLM's self-assessed uncertainty exceeds a threshold), and
 (c) richer warm-start context that includes not just similar configs
 but also their failure diagnostics.
@@ -827,14 +932,22 @@ with locally-deployed open-source LLMs.  The system achieves 97.4\% overall
 success across 1{,}135 production runs and demonstrates $\mathcal{O}(h^2)$
 spatial convergence validated against analytical solutions.
 
-Our three-way ablation study reveals an important and counter-intuitive
-finding: mandatory GraphRAG knowledge augmentation \emph{reduces} success
-on complex tasks (60\%) relative to the LLM-only baseline (100\%).
-However, our proposed \emph{KG Smart} integration---combining warm-start
-injection of similar past runs with lazy conditional retrieval---recovers
-90\% success while retaining access to knowledge graph tools for failure
-diagnosis.  This demonstrates that the \emph{integration pattern}, not
-the knowledge source, determines KG utility for LLM agents.
+Our three-way ablation study across 13 benchmark tasks reveals an important
+and counter-intuitive finding: mandatory GraphRAG knowledge augmentation
+\emph{reduces} success on complex tasks (69\%) relative to the LLM-only
+baseline (100\%).  However, our proposed \emph{KG Smart}
+integration---combining warm-start injection of similar past runs with lazy
+conditional retrieval---recovers 92\% success while retaining access to
+knowledge graph tools.  This demonstrates that the \emph{integration
+pattern}, not the knowledge source, determines KG utility for LLM agents.
+
+Crucially, the novel-material experiment (\cref{sec:novidium}) resolves
+the apparent paradox of high KG Off performance: when the task requires
+proprietary data absent from the LLM's training corpus, KG Smart achieves
+$1.9\times$ higher configuration quality ($\bar{Q} = 0.79$ vs.\ $0.42$)
+while the KG-free baseline fabricates incorrect material properties.
+This confirms the KG's essential role in domains with novel or proprietary
+information.
 
 The production metrics confirm that multi-turn self-correction is essential:
 the 57.6\% first-try rate improves to 97.4\% through iterative debugging,
