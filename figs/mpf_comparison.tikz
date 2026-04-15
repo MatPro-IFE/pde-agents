@@ -1,0 +1,48 @@
+% Material Property Fidelity (MPF) comparison across novel materials
+\begin{tikzpicture}
+\begin{axis}[
+  ybar,
+  bar width=9pt,
+  width=0.95\columnwidth,
+  height=0.55\columnwidth,
+  ylabel={Material Property Fidelity (MPF)},
+  ylabel style={font=\small},
+  symbolic x coords={Novidium, Cryonite, Pyrathane, Average},
+  xtick=data,
+  xticklabel style={font=\small},
+  tick label style={font=\scriptsize},
+  ymin=0, ymax=1.19,
+  ytick={0,0.2,0.4,0.6,0.8,1.0},
+  enlarge x limits=0.22,
+  legend style={font=\scriptsize, at={(0.5,1.04)}, anchor=south,
+                fill=white, draw=gray!60, rounded corners=2pt,
+                column sep=6pt},
+  legend columns=2,
+  nodes near coords,
+  nodes near coords align={vertical},
+  nodes near coords style={font=\tiny, /pgf/number format/fixed,
+                           /pgf/number format/precision=2},
+  grid=major,
+  grid style={line width=0.3pt, draw=gray!30},
+]
+
+% KG Off — wrong properties
+\addplot[fill=nodegreen!55, draw=nodegreen!80] coordinates {
+  (Novidium,  0.45)
+  (Cryonite,  0.39)
+  (Pyrathane, 0.15)
+  (Average,   0.34)
+};
+\addlegendentry{KG Off}
+
+% KG Smart — correct properties
+\addplot[fill=nodeorange!55, draw=nodeorange!80] coordinates {
+  (Novidium,  1.00)
+  (Cryonite,  1.00)
+  (Pyrathane, 1.00)
+  (Average,   1.00)
+};
+\addlegendentry{KG Smart}
+
+\end{axis}
+\end{tikzpicture}
