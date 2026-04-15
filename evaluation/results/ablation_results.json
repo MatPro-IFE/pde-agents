@@ -1,19 +1,23 @@
 {
-  "timestamp": "2026-04-15T12:13:25",
-  "n_tasks": 3,
+  "timestamp": "2026-04-15T13:22:55",
+  "n_tasks": 7,
   "kg_on": {
     "aggregate": {
-      "n_tasks": 3,
-      "success_rate": 1.0,
-      "first_try_rate": 1.0,
-      "avg_quality": 0.25,
-      "avg_iterations": 7.333333333333333,
-      "avg_wall_time": 45.3105247731631,
+      "n_tasks": 7,
+      "success_rate": 0.5714285714285714,
+      "first_try_rate": 0.5714285714285714,
+      "avg_quality": 0.5535714285714286,
+      "avg_property_fidelity": 0.5712746355685131,
+      "avg_physics_score": 0.7142087463556851,
+      "avg_iterations": 5.285714285714286,
+      "avg_wall_time": 267.7703366040119,
       "by_difficulty": {
         "novel": {
-          "n": 3,
-          "success_rate": 1.0,
-          "avg_quality": 0.25
+          "n": 7,
+          "success_rate": 0.5714285714285714,
+          "avg_quality": 0.5535714285714286,
+          "avg_property_fidelity": 0.5712746355685131,
+          "avg_physics_score": 0.7142087463556851
         }
       }
     },
@@ -22,30 +26,189 @@
         "task_id": "G1",
         "difficulty": "novel",
         "mode": "kg_on",
+        "success": false,
+        "wall_time_s": 17.723183997906744,
+        "agent_iterations": 3,
+        "run_id": null,
+        "config_produced": {},
+        "config_quality_score": 0.0,
+        "first_try_success": false,
+        "error_message": "",
+        "raw_response": {
+          "agent": "simulation",
+          "task": "Simulate 2D steady-state heat conduction in a Novidium plate. Left wall at 400 K, right wall at 300 K, top and bottom insulated. Use a 48\u00d748 mesh. Look up the correct material properties for Novidium from the knowledge graph.",
+          "task_id": "a2862f0ca4054d9f84265b1c61366993",
+          "run_id": null,
+          "answer": "Let's create a configuration based on the material properties of Novidium and the specified boundary conditions. Here is the initial configuration:\n\n```json\n{\n  \"dim\": 2,\n  \"nx\": 48,\n  \"ny\": 48,\n  \"k\": 73.0,\n  \"rho\": 5420.0,\n  \"cp\": 612.0,\n  \"source\": 0.0,\n  \"t_end\": 1.0,  // For steady-state, we can use a small t_end\n  \"dt\": 0.01,    // Small time step for stability\n  \"theta\": 1.0,  // Backward Euler for stability\n  \"bcs\": [\n    {\"type\": \"dirichlet\", \"value\": 400.0, \"location\": \"left\"},\n    {\"type\": \"dirichlet\", \"value\": 300.0, \"location\": \"right\"},\n    {\"type\": \"neumann\",   \"value\": 0.0,   \"location\": \"top\"},\n    {\"type\": \"neumann\",   \"value\": 0.0,   \"location\": \"bottom\"}\n  ],\n  \"u_init\": 350.0  // Midpoint of left and right BCs\n}\n```\n\nNow let's validate this configuration.\n\n{\"name\": \"check_config_warnings\", \"arguments\": {\"config_json\": \"{\\\"dim\\\": 2, \\\"nx\\\": 48, \\\"ny\\\": 48, \\\"k\\\": 73.0, \\\"rho\\\": 5420.0, \\\"cp\\\": 612.0, \\\"source\\\": 0.0, \\\"t_end\\\": 1.0, \\\"dt\\\": 0.01, \\\"theta\\\": 1.0, \\\"bcs\\\": [{\\\"type\\\": \\\"dirichlet\\\", \\\"value\\\": 400.0, \\\"location\\\": \\\"left\\\"}, {\\\"type\\\": \\\"dirichlet\\\", \\\"value\\\": 300.0, \\\"location\\\": \\\"right\\\"}, {\\\"type\\\": \\\"neumann\\\", \\\"value\\\": 0.0, \\\"location\\\": \\\"top\\\"}, {\\\"type\\\": \\\"neumann\\\", \\\"value\\\": 0.0, \\\"location\\\": \\\"bottom\\\"}], \\\"u_init\\\": 350.0}\"}}",
+          "status": "done",
+          "iterations": 3,
+          "tool_calls_log": [
+            {
+              "iteration": 0,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 1167,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 1,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 7511,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 2,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 8972,
+              "has_tool_calls": false
+            }
+          ]
+        },
+        "property_fidelity": 0.0,
+        "t_max_actual": null,
+        "t_min_actual": null,
+        "t_mean_actual": null,
+        "t_max_error": null,
+        "t_min_error": null,
+        "physics_score": 0.5
+      },
+      {
+        "task_id": "G2",
+        "difficulty": "novel",
+        "mode": "kg_on",
         "success": true,
-        "wall_time_s": 38.0296665718779,
+        "wall_time_s": 36.53145930916071,
         "agent_iterations": 7,
-        "run_id": "modified_ab64fa6d",
+        "run_id": "modified_dee659ec",
         "config_produced": {
           "dim": 2,
-          "nx": 48,
-          "ny": 48,
+          "nx": 32,
+          "ny": 32,
           "k": 73.0,
           "rho": 5420.0,
           "cp": 612.0,
           "source": 0.0,
-          "t_end": 1.0,
-          "dt": 0.01,
+          "t_end": 200.0,
+          "dt": 1.0,
           "theta": 1.0,
           "bcs": [
             {
               "type": "dirichlet",
-              "value": 400.0,
+              "value": 293.0,
               "location": "left"
             },
             {
               "type": "dirichlet",
-              "value": 300.0,
+              "value": 293.0,
+              "location": "right"
+            },
+            {
+              "type": "dirichlet",
+              "value": 293.0,
+              "location": "top"
+            },
+            {
+              "type": "dirichlet",
+              "value": 293.0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 293.0,
+          "run_id": "modified_dee659ec",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {
+          "agent": "simulation",
+          "task": "Model transient heat diffusion in a Novidium block (2D). All four boundaries at 293 K, initial temperature 600 K. Use 32\u00d732 mesh, simulate for 200 seconds with dt=1.0. Use the material properties of Novidium.",
+          "task_id": "c76530162d9d4fdd845d78fb79f89683",
+          "run_id": "modified_dee659ec",
+          "answer": "The simulation with run_id `modified_dee659ec` has successfully completed. Here are the key results:\n\n- **Wall Time**: 0.148 seconds\n- **Number of Degrees of Freedom (DOFs)**: 1089\n- **Maximum Temperature (`t_max`)**: 293.00 K\n- **Minimum Temperature (`t_min`)**: 293.00 K\n\nThe simulation results have been uploaded to the MinIO bucket `simulation-results` under the prefix `runs/modified_dee659ec`.\n\nIf you need further analysis or additional simulations, feel free to request!",
+          "status": "done",
+          "iterations": 7,
+          "tool_calls_log": [
+            {
+              "iteration": 0,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 690,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 1,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 4314,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 2,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 9849,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 3,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 4519,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 4,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 6437,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 5,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 6931,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 6,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 3095,
+              "has_tool_calls": false
+            }
+          ]
+        },
+        "property_fidelity": 0.9997278911564625,
+        "t_max_actual": 293.00004463654415,
+        "t_min_actual": 292.9999762855899,
+        "t_mean_actual": 292.99999993397057,
+        "t_max_error": 0.0,
+        "t_min_error": 0.0,
+        "physics_score": 0.9998639455782312
+      },
+      {
+        "task_id": "G3",
+        "difficulty": "novel",
+        "mode": "kg_on",
+        "success": true,
+        "wall_time_s": 25.54010001104325,
+        "agent_iterations": 6,
+        "run_id": "heat_56961489",
+        "config_produced": {
+          "dim": 2,
+          "nx": 64,
+          "ny": 64,
+          "k": 73.0,
+          "rho": 5420.0,
+          "cp": 612.0,
+          "source": 0.0,
+          "t_end": 150.0,
+          "dt": 0.1,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 700.0,
+              "location": "left"
+            },
+            {
+              "type": "robin",
+              "alpha": 50.0,
+              "u_inf": 293.0,
               "location": "right"
             },
             {
@@ -59,220 +222,410 @@
               "location": "bottom"
             }
           ],
-          "u_init": 300.0,
-          "run_id": "modified_ab64fa6d",
+          "u_init": 546.5,
+          "run_id": "heat_56961489",
           "output_dir": "/workspace/results"
         },
-        "config_quality_score": 0.75,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {
-          "agent": "simulation",
-          "task": "Simulate 2D steady-state heat conduction in a Novidium plate. Left wall at 400 K, right wall at 300 K, top and bottom insulated. Use a 48\u00d748 mesh. Look up the correct material properties for Novidium from the knowledge graph.",
-          "task_id": "e2e9007605e9482287e22736a599a1ba",
-          "run_id": "modified_ab64fa6d",
-          "answer": "The simulation with run_id `modified_ab64fa6d` has successfully completed. Here are the key results:\n\n- **Wall Time**: 0.147 seconds\n- **Number of Degrees of Freedom (DOFs)**: 2401\n- **Maximum Temperature (`t_max`)**: 399.999 K\n- **Minimum Temperature (`t_min`)**: 275.073 K\n\nThe simulation results have been uploaded to the MinIO bucket `simulation-results` under the prefix `runs/modified_ab64fa6d`.\n\nIf you need further analysis or additional simulations, feel free to request!",
-          "status": "done",
-          "iterations": 7,
-          "tool_calls_log": [
-            {
-              "iteration": 0,
-              "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 1204,
-              "has_tool_calls": true
-            },
-            {
-              "iteration": 1,
-              "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 4053,
-              "has_tool_calls": true
-            },
-            {
-              "iteration": 2,
-              "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 9430,
-              "has_tool_calls": true
-            },
-            {
-              "iteration": 3,
-              "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 6841,
-              "has_tool_calls": true
-            },
-            {
-              "iteration": 4,
-              "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 6123,
-              "has_tool_calls": true
-            },
-            {
-              "iteration": 5,
-              "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 4702,
-              "has_tool_calls": true
-            },
-            {
-              "iteration": 6,
-              "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 4761,
-              "has_tool_calls": false
-            }
-          ]
-        }
-      },
-      {
-        "task_id": "G2",
-        "difficulty": "novel",
-        "mode": "kg_on",
-        "success": true,
-        "wall_time_s": 35.00093986093998,
-        "agent_iterations": 7,
-        "run_id": "modified_3e7627ad",
-        "config_produced": {},
-        "config_quality_score": 0.0,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {
-          "agent": "simulation",
-          "task": "Model transient heat diffusion in a Novidium block (2D). All four boundaries at 293 K, initial temperature 600 K. Use 32\u00d732 mesh, simulate for 200 seconds with dt=1.0. Use the material properties of Novidium.",
-          "task_id": "3461586e489b4977a462276f17b9064d",
-          "run_id": "modified_3e7627ad",
-          "answer": "The simulation with run_id `heat_46b0e7fc` has successfully completed. Here are the key results:\n\n- **Wall Time**: 0.146 seconds\n- **Number of Degrees of Freedom (DOFs)**: 1089\n- **Maximum Temperature (`t_max`)**: 293.00 K\n- **Minimum Temperature (`t_min`)**: 293.00 K\n\nThe simulation ran efficiently with the specified configuration, and all boundary conditions were met as expected. The temperature remained constant at approximately 293 K throughout the simulation, which is consistent with the Dirichlet boundary conditions set to 293 K on all sides.\n\nIf you need further analysis or have additional simulations to run, feel free to provide more details!",
-          "status": "done",
-          "iterations": 7,
-          "tool_calls_log": [
-            {
-              "iteration": 0,
-              "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 693,
-              "has_tool_calls": true
-            },
-            {
-              "iteration": 1,
-              "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 4293,
-              "has_tool_calls": true
-            },
-            {
-              "iteration": 2,
-              "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 9824,
-              "has_tool_calls": true
-            },
-            {
-              "iteration": 3,
-              "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 4530,
-              "has_tool_calls": true
-            },
-            {
-              "iteration": 4,
-              "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 4484,
-              "has_tool_calls": true
-            },
-            {
-              "iteration": 5,
-              "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 6704,
-              "has_tool_calls": true
-            },
-            {
-              "iteration": 6,
-              "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 3612,
-              "has_tool_calls": false
-            }
-          ]
-        }
-      },
-      {
-        "task_id": "G3",
-        "difficulty": "novel",
-        "mode": "kg_on",
-        "success": true,
-        "wall_time_s": 62.900967886671424,
-        "agent_iterations": 8,
-        "run_id": "modified_98e8c348",
-        "config_produced": {},
-        "config_quality_score": 0.0,
+        "config_quality_score": 1.0,
         "first_try_success": true,
         "error_message": "",
         "raw_response": {
           "agent": "simulation",
           "task": "Simulate heat conduction in a Novidium component with mixed boundary conditions. Left face heated to 700 K, right face cooled by convection (h=50 W/m\u00b2K, T_amb=293 K). Top and bottom insulated. 64\u00d764 mesh, run for 150 seconds. Use the thermal properties of the novel material Novidium.",
-          "task_id": "b490e287f9d641bbbf3fd035b29edfc6",
-          "run_id": "modified_98e8c348",
-          "answer": "The simulation with `run_id` \"heat_a635a92d\" has successfully completed. Here are the key details:\n\n- **Status**: Success\n- **Dimensions (dim)**: 2D\n- **Degrees of Freedom (n_dofs)**: 4,225\n- **Wall Time**: 15.91 seconds\n- **End Time (t_end)**: 138.0 time units\n- **Thermal Conductivity (k)**: 73.0 W/(m\u00b7K)\n- **Created At**: 2026-04-15 12:11:25.549063+00:00\n- **Output Directory**: /workspace/results\n\nIf you need further analysis or have additional simulations to run, feel free to let me know!",
+          "task_id": "b991ba643bbf4e24b5e4506f16af444a",
+          "run_id": "heat_56961489",
+          "answer": "The simulation with run_id `heat_56961489` has successfully completed. Here are the key details:\n\n- **Run ID**: heat_56961489\n- **Status**: success\n- **Dimension**: 2D\n- **Degrees of Freedom (DOFs)**: 4225\n- **Wall Time**: 1.656 seconds\n- **Simulation End Time (t_end)**: 150 seconds\n- **Thermal Conductivity (k)**: 73 W/(m\u00b7K)\n- **Created At**: 2026-04-15 12:46:38.528134+00:00\n- **Output Directory**: /workspace/results\n\nThe simulation ran efficiently within the expected time frame and completed successfully with the specified boundary conditions and material properties for Novidium.\n\nIf you need further analysis or additional simulations, feel free to request!",
           "status": "done",
-          "iterations": 8,
+          "iterations": 6,
           "tool_calls_log": [
             {
               "iteration": 0,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 670,
+              "elapsed_ms": 728,
               "has_tool_calls": true
             },
             {
               "iteration": 1,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 4338,
+              "elapsed_ms": 8168,
               "has_tool_calls": true
             },
             {
               "iteration": 2,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 6375,
+              "elapsed_ms": 4256,
               "has_tool_calls": true
             },
             {
               "iteration": 3,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 4646,
+              "elapsed_ms": 4267,
               "has_tool_calls": true
             },
             {
               "iteration": 4,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 5156,
+              "elapsed_ms": 1048,
               "has_tool_calls": true
             },
             {
               "iteration": 5,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 7030,
+              "elapsed_ms": 3979,
+              "has_tool_calls": false
+            }
+          ]
+        },
+        "property_fidelity": 0.9997278911564625,
+        "t_max_actual": 699.9999901569796,
+        "t_min_actual": 535.5745390471113,
+        "t_mean_actual": 556.8619758958873,
+        "t_max_error": 0.0,
+        "t_min_error": null,
+        "physics_score": 0.9998639455782312
+      },
+      {
+        "task_id": "C1",
+        "difficulty": "novel",
+        "mode": "kg_on",
+        "success": false,
+        "wall_time_s": 24.465878827497363,
+        "agent_iterations": 3,
+        "run_id": null,
+        "config_produced": {},
+        "config_quality_score": 0.0,
+        "first_try_success": false,
+        "error_message": "",
+        "raw_response": {
+          "agent": "simulation",
+          "task": "Simulate 2D steady-state heat conduction in a Cryonite insulation panel. Left wall at 350 K, right wall at 280 K, top and bottom insulated. Use a 48\u00d748 mesh. Look up the correct material properties for Cryonite from the knowledge graph.",
+          "task_id": "37645af2c7604d81bd209536a42a3eb4",
+          "run_id": null,
+          "answer": "Let's create a configuration based on the provided details and material properties.\n\nHere is the initial configuration:\n\n```json\n{\n  \"dim\": 2,\n  \"nx\": 48,\n  \"ny\": 48,\n  \"k\": 0.42,\n  \"rho\": 1180.0,\n  \"cp\": 1940.0,\n  \"source\": 0.0,\n  \"t_end\": 100,  // Arbitrary time for steady-state simulation\n  \"dt\": 1.0,     // Placeholder value; will be validated\n  \"theta\": 1.0,  // Backward Euler for stability\n  \"bcs\": [\n    {\"type\": \"dirichlet\", \"value\": 350, \"location\": \"left\"},\n    {\"type\": \"dirichlet\", \"value\": 280, \"location\": \"right\"},\n    {\"type\": \"neumann\",   \"value\": 0.0, \"location\": \"top\"},\n    {\"type\": \"neumann\",   \"value\": 0.0, \"location\": \"bottom\"}\n  ],\n  \"u_init\": 315.0  // Midpoint of left and right BCs\n}\n```\n\nNow let's validate this configuration.\n\n{\"name\": \"check_config_warnings\", \"arguments\": {\"config_json\": \"{\\\"dim\\\": 2, \\\"nx\\\": 48, \\\"ny\\\": 48, \\\"k\\\": 0.42, \\\"rho\\\": 1180.0, \\\"cp\\\": 1940.0, \\\"source\\\": 0.0, \\\"t_end\\\": 100, \\\"dt\\\": 1.0, \\\"theta\\\": 1.0, \\\"bcs\\\": [{\\\"type\\\": \\\"dirichlet\\\", \\\"value\\\": 350, \\\"location\\\": \\\"left\\\"}, {\\\"type\\\": \\\"dirichlet\\\", \\\"value\\\": 280, \\\"location\\\": \\\"right\\\"}, {\\\"type\\\": \\\"neumann\\\", \\\"value\\\": 0.0, \\\"location\\\": \\\"top\\\"}, {\\\"type\\\": \\\"neumann\\\", \\\"value\\\": 0.0, \\\"location\\\": \\\"bottom\\\"}], \\\"u_init\\\": 315.0}\"}}",
+          "status": "done",
+          "iterations": 3,
+          "tool_calls_log": [
+            {
+              "iteration": 0,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 699,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 1,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 15062,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 2,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 8637,
+              "has_tool_calls": false
+            }
+          ]
+        },
+        "property_fidelity": 0.0,
+        "t_max_actual": null,
+        "t_min_actual": null,
+        "t_mean_actual": null,
+        "t_max_error": null,
+        "t_min_error": null,
+        "physics_score": 0.5
+      },
+      {
+        "task_id": "C2",
+        "difficulty": "novel",
+        "mode": "kg_on",
+        "success": true,
+        "wall_time_s": 1697.4217680580914,
+        "agent_iterations": 6,
+        "run_id": "heat_50d180ee",
+        "config_produced": {
+          "dim": 2,
+          "nx": 32,
+          "ny": 32,
+          "k": 0.42,
+          "rho": 1180.0,
+          "cp": 1940.0,
+          "source": 0.0,
+          "t_end": 5000.0,
+          "dt": 0.01,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 400.0,
+              "location": "left"
+            },
+            {
+              "type": "robin",
+              "alpha": 15.0,
+              "u_inf": 250.0,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 325.0,
+          "run_id": "heat_50d180ee",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {
+          "agent": "simulation",
+          "task": "Model heat transfer through a Cryonite wall with convective cooling on the right face (h=15 W/m\u00b2K, T_amb=250 K). Left face at 400 K, top and bottom insulated. 32\u00d732 mesh, simulate for 500 seconds. Use the thermal properties of Cryonite.",
+          "task_id": "9abd170e91d0478e9888631c0ee378d2",
+          "run_id": "heat_50d180ee",
+          "answer": "The simulation with run_id `heat_50d180ee` has successfully completed. Here are the key results:\n\n- **Wall Time**: 1354.87 seconds (approximately 22.6 minutes)\n- **Number of Degrees of Freedom (DOFs)**: 1089\n- **Maximum Temperature (`t_max`)**: 400.0 K\n- **Minimum Temperature (`t_min`)**: 279.58 K\n\nThe simulation results have been uploaded to the MinIO bucket `simulation-results` under the prefix `runs/heat_50d180ee`. No errors were encountered during the upload process.\n\nIf you need further analysis or additional simulations, feel free to proceed with the next steps.",
+          "status": "done",
+          "iterations": 6,
+          "tool_calls_log": [
+            {
+              "iteration": 0,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 691,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 1,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 4355,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 2,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 15850,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 3,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 9075,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 4,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 7742,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 5,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 9249,
+              "has_tool_calls": false
+            }
+          ]
+        },
+        "property_fidelity": 1.0,
+        "t_max_actual": 400.0000009891736,
+        "t_min_actual": 279.5835660827988,
+        "t_mean_actual": 326.699114965761,
+        "t_max_error": 0.0,
+        "t_min_error": null,
+        "physics_score": 1.0
+      },
+      {
+        "task_id": "P1",
+        "difficulty": "novel",
+        "mode": "kg_on",
+        "success": true,
+        "wall_time_s": 48.19697820395231,
+        "agent_iterations": 7,
+        "run_id": "modified_a25dfbd7",
+        "config_produced": {
+          "dim": 2,
+          "nx": 48,
+          "ny": 48,
+          "k": 312.0,
+          "rho": 3850.0,
+          "cp": 278.0,
+          "source": 0.0,
+          "t_end": 1.0,
+          "dt": 0.0001,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 1500.0,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 400.0,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 400.0,
+          "run_id": "modified_a25dfbd7",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.875,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {
+          "agent": "simulation",
+          "task": "Simulate 2D steady-state heat conduction in a Pyrathane crucible wall. Left face at 1500 K, right face at 400 K, top and bottom insulated. Use a 48\u00d748 mesh. Look up the correct material properties for Pyrathane from the knowledge graph.",
+          "task_id": "be6dc33cd082414a8eab011fda626ebd",
+          "run_id": "modified_a25dfbd7",
+          "answer": "The simulation with run_id `modified_a25dfbd7` has successfully completed. Here are the key results:\n\n- **Wall Time**: 6.88 seconds\n- **Number of Degrees of Freedom (DOFs)**: 2401\n- **Maximum Temperature (`t_max`)**: 1500.0 K\n- **Minimum Temperature (`t_min`)**: 380.08 K\n\nThe results have been uploaded to the MinIO bucket `simulation-results` under the prefix `runs/modified_a25dfbd7`.\n\nIf you need further analysis or additional simulations, feel free to request!",
+          "status": "done",
+          "iterations": 7,
+          "tool_calls_log": [
+            {
+              "iteration": 0,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 1515,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 1,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 4265,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 2,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 9679,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 3,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 4657,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 4,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 4730,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 5,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 6886,
               "has_tool_calls": true
             },
             {
               "iteration": 6,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 3477,
-              "has_tool_calls": true
-            },
-            {
-              "iteration": 7,
-              "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 5798,
+              "elapsed_ms": 3056,
               "has_tool_calls": false
             }
           ]
-        }
+        },
+        "property_fidelity": 0.9994666666666666,
+        "t_max_actual": 1500.0000012380394,
+        "t_min_actual": 380.08084297429366,
+        "t_mean_actual": 432.63821475055767,
+        "t_max_error": 0.0,
+        "t_min_error": 14.91915702570634,
+        "physics_score": 0.4997333333333333
+      },
+      {
+        "task_id": "P2",
+        "difficulty": "novel",
+        "mode": "kg_on",
+        "success": false,
+        "wall_time_s": 24.51298782043159,
+        "agent_iterations": 5,
+        "run_id": "modified_6a12ec54",
+        "config_produced": {},
+        "config_quality_score": 0.0,
+        "first_try_success": false,
+        "error_message": "",
+        "raw_response": {
+          "agent": "simulation",
+          "task": "Simulate transient heat diffusion in a Pyrathane component (2D). All boundaries at 400 K, initial temperature 2000 K. Use 32\u00d732 mesh, simulate for 15 seconds with dt=0.1. Use the thermal properties of Pyrathane.",
+          "task_id": "4b3ec299a61d4a81a85f82997dddafd7",
+          "run_id": "modified_6a12ec54",
+          "answer": "",
+          "status": "done",
+          "iterations": 5,
+          "tool_calls_log": [
+            {
+              "iteration": 0,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 720,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 1,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 4455,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 2,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 9704,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 3,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 4620,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 4,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 4807,
+              "has_tool_calls": false
+            }
+          ]
+        },
+        "property_fidelity": 0.0,
+        "t_max_actual": null,
+        "t_min_actual": null,
+        "t_mean_actual": null,
+        "t_max_error": null,
+        "t_min_error": null,
+        "physics_score": 0.5
       }
     ]
   },
   "kg_off": {
     "aggregate": {
-      "n_tasks": 3,
+      "n_tasks": 7,
       "success_rate": 1.0,
       "first_try_rate": 1.0,
-      "avg_quality": 0.4166666666666667,
-      "avg_iterations": 3.0,
-      "avg_wall_time": 11.942333915891746,
+      "avg_quality": 0.6071428571428571,
+      "avg_property_fidelity": 0.344584152159958,
+      "avg_physics_score": 0.6298633703003143,
+      "avg_iterations": 3.142857142857143,
+      "avg_wall_time": 12.401420037395187,
       "by_difficulty": {
         "novel": {
-          "n": 3,
+          "n": 7,
           "success_rate": 1.0,
-          "avg_quality": 0.4166666666666667
+          "avg_quality": 0.6071428571428571,
+          "avg_property_fidelity": 0.344584152159958,
+          "avg_physics_score": 0.6298633703003143
         }
       }
     },
@@ -282,19 +635,19 @@
         "difficulty": "novel",
         "mode": "kg_off",
         "success": true,
-        "wall_time_s": 12.157027320005,
+        "wall_time_s": 10.73787083197385,
         "agent_iterations": 3,
-        "run_id": "heat_2c2f0802",
+        "run_id": "heat_9171719a",
         "config_produced": {
           "dim": 2,
           "nx": 48,
           "ny": 48,
           "k": 10,
-          "rho": 3000,
-          "cp": 500,
+          "rho": 7500,
+          "cp": 390,
           "source": 0,
           "t_end": 1e-06,
-          "dt": 1e-09,
+          "dt": 1e-08,
           "theta": 1.0,
           "bcs": [
             {
@@ -319,62 +672,68 @@
             }
           ],
           "u_init": 350.0,
-          "run_id": "heat_2c2f0802",
+          "run_id": "heat_9171719a",
           "output_dir": "/workspace/results"
         },
-        "config_quality_score": 0.375,
+        "config_quality_score": 0.625,
         "first_try_success": true,
         "error_message": "",
         "raw_response": {
           "agent": "simulation",
           "task": "Simulate 2D steady-state heat conduction in a Novidium plate. Left wall at 400 K, right wall at 300 K, top and bottom insulated. Use a 48\u00d748 mesh. Look up the correct material properties for Novidium from the knowledge graph.",
-          "task_id": "82212ce294fd4b7c85a661a5a811a2ef",
-          "run_id": "heat_2c2f0802",
-          "answer": "The simulation with run_id \"heat_2c2f0802\" has successfully completed. Here are the key results:\n\n- **Wall Time**: 0.725 seconds\n- **Number of Degrees of Freedom (DOFs)**: 2401\n- **Maximum Temperature**: 399.99 K\n- **Minimum Temperature**: 299.99 K\n\nThe simulation output files have been uploaded to the MinIO bucket \"simulation-results\" under the prefix \"runs/heat_2c2f0802\". If you need further analysis or additional simulations, feel free to request!",
+          "task_id": "d7071dcf371c4c4da5816cc15c82404f",
+          "run_id": "heat_9171719a",
+          "answer": "The simulation with run_id `heat_9171719a` has successfully completed. Here are the key results:\n\n- **Wall Time**: 0.147 seconds\n- **Number of Degrees of Freedom (DOFs)**: 2401\n- **Maximum Temperature**: 399.999 K\n- **Minimum Temperature**: 299.999 K\n\nThe simulation results have been uploaded to the MinIO bucket `simulation-results` under the prefix `runs/heat_9171719a`.\n\nIf you need further analysis or additional simulations, feel free to request!",
           "status": "done",
           "iterations": 3,
           "tool_calls_log": [
             {
               "iteration": 0,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 4070,
+              "elapsed_ms": 3890,
               "has_tool_calls": true
             },
             {
               "iteration": 1,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 3724,
+              "elapsed_ms": 3703,
               "has_tool_calls": true
             },
             {
               "iteration": 2,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 2748,
+              "elapsed_ms": 2721,
               "has_tool_calls": false
             }
           ]
-        }
+        },
+        "property_fidelity": 0.46331905253634587,
+        "t_max_actual": 399.99999503036645,
+        "t_min_actual": 299.9999962727749,
+        "t_mean_actual": 349.999999035001,
+        "t_max_error": 0.0,
+        "t_min_error": 0.0,
+        "physics_score": 0.7316595262681729
       },
       {
         "task_id": "G2",
         "difficulty": "novel",
         "mode": "kg_off",
         "success": true,
-        "wall_time_s": 10.573198552243412,
+        "wall_time_s": 10.650141457095742,
         "agent_iterations": 3,
-        "run_id": "heat_b5142ee8",
+        "run_id": "heat_42c2f731",
         "config_produced": {
           "dim": 2,
           "nx": 32,
           "ny": 32,
-          "k": 50,
+          "k": 45,
           "rho": 8960,
-          "cp": 410,
+          "cp": 137,
           "source": 0,
           "t_end": 200,
           "dt": 1.0,
           "theta": 1.0,
-          "u_init": 600,
           "bcs": [
             {
               "type": "dirichlet",
@@ -397,57 +756,65 @@
               "location": "bottom"
             }
           ],
-          "run_id": "heat_b5142ee8",
+          "u_init": 600,
+          "run_id": "heat_42c2f731",
           "output_dir": "/workspace/results"
         },
-        "config_quality_score": 0.375,
+        "config_quality_score": 0.625,
         "first_try_success": true,
         "error_message": "",
         "raw_response": {
           "agent": "simulation",
           "task": "Model transient heat diffusion in a Novidium block (2D). All four boundaries at 293 K, initial temperature 600 K. Use 32\u00d732 mesh, simulate for 200 seconds with dt=1.0. Use the material properties of Novidium.",
-          "task_id": "9c535320b85c45008986f4b5cc3b0b17",
-          "run_id": "heat_b5142ee8",
-          "answer": "The simulation with run_id `heat_b5142ee8` has successfully completed. Here are the key results:\n\n- **Wall Time**: 0.153 seconds\n- **Number of Degrees of Freedom (DOFs)**: 1089\n- **Maximum Temperature**: 600.02 K\n- **Minimum Temperature**: 293.00 K\n\nThe simulation output files have been uploaded to the MinIO bucket `simulation-results` under the prefix `runs/heat_b5142ee8`.\n\nIf you need further analysis or additional simulations, feel free to request!",
+          "task_id": "80c57c33a6514eceaab8757faaa8a368",
+          "run_id": "heat_42c2f731",
+          "answer": "The simulation with run_id \"heat_42c2f731\" has successfully completed. Here are the key results:\n\n- **Wall Time**: 0.144 seconds\n- **Number of Degrees of Freedom (DOFs)**: 1089\n- **Maximum Temperature**: 599.98 K\n- **Minimum Temperature**: 293.00 K\n\nThe simulation output files have been uploaded to the MinIO bucket \"simulation-results\" under the prefix \"runs/heat_42c2f731\".\n\nIf you need further analysis or additional simulations, feel free to request!",
           "status": "done",
           "iterations": 3,
           "tool_calls_log": [
             {
               "iteration": 0,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 3624,
+              "elapsed_ms": 3690,
               "has_tool_calls": true
             },
             {
               "iteration": 1,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 3781,
+              "elapsed_ms": 3729,
               "has_tool_calls": true
             },
             {
               "iteration": 2,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 2644,
+              "elapsed_ms": 2734,
               "has_tool_calls": false
             }
           ]
-        }
+        },
+        "property_fidelity": 0.3956584313956083,
+        "t_max_actual": 599.9812103398962,
+        "t_min_actual": 292.9999977755138,
+        "t_mean_actual": 480.5898258847487,
+        "t_max_error": 0.0,
+        "t_min_error": 0.0,
+        "physics_score": 0.6978292156978041
       },
       {
         "task_id": "G3",
         "difficulty": "novel",
         "mode": "kg_off",
         "success": true,
-        "wall_time_s": 13.096775875426829,
+        "wall_time_s": 13.056620851159096,
         "agent_iterations": 3,
-        "run_id": "heat_47b62fde",
+        "run_id": "heat_567f19a2",
         "config_produced": {
           "dim": 2,
           "nx": 64,
           "ny": 64,
           "k": 10,
-          "rho": 8500,
-          "cp": 390,
+          "rho": 3000,
+          "cp": 500,
           "source": 0,
           "t_end": 150,
           "dt": 0.1,
@@ -476,7 +843,328 @@
             }
           ],
           "u_init": 700,
-          "run_id": "heat_47b62fde",
+          "run_id": "heat_567f19a2",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.625,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {
+          "agent": "simulation",
+          "task": "Simulate heat conduction in a Novidium component with mixed boundary conditions. Left face heated to 700 K, right face cooled by convection (h=50 W/m\u00b2K, T_amb=293 K). Top and bottom insulated. 64\u00d764 mesh, run for 150 seconds. Use the thermal properties of the novel material Novidium.",
+          "task_id": "1a47d387c021431c9a70e0c6ad33f8ac",
+          "run_id": "heat_567f19a2",
+          "answer": "The simulation with run_id \"heat_567f19a2\" has successfully completed. Here are the key results:\n\n- **Wall Time**: 1.76 seconds\n- **Number of Degrees of Freedom (DOFs)**: 4225\n- **Maximum Temperature**: 700.00 K\n- **Minimum Temperature**: 635.84 K\n\nThe simulation output files have been uploaded to the MinIO bucket \"simulation-results\" under the prefix \"runs/heat_567f19a2\". If you need further analysis or additional simulations, feel free to request!",
+          "status": "done",
+          "iterations": 3,
+          "tool_calls_log": [
+            {
+              "iteration": 0,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 3681,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 1,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 3784,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 2,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 2606,
+              "has_tool_calls": false
+            }
+          ]
+        },
+        "property_fidelity": 0.5022727890124861,
+        "t_max_actual": 700.0018234423317,
+        "t_min_actual": 635.842970875299,
+        "t_mean_actual": 697.7219877894613,
+        "t_max_error": 0.0,
+        "t_min_error": null,
+        "physics_score": 0.751136394506243
+      },
+      {
+        "task_id": "C1",
+        "difficulty": "novel",
+        "mode": "kg_off",
+        "success": true,
+        "wall_time_s": 9.19821453280747,
+        "agent_iterations": 3,
+        "run_id": "heat_cd379a26",
+        "config_produced": {
+          "dim": 2,
+          "nx": 48,
+          "ny": 48,
+          "k": 0.15,
+          "rho": 960,
+          "cp": 1730,
+          "source": 0,
+          "t_end": 1e-06,
+          "dt": 1e-08,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 350,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 280,
+              "location": "right"
+            }
+          ],
+          "u_init": 315.0,
+          "run_id": "heat_cd379a26",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.625,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {
+          "agent": "simulation",
+          "task": "Simulate 2D steady-state heat conduction in a Cryonite insulation panel. Left wall at 350 K, right wall at 280 K, top and bottom insulated. Use a 48\u00d748 mesh. Look up the correct material properties for Cryonite from the knowledge graph.",
+          "task_id": "f7bddffb22ea484d82ad6b948d356bf7",
+          "run_id": "heat_cd379a26",
+          "answer": "The simulation with run_id `heat_cd379a26` has successfully completed. Here are the key results:\n\n- **Wall Time**: 0.152 seconds\n- **Number of Degrees of Freedom (DOFs)**: 2401\n- **Maximum Temperature**: 349.999 K\n- **Minimum Temperature**: 279.999 K\n\nThe simulation results have been uploaded to the MinIO bucket `simulation-results` under the prefix `runs/heat_cd379a26`.\n\nIf you need further analysis or additional simulations, feel free to request!",
+          "status": "done",
+          "iterations": 3,
+          "tool_calls_log": [
+            {
+              "iteration": 0,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 2964,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 1,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 3057,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 2,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 2633,
+              "has_tool_calls": false
+            }
+          ]
+        },
+        "property_fidelity": 0.6874849188321144,
+        "t_max_actual": 349.9999956330164,
+        "t_min_actual": 279.99999650641314,
+        "t_mean_actual": 314.99999912244664,
+        "t_max_error": 0.0,
+        "t_min_error": 0.0,
+        "physics_score": 0.8437424594160572
+      },
+      {
+        "task_id": "C2",
+        "difficulty": "novel",
+        "mode": "kg_off",
+        "success": true,
+        "wall_time_s": 13.839467163197696,
+        "agent_iterations": 3,
+        "run_id": "heat_27d1dfe1",
+        "config_produced": {
+          "dim": 2,
+          "nx": 32,
+          "ny": 32,
+          "k": 1.0,
+          "rho": 8960,
+          "cp": 450,
+          "source": 0,
+          "t_end": 500,
+          "dt": 0.1,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 400,
+              "location": "left"
+            },
+            {
+              "type": "robin",
+              "alpha": 15,
+              "u_inf": 250,
+              "location": "right"
+            }
+          ],
+          "u_init": 325.0,
+          "run_id": "heat_27d1dfe1",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.625,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {
+          "agent": "simulation",
+          "task": "Model heat transfer through a Cryonite wall with convective cooling on the right face (h=15 W/m\u00b2K, T_amb=250 K). Left face at 400 K, top and bottom insulated. 32\u00d732 mesh, simulate for 500 seconds. Use the thermal properties of Cryonite.",
+          "task_id": "3cdc7a3d4d9b4a378cfd2ae37c15ba1e",
+          "run_id": "heat_27d1dfe1",
+          "answer": "The simulation with run_id \"heat_27d1dfe1\" has successfully completed. Here are the key results:\n\n- **Wall Time**: 1.90 seconds\n- **Number of Degrees of Freedom (DOFs)**: 1089\n- **Maximum Temperature**: 400.0 K (at the left boundary)\n- **Minimum Temperature**: 312.85 K (near the right boundary)\n\nThe results have been uploaded to the MinIO bucket `simulation-results` under the prefix `runs/heat_27d1dfe1`.\n\nIf you need further analysis or additional simulations, feel free to request!",
+          "status": "done",
+          "iterations": 3,
+          "tool_calls_log": [
+            {
+              "iteration": 0,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 2983,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 1,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 3094,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 2,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 2722,
+              "has_tool_calls": false
+            }
+          ]
+        },
+        "property_fidelity": 0.07731958762886604,
+        "t_max_actual": 400.00000079447625,
+        "t_min_actual": 312.8544619419907,
+        "t_mean_actual": 326.93477611442756,
+        "t_max_error": 0.0,
+        "t_min_error": null,
+        "physics_score": 0.5386597938144331
+      },
+      {
+        "task_id": "P1",
+        "difficulty": "novel",
+        "mode": "kg_off",
+        "success": true,
+        "wall_time_s": 11.534332050010562,
+        "agent_iterations": 3,
+        "run_id": "heat_59c190ab",
+        "config_produced": {
+          "dim": 2,
+          "nx": 48,
+          "ny": 48,
+          "k": 0.15,
+          "rho": 1700,
+          "cp": 900,
+          "source": 0,
+          "t_end": 0.001,
+          "dt": 1e-06,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 1500,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 400,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 950,
+          "run_id": "heat_59c190ab",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.625,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {
+          "agent": "simulation",
+          "task": "Simulate 2D steady-state heat conduction in a Pyrathane crucible wall. Left face at 1500 K, right face at 400 K, top and bottom insulated. Use a 48\u00d748 mesh. Look up the correct material properties for Pyrathane from the knowledge graph.",
+          "task_id": "bef653363c614b85ac83593df2f38103",
+          "run_id": "heat_59c190ab",
+          "answer": "The simulation with run_id `heat_59c190ab` has successfully completed. Here are the key results:\n\n- **Wall Time**: 0.724 seconds\n- **Number of Degrees of Freedom (DOFs)**: 2401\n- **Maximum Temperature**: ~1500 K\n- **Minimum Temperature**: ~400 K\n\nThe simulation output files have been uploaded to the MinIO bucket `simulation-results` under the prefix `runs/heat_59c190ab`.\n\nIf you need further analysis or additional simulations, feel free to request.",
+          "status": "done",
+          "iterations": 3,
+          "tool_calls_log": [
+            {
+              "iteration": 0,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 3655,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 1,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 3687,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 2,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 2550,
+              "has_tool_calls": false
+            }
+          ]
+        },
+        "property_fidelity": 0.14734614718614714,
+        "t_max_actual": 1499.999981694947,
+        "t_min_actual": 399.9999951186526,
+        "t_mean_actual": 949.9999742426797,
+        "t_max_error": 0.0,
+        "t_min_error": 0.0,
+        "physics_score": 0.5736730735930735
+      },
+      {
+        "task_id": "P2",
+        "difficulty": "novel",
+        "mode": "kg_off",
+        "success": true,
+        "wall_time_s": 17.7932933755219,
+        "agent_iterations": 4,
+        "run_id": "heat_2f223f07",
+        "config_produced": {
+          "dim": 2,
+          "nx": 32,
+          "ny": 32,
+          "k": 0.15,
+          "rho": 1600,
+          "cp": 840,
+          "source": 0,
+          "t_end": 15,
+          "dt": 0.1,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 400,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 400,
+              "location": "right"
+            },
+            {
+              "type": "dirichlet",
+              "value": 400,
+              "location": "top"
+            },
+            {
+              "type": "dirichlet",
+              "value": 400,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 2000,
+          "run_id": "heat_2f223f07",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 0.5,
@@ -484,49 +1172,66 @@
         "error_message": "",
         "raw_response": {
           "agent": "simulation",
-          "task": "Simulate heat conduction in a Novidium component with mixed boundary conditions. Left face heated to 700 K, right face cooled by convection (h=50 W/m\u00b2K, T_amb=293 K). Top and bottom insulated. 64\u00d764 mesh, run for 150 seconds. Use the thermal properties of the novel material Novidium.",
-          "task_id": "f63191f353124fb795f566f3a8054311",
-          "run_id": "heat_47b62fde",
-          "answer": "The simulation with run_id `heat_47b62fde` has successfully completed. Here are the key results:\n\n- **Wall Time**: 1.77 seconds\n- **Number of Degrees of Freedom (DOFs)**: 4,225\n- **Maximum Temperature**: 700.04 K\n- **Minimum Temperature**: 654.66 K\n\nThe simulation output files have been uploaded to the MinIO bucket `simulation-results` under the prefix `runs/heat_47b62fde`.\n\nIf you need further analysis or additional simulations, feel free to request!",
+          "task": "Simulate transient heat diffusion in a Pyrathane component (2D). All boundaries at 400 K, initial temperature 2000 K. Use 32\u00d732 mesh, simulate for 15 seconds with dt=0.1. Use the thermal properties of Pyrathane.",
+          "task_id": "3d9b7d8bf5744d2eb9b2c8165c94b189",
+          "run_id": "heat_2f223f07",
+          "answer": "The simulation with run_id `heat_2f223f07` has successfully completed. Here are the key results:\n\n- **Wall Time**: 0.16 seconds\n- **Number of Degrees of Freedom (DOFs)**: 1089\n- **Maximum Temperature**: ~2950 K\n- **Minimum Temperature**: ~400 K\n\nThe simulation output files have been uploaded to the MinIO bucket `simulation-results` under the prefix `runs/heat_2f223f07`.\n\nIf you need further analysis or additional simulations, feel free to request.",
           "status": "done",
-          "iterations": 3,
+          "iterations": 4,
           "tool_calls_log": [
             {
               "iteration": 0,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 3684,
+              "elapsed_ms": 3643,
               "has_tool_calls": true
             },
             {
               "iteration": 1,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 3792,
+              "elapsed_ms": 7172,
               "has_tool_calls": true
             },
             {
               "iteration": 2,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 2670,
+              "elapsed_ms": 3835,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 3,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 2576,
               "has_tool_calls": false
             }
           ]
-        }
+        },
+        "property_fidelity": 0.13868813852813844,
+        "t_max_actual": 2950.4030094644877,
+        "t_min_actual": 399.99999977246745,
+        "t_mean_actual": 1849.9476513792324,
+        "t_max_error": 950.4030094644877,
+        "t_min_error": 0.0,
+        "physics_score": 0.2723431288064168
       }
     ]
   },
   "kg_smart": {
     "aggregate": {
-      "n_tasks": 3,
+      "n_tasks": 7,
       "success_rate": 1.0,
       "first_try_rate": 1.0,
-      "avg_quality": 0.7916666666666666,
+      "avg_quality": 0.9642857142857143,
+      "avg_property_fidelity": 0.9997310009718172,
+      "avg_physics_score": 0.9998652976523542,
       "avg_iterations": 5.0,
-      "avg_wall_time": 16.573949992656708,
+      "avg_wall_time": 41.031795971893835,
       "by_difficulty": {
         "novel": {
-          "n": 3,
+          "n": 7,
           "success_rate": 1.0,
-          "avg_quality": 0.7916666666666666
+          "avg_quality": 0.9642857142857143,
+          "avg_property_fidelity": 0.9997310009718172,
+          "avg_physics_score": 0.9998652976523542
         }
       }
     },
@@ -536,9 +1241,9 @@
         "difficulty": "novel",
         "mode": "kg_smart",
         "success": true,
-        "wall_time_s": 17.30446322541684,
+        "wall_time_s": 17.2578719323501,
         "agent_iterations": 5,
-        "run_id": "heat_be248992",
+        "run_id": "heat_c11582fb",
         "config_produced": {
           "dim": 2,
           "nx": 48,
@@ -573,62 +1278,69 @@
             }
           ],
           "u_init": 350.0,
-          "run_id": "heat_be248992",
+          "run_id": "heat_c11582fb",
           "output_dir": "/workspace/results"
         },
-        "config_quality_score": 0.75,
+        "config_quality_score": 1.0,
         "first_try_success": true,
         "error_message": "",
         "raw_response": {
           "agent": "simulation",
           "task": "Simulate 2D steady-state heat conduction in a Novidium plate. Left wall at 400 K, right wall at 300 K, top and bottom insulated. Use a 48\u00d748 mesh. Look up the correct material properties for Novidium from the knowledge graph.",
-          "task_id": "c52761530d844f71877a9893bc3defbd",
-          "run_id": "heat_be248992",
-          "answer": "The simulation with run_id `heat_be248992` has successfully completed. Here are the key results:\n\n- **Status**: Success\n- **Dimension**: 2D\n- **Number of Degrees of Freedom (DOFs)**: 2401\n- **Wall Time**: 1.0156 seconds\n- **Final Simulation Time (t_end)**: 10,000 seconds\n- **Thermal Conductivity (k)**: 73 W/(m\u00b7K)\n- **Created At**: 2026-04-15 12:12:45.963396+00:00\n- **Output Directory**: /workspace/results\n\nThe temperature range in the simulation was from approximately 300 K to 400 K, consistent with the Dirichlet boundary conditions specified (left wall at 400 K and right wall at 300 K).\n\nIf you need further analysis or additional simulations, feel free to request!",
+          "task_id": "4ea1613ed995495e846c9f4b1986ccf6",
+          "run_id": "heat_c11582fb",
+          "answer": "The simulation with run_id `heat_c11582fb` has successfully completed. Here are the key results:\n\n- **Status**: Success\n- **Domain Dimension (dim)**: 2D\n- **Number of Degrees of Freedom (n_dofs)**: 2401\n- **Wall Time**: 1.03 seconds\n- **Final Simulation Time (t_end)**: 10,000 seconds\n- **Thermal Conductivity (k)**: 73 W/(m\u00b7K)\n- **Created At**: 2026-04-15 13:18:18.297997+00:00\n- **Output Directory**: /workspace/results\n\nThe temperature range in the simulation was from approximately 300 K to 400 K, consistent with the Dirichlet boundary conditions specified (left wall at 400 K and right wall at 300 K).\n\nIf you need further analysis or additional simulations, feel free to request.",
           "status": "done",
           "iterations": 5,
           "tool_calls_log": [
             {
               "iteration": 0,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 1400,
+              "elapsed_ms": 1404,
               "has_tool_calls": true
             },
             {
               "iteration": 1,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 4482,
+              "elapsed_ms": 4318,
               "has_tool_calls": true
             },
             {
               "iteration": 2,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 4186,
+              "elapsed_ms": 4137,
               "has_tool_calls": true
             },
             {
               "iteration": 3,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 957,
+              "elapsed_ms": 1016,
               "has_tool_calls": true
             },
             {
               "iteration": 4,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 4249,
+              "elapsed_ms": 4310,
               "has_tool_calls": false
             }
           ]
-        }
+        },
+        "property_fidelity": 0.9997278911564625,
+        "t_max_actual": 399.9999990244863,
+        "t_min_actual": 299.9999992683647,
+        "t_mean_actual": 349.9998514734095,
+        "t_max_error": 0.0,
+        "t_min_error": 0.0,
+        "physics_score": 0.9998639455782312
       },
       {
         "task_id": "G2",
         "difficulty": "novel",
         "mode": "kg_smart",
         "success": true,
-        "wall_time_s": 14.863247495144606,
+        "wall_time_s": 15.937477750703692,
         "agent_iterations": 5,
-        "run_id": "heat_42c0fe29",
+        "run_id": "heat_228bf967",
         "config_produced": {
           "dim": 2,
           "nx": 32,
@@ -663,62 +1375,69 @@
             }
           ],
           "u_init": 600.0,
-          "run_id": "heat_42c0fe29",
+          "run_id": "heat_228bf967",
           "output_dir": "/workspace/results"
         },
-        "config_quality_score": 0.75,
+        "config_quality_score": 0.875,
         "first_try_success": true,
         "error_message": "",
         "raw_response": {
           "agent": "simulation",
           "task": "Model transient heat diffusion in a Novidium block (2D). All four boundaries at 293 K, initial temperature 600 K. Use 32\u00d732 mesh, simulate for 200 seconds with dt=1.0. Use the material properties of Novidium.",
-          "task_id": "f1451b398c1d4fee927c22dbe1b1596f",
-          "run_id": "heat_42c0fe29",
-          "answer": "The simulation with run_id `heat_42c0fe29` has successfully completed. Here are the key results:\n\n- **Status**: Success\n- **Dimension**: 2D\n- **Number of Degrees of Freedom (DOFs)**: 1089\n- **Wall Time**: 0.1536 seconds\n- **Simulation End Time**: 200 seconds\n- **Thermal Conductivity (k)**: 73 W/(m\u00b7K)\n- **Output Directory**: `/workspace/results`\n\nThe temperature range in the simulation was:\n- **Maximum Temperature (T_max)**: 600.001 K\n- **Minimum Temperature (T_min)**: 293.000 K\n\nIf you need further analysis or additional simulations, feel free to request!",
+          "task_id": "059a8ae21658409e97f7d8636dcb1ea3",
+          "run_id": "heat_228bf967",
+          "answer": "The simulation with run_id `heat_228bf967` has successfully completed. Here are the key results:\n\n- **Status**: Success\n- **Domain Dimension (dim)**: 2D\n- **Number of Degrees of Freedom (n_dofs)**: 1089\n- **Wall Time**: 0.1476 seconds\n- **Simulation End Time (t_end)**: 200 seconds\n- **Thermal Conductivity (k)**: 73 W/(m\u00b7K)\n- **Output Directory**: `/workspace/results`\n\nThe temperature range during the simulation was:\n- **Maximum Temperature (T_max)**: 600.001 K\n- **Minimum Temperature (T_min)**: 293.000 K\n\nThese results indicate that the initial high temperature of 600 K has started to diffuse towards the boundaries, which are held at 293 K. The simulation ran efficiently within the specified time frame and resource estimates.\n\nIf you need further analysis or additional simulations with different parameters, feel free to request!",
           "status": "done",
           "iterations": 5,
           "tool_calls_log": [
             {
               "iteration": 0,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 1322,
+              "elapsed_ms": 1302,
               "has_tool_calls": true
             },
             {
               "iteration": 1,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 4323,
+              "elapsed_ms": 4380,
               "has_tool_calls": true
             },
             {
               "iteration": 2,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 4219,
+              "elapsed_ms": 4234,
               "has_tool_calls": true
             },
             {
               "iteration": 3,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 1006,
+              "elapsed_ms": 1000,
               "has_tool_calls": true
             },
             {
               "iteration": 4,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 3367,
+              "elapsed_ms": 4386,
               "has_tool_calls": false
             }
           ]
-        }
+        },
+        "property_fidelity": 0.9997278911564625,
+        "t_max_actual": 600.0005562942381,
+        "t_min_actual": 293.0000001566205,
+        "t_mean_actual": 501.3000001517305,
+        "t_max_error": 0.0005562942380947788,
+        "t_min_error": 0.0,
+        "physics_score": 0.9998630395615569
       },
       {
         "task_id": "G3",
         "difficulty": "novel",
         "mode": "kg_smart",
         "success": true,
-        "wall_time_s": 17.55413925740868,
-        "agent_iterations": 5,
-        "run_id": "heat_8cf2ccd2",
+        "wall_time_s": 15.860981359146535,
+        "agent_iterations": 4,
+        "run_id": "heat_d1ed0f03",
         "config_produced": {
           "dim": 2,
           "nx": 64,
@@ -754,20 +1473,20 @@
             }
           ],
           "u_init": 496.5,
-          "run_id": "heat_8cf2ccd2",
+          "run_id": "heat_d1ed0f03",
           "output_dir": "/workspace/results"
         },
-        "config_quality_score": 0.875,
+        "config_quality_score": 1.0,
         "first_try_success": true,
         "error_message": "",
         "raw_response": {
           "agent": "simulation",
           "task": "Simulate heat conduction in a Novidium component with mixed boundary conditions. Left face heated to 700 K, right face cooled by convection (h=50 W/m\u00b2K, T_amb=293 K). Top and bottom insulated. 64\u00d764 mesh, run for 150 seconds. Use the thermal properties of the novel material Novidium.",
-          "task_id": "72e934860b4f483292eb75568e5b216a",
-          "run_id": "heat_8cf2ccd2",
-          "answer": "The simulation with run ID `heat_8cf2ccd2` has successfully completed. Here are the key results:\n\n- **Status**: Success\n- **Domain Dimension (dim)**: 2D\n- **Number of Degrees of Freedom (DOFs)**: 4,225\n- **Wall Time**: 1.639 seconds\n- **Simulation End Time (t_end)**: 150 seconds\n- **Thermal Conductivity (k)**: 73 W/(m\u00b7K)\n- **Output Directory**: `/workspace/results`\n\nThe temperature range in the simulation was:\n- **Maximum Temperature (T_max)**: 699.99 K\n- **Minimum Temperature (T_min)**: 487.73 K\n\nIf you need further analysis or additional simulations, feel free to request!",
+          "task_id": "3cbd7394717b466aa8afa9e56815d390",
+          "run_id": "heat_d1ed0f03",
+          "answer": "The simulation with run_id `heat_d1ed0f03` has successfully completed. Here are the key results:\n\n- **Wall Time:** 1.658 seconds\n- **Number of Degrees of Freedom (DOFs):** 4225\n- **Maximum Temperature (T_max):** 699.99 K\n- **Minimum Temperature (T_min):** 487.73 K\n\nThe simulation results have been uploaded to the MinIO bucket `simulation-results` under the prefix `runs/heat_d1ed0f03`. If you need further analysis or additional simulations, feel free to request!",
           "status": "done",
-          "iterations": 5,
+          "iterations": 4,
           "tool_calls_log": [
             {
               "iteration": 0,
@@ -778,29 +1497,405 @@
             {
               "iteration": 1,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 4415,
+              "elapsed_ms": 4444,
               "has_tool_calls": true
             },
             {
               "iteration": 2,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 4293,
+              "elapsed_ms": 4272,
               "has_tool_calls": true
             },
             {
               "iteration": 3,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 1011,
+              "elapsed_ms": 2873,
+              "has_tool_calls": false
+            }
+          ]
+        },
+        "property_fidelity": 0.9997278911564625,
+        "t_max_actual": 699.9999894908899,
+        "t_min_actual": 487.7288100243497,
+        "t_mean_actual": 510.56754476640725,
+        "t_max_error": 0.0,
+        "t_min_error": null,
+        "physics_score": 0.9998639455782312
+      },
+      {
+        "task_id": "C1",
+        "difficulty": "novel",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 23.422539262101054,
+        "agent_iterations": 4,
+        "run_id": "heat_3542a213",
+        "config_produced": {
+          "dim": 2,
+          "nx": 48,
+          "ny": 48,
+          "k": 0.42,
+          "rho": 1180.0,
+          "cp": 1940.0,
+          "source": 0.0,
+          "t_end": 10000.0,
+          "dt": 1.0,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 350.0,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 280.0,
+              "location": "right"
+            }
+          ],
+          "u_init": 315.0,
+          "run_id": "heat_3542a213",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {
+          "agent": "simulation",
+          "task": "Simulate 2D steady-state heat conduction in a Cryonite insulation panel. Left wall at 350 K, right wall at 280 K, top and bottom insulated. Use a 48\u00d748 mesh. Look up the correct material properties for Cryonite from the knowledge graph.",
+          "task_id": "c6deeb42f79c467d914958fdda1fec0a",
+          "run_id": "heat_3542a213",
+          "answer": "{\n  \"run_id\": \"heat_3542a213\",\n  \"status\": \"success\",\n  \"wall_time\": 6.527052706107497,\n  \"n_dofs\": 2401,\n  \"t_max\": 349.9999957420079,\n  \"t_min\": 279.99999659360634\n}",
+          "status": "done",
+          "iterations": 4,
+          "tool_calls_log": [
+            {
+              "iteration": 0,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 1310,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 1,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 3669,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 2,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 3339,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 3,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 2400,
+              "has_tool_calls": false
+            }
+          ]
+        },
+        "property_fidelity": 1.0,
+        "t_max_actual": 349.9999957420079,
+        "t_min_actual": 279.99999659360634,
+        "t_mean_actual": 314.99965870552734,
+        "t_max_error": 0.0,
+        "t_min_error": 0.0,
+        "physics_score": 1.0
+      },
+      {
+        "task_id": "C2",
+        "difficulty": "novel",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 17.998045335523784,
+        "agent_iterations": 5,
+        "run_id": "heat_3c9ad5b6",
+        "config_produced": {
+          "dim": 2,
+          "nx": 32,
+          "ny": 32,
+          "k": 0.42,
+          "rho": 1180.0,
+          "cp": 1940.0,
+          "source": 0.0,
+          "t_end": 500.0,
+          "dt": 0.1,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 400.0,
+              "location": "left"
+            },
+            {
+              "type": "robin",
+              "alpha": 15.0,
+              "u_inf": 250.0,
+              "location": "right"
+            }
+          ],
+          "u_init": 325.0,
+          "run_id": "heat_3c9ad5b6",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {
+          "agent": "simulation",
+          "task": "Model heat transfer through a Cryonite wall with convective cooling on the right face (h=15 W/m\u00b2K, T_amb=250 K). Left face at 400 K, top and bottom insulated. 32\u00d732 mesh, simulate for 500 seconds. Use the thermal properties of Cryonite.",
+          "task_id": "4e87b199e20f4d15b2df4ba08e5113cf",
+          "run_id": "heat_3c9ad5b6",
+          "answer": "The simulation with run_id `heat_3c9ad5b6` has successfully completed. Here are the key results:\n\n- **Status**: Success\n- **Domain Dimension (dim)**: 2D\n- **Number of Degrees of Freedom (n_dofs)**: 1089\n- **Wall Time**: 1.9058 seconds\n- **Simulation End Time (t_end)**: 500 seconds\n- **Thermal Conductivity (k)**: 0.42 W/(m\u00b7K)\n- **Output Directory**: `/workspace/results`\n\nThe temperature range during the simulation was:\n- **Maximum Temperature (T_max)**: 400.0 K\n- **Minimum Temperature (T_min)**: 303.34 K\n\nIf you need further analysis or additional simulations, feel free to request!",
+          "status": "done",
+          "iterations": 5,
+          "tool_calls_log": [
+            {
+              "iteration": 0,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 1346,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 1,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 3602,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 2,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 3513,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 3,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 1014,
               "has_tool_calls": true
             },
             {
               "iteration": 4,
               "model": "qwen2.5-coder:32b",
-              "elapsed_ms": 3506,
+              "elapsed_ms": 3532,
               "has_tool_calls": false
             }
           ]
-        }
+        },
+        "property_fidelity": 1.0,
+        "t_max_actual": 400.00000076784215,
+        "t_min_actual": 303.33784167499874,
+        "t_mean_actual": 326.63630939431306,
+        "t_max_error": 0.0,
+        "t_min_error": null,
+        "physics_score": 1.0
+      },
+      {
+        "task_id": "P1",
+        "difficulty": "novel",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 180.877510484308,
+        "agent_iterations": 7,
+        "run_id": "modified_dab687a8",
+        "config_produced": {
+          "dim": 2,
+          "nx": 48,
+          "ny": 48,
+          "k": 312.0,
+          "rho": 3850.0,
+          "cp": 278.0,
+          "source": 0.0,
+          "t_end": 10.0,
+          "dt": 0.0001,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 1500.0,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 400.0,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 950.0,
+          "run_id": "modified_dab687a8",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {
+          "agent": "simulation",
+          "task": "Simulate 2D steady-state heat conduction in a Pyrathane crucible wall. Left face at 1500 K, right face at 400 K, top and bottom insulated. Use a 48\u00d748 mesh. Look up the correct material properties for Pyrathane from the knowledge graph.",
+          "task_id": "e8c45a1fc5e344208402dc239f59d628",
+          "run_id": "modified_dab687a8",
+          "answer": "Simulation run `modified_dab687a8` was successful. Here are the key results:\n\n- **Wall Time:** 86.97 seconds\n- **Number of Degrees of Freedom (DOFs):** 2401\n- **Maximum Temperature (`T_max`):** 1500 K\n- **Minimum Temperature (`T_min`):** 400 K\n\nThe simulation results have been uploaded to the MinIO bucket `simulation-results` under the prefix `runs/modified_dab687a8`.\n\nIf you need further analysis or additional simulations, feel free to request.",
+          "status": "done",
+          "iterations": 7,
+          "tool_calls_log": [
+            {
+              "iteration": 0,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 1331,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 1,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 8030,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 2,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 8088,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 3,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 4364,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 4,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 4508,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 5,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 4496,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 6,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 2805,
+              "has_tool_calls": false
+            }
+          ]
+        },
+        "property_fidelity": 0.9994666666666666,
+        "t_max_actual": 1499.9999742726216,
+        "t_min_actual": 399.9999931393657,
+        "t_mean_actual": 949.9836258948383,
+        "t_max_error": 0.0,
+        "t_min_error": 0.0,
+        "physics_score": 0.9997333333333334
+      },
+      {
+        "task_id": "P2",
+        "difficulty": "novel",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 15.8681456791237,
+        "agent_iterations": 5,
+        "run_id": "heat_d3a1aaed",
+        "config_produced": {
+          "dim": 2,
+          "nx": 32,
+          "ny": 32,
+          "k": 312.0,
+          "rho": 3850.0,
+          "cp": 278.0,
+          "source": 0.0,
+          "t_end": 15.0,
+          "dt": 0.1,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 400.0,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 400.0,
+              "location": "right"
+            },
+            {
+              "type": "dirichlet",
+              "value": 400.0,
+              "location": "top"
+            },
+            {
+              "type": "dirichlet",
+              "value": 400.0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 2000.0,
+          "run_id": "heat_d3a1aaed",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.875,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {
+          "agent": "simulation",
+          "task": "Simulate transient heat diffusion in a Pyrathane component (2D). All boundaries at 400 K, initial temperature 2000 K. Use 32\u00d732 mesh, simulate for 15 seconds with dt=0.1. Use the thermal properties of Pyrathane.",
+          "task_id": "40cb88d25d5043138488915b46b1eac9",
+          "run_id": "heat_d3a1aaed",
+          "answer": "The simulation with run_id `heat_d3a1aaed` has successfully completed. Here are the key results:\n\n- **Status**: Success\n- **Domain Dimension (dim)**: 2D\n- **Number of Degrees of Freedom (n_dofs)**: 1089\n- **Wall Time**: 0.126 seconds\n- **Simulation End Time (t_end)**: 15 seconds\n- **Thermal Conductivity (k)**: 312 W/(m\u00b7K)\n- **Output Directory**: `/workspace/results`\n\nThe temperature range in the simulation was:\n- **Maximum Temperature (T_max)**: 2000.002 K\n- **Minimum Temperature (T_min)**: 400.000 K\n\nThese results indicate that the initial high temperature of 2000 K has started to equilibrate towards the boundary conditions set at 400 K, as expected given the high thermal conductivity and short simulation time.\n\nIf you need further analysis or additional simulations, feel free to request!",
+          "status": "done",
+          "iterations": 5,
+          "tool_calls_log": [
+            {
+              "iteration": 0,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 1352,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 1,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 4385,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 2,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 4224,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 3,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 1000,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 4,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 4311,
+              "has_tool_calls": false
+            }
+          ]
+        },
+        "property_fidelity": 0.9994666666666666,
+        "t_max_actual": 2000.0016442182603,
+        "t_min_actual": 399.9999941546956,
+        "t_mean_actual": 1486.947388947279,
+        "t_max_error": 0.001644218260253183,
+        "t_min_error": 0.0,
+        "physics_score": 0.9997328195151269
       }
     ]
   }

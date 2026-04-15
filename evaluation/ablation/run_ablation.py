@@ -39,7 +39,7 @@ from pathlib import Path
 import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from ablation.benchmark_tasks import ABLATION_TASKS, NOVIDIUM_TASKS
+from ablation.benchmark_tasks import ABLATION_TASKS, NOVIDIUM_TASKS, ALL_NOVEL_TASKS
 
 DEFAULT_API_URL = "http://localhost:8000"
 TIMEOUT = 600  # 10 minutes per task
@@ -49,7 +49,7 @@ TIMEOUT = 600  # 10 minutes per task
 class TaskResult:
     task_id: str
     difficulty: str
-    mode: str       # "kg_on" or "kg_off"
+    mode: str       # "kg_on" / "kg_off" / "kg_smart"
     success: bool
     wall_time_s: float
     agent_iterations: int
@@ -59,12 +59,116 @@ class TaskResult:
     first_try_success: bool
     error_message: str = ""
     raw_response: dict = field(default_factory=dict)
+    # ── New physics-aware metrics ──
+    property_fidelity: float = 0.0   # 0–1: how close k/rho/cp are to truth
+    t_max_actual: float | None = None
+    t_min_actual: float | None = None
+    t_mean_actual: float | None = None
+    t_max_error: float | None = None  # |T_max_actual - T_max_reference|
+    t_min_error: float | None = None
+    physics_score: float = 0.0       # combined correctness metric
 
 
-def score_config(produced_config: dict, ground_truth: dict) -> float:
+def _load_sim_result(run_id: str) -> dict | None:
+    """Load max/min/mean temperature from the solver result.json on disk."""
+    if not run_id:
+        return None
+    for base in ("/workspace/results", "/app/results", "results"):
+        p = Path(base) / run_id / "result.json"
+        if p.exists():
+            with open(p) as f:
+                return json.load(f)
+    return None
+
+
+def compute_property_fidelity(produced_config: dict, ground_truth: dict) -> float:
+    """Measure how close the agent's material properties are to ground truth.
+
+    Returns 0.0–1.0 where 1.0 means exact match of k, rho, cp.
+    Only scored for fields that have a _range in ground_truth.
+    """
+    errors = []
+    for prop, range_key in [("k", "k_range"), ("rho", "rho_range"), ("cp", "cp_range")]:
+        if range_key not in ground_truth:
+            continue
+        lo, hi = ground_truth[range_key]
+        midpoint = (lo + hi) / 2.0
+        val = produced_config.get(prop)
+        if val is None:
+            errors.append(1.0)
+            continue
+        rel_err = abs(val - midpoint) / midpoint
+        errors.append(min(rel_err, 1.0))
+    if not errors:
+        return 1.0
+    return max(0.0, 1.0 - sum(errors) / len(errors))
+
+
+def compute_physics_score(
+    run_id: str | None,
+    ground_truth: dict,
+    produced_config: dict,
+    reference_temps: dict | None = None,
+) -> dict:
+    """Compute physics-aware metrics from actual simulation outputs.
+
+    Returns dict with: property_fidelity, t_max_actual, t_min_actual,
+    t_mean_actual, t_max_error, t_min_error, physics_score.
+    """
+    prop_fid = compute_property_fidelity(produced_config, ground_truth)
+
+    result = _load_sim_result(run_id)
+    t_max = result.get("max_temperature") if result else None
+    t_min = result.get("min_temperature") if result else None
+    t_mean = result.get("mean_temperature") if result else None
+
+    t_max_err = None
+    t_min_err = None
+    temp_score = 1.0
+
+    if t_max is not None and "T_max_range" in ground_truth:
+        lo, hi = ground_truth["T_max_range"]
+        if lo <= t_max <= hi:
+            t_max_err = 0.0
+        else:
+            t_max_err = min(abs(t_max - lo), abs(t_max - hi))
+            temp_score *= max(0.0, 1.0 - t_max_err / max(abs(hi - lo), 1.0))
+
+    if t_min is not None and "T_min_range" in ground_truth:
+        lo, hi = ground_truth["T_min_range"]
+        if lo <= t_min <= hi:
+            t_min_err = 0.0
+        else:
+            t_min_err = min(abs(t_min - lo), abs(t_min - hi))
+            temp_score *= max(0.0, 1.0 - t_min_err / max(abs(hi - lo), 1.0))
+
+    if reference_temps and t_max is not None:
+        ref_tmax = reference_temps.get("t_max")
+        ref_tmin = reference_temps.get("t_min")
+        if ref_tmax is not None:
+            t_max_err = abs(t_max - ref_tmax)
+        if ref_tmin is not None and t_min is not None:
+            t_min_err = abs(t_min - ref_tmin)
+
+    physics = 0.5 * prop_fid + 0.5 * temp_score
+
+    return {
+        "property_fidelity": prop_fid,
+        "t_max_actual": t_max,
+        "t_min_actual": t_min,
+        "t_mean_actual": t_mean,
+        "t_max_error": t_max_err,
+        "t_min_error": t_min_err,
+        "physics_score": physics,
+    }
+
+
+def score_config(produced_config: dict, ground_truth: dict,
+                 run_id: str | None = None) -> float:
     """Score how well the agent's config matches ground truth expectations.
 
     Returns 0.0–1.0 where 1.0 = perfect match of all checkable fields.
+    Now includes T_max/T_min scoring from actual simulation results.
     """
     checks = 0
     passes = 0
@@ -85,10 +189,19 @@ def score_config(produced_config: dict, ground_truth: dict) -> float:
                 if lo <= val <= hi:
                     passes += 1
 
-    for range_field in ("T_max_range", "T_min_range"):
+    result = _load_sim_result(run_id)
+    for range_field, result_key in [
+        ("T_max_range", "max_temperature"),
+        ("T_min_range", "min_temperature"),
+    ]:
         if range_field in ground_truth:
             checks += 1
-            # Scored from the simulation result, not just config
+            if result:
+                val = result.get(result_key)
+                if val is not None:
+                    lo, hi = ground_truth[range_field]
+                    if lo <= val <= hi:
+                        passes += 1
 
     if ground_truth.get("has_robin_bc"):
         checks += 1
@@ -185,11 +298,17 @@ def run_task_direct(task: dict, disable_kg: bool,
                 pass  # config extraction done below
         config_produced = extract_config_from_direct_result(result)
 
-        quality = score_config(config_produced, task["ground_truth"])
+        quality = score_config(config_produced, task["ground_truth"],
+                               run_id=run_id)
         first_try = iterations <= 12 and success
 
+        phys = compute_physics_score(run_id, task["ground_truth"],
+                                     config_produced)
+
         status = "OK" if success else "FAIL"
-        print(f"{status}  quality={quality:.2f}  iter={iterations}  run_id={run_id}  ({wall:.1f}s)")
+        print(f"{status}  Q={quality:.2f}  MPF={phys['property_fidelity']:.2f}  "
+              f"phys={phys['physics_score']:.2f}  iter={iterations}  "
+              f"run_id={run_id}  ({wall:.1f}s)")
 
         return TaskResult(
             task_id=task["id"], difficulty=task["difficulty"],
@@ -199,6 +318,13 @@ def run_task_direct(task: dict, disable_kg: bool,
             config_quality_score=quality,
             first_try_success=first_try,
             raw_response=result,
+            property_fidelity=phys["property_fidelity"],
+            t_max_actual=phys["t_max_actual"],
+            t_min_actual=phys["t_min_actual"],
+            t_mean_actual=phys["t_mean_actual"],
+            t_max_error=phys["t_max_error"],
+            t_min_error=phys["t_min_error"],
+            physics_score=phys["physics_score"],
         )
     except Exception as e:
         wall = time.perf_counter() - t0
@@ -363,6 +489,8 @@ def aggregate(results: list[TaskResult]) -> dict:
         "success_rate": len(successes) / n if n else 0,
         "first_try_rate": sum(1 for r in results if r.first_try_success) / n if n else 0,
         "avg_quality": sum(r.config_quality_score for r in results) / n if n else 0,
+        "avg_property_fidelity": sum(r.property_fidelity for r in results) / n if n else 0,
+        "avg_physics_score": sum(r.physics_score for r in results) / n if n else 0,
         "avg_iterations": sum(r.agent_iterations for r in results) / n if n else 0,
         "avg_wall_time": sum(r.wall_time_s for r in results) / n if n else 0,
         "by_difficulty": {
@@ -370,6 +498,8 @@ def aggregate(results: list[TaskResult]) -> dict:
                 "n": len(subset := [r for r in results if r.difficulty == diff]),
                 "success_rate": sum(1 for r in subset if r.success) / max(len(subset), 1),
                 "avg_quality": sum(r.config_quality_score for r in subset) / max(len(subset), 1),
+                "avg_property_fidelity": sum(r.property_fidelity for r in subset) / max(len(subset), 1),
+                "avg_physics_score": sum(r.physics_score for r in subset) / max(len(subset), 1),
             }
             for diff in ("easy", "medium", "hard", "novel")
             if any(r.difficulty == diff for r in results)
@@ -454,10 +584,11 @@ def run_ablation(api_url: str, tasks: list[dict] | None = None,
     print(f"  {'-'*28}  {'-'*8}  {'-'*8}" + (f"  {'-'*9}" if include_smart else ""))
 
     for metric in ("success_rate", "first_try_rate", "avg_quality",
+                    "avg_property_fidelity", "avg_physics_score",
                     "avg_iterations", "avg_wall_time"):
         v_on = agg_on[metric]
         v_off = agg_off[metric]
-        fmt = ".2f" if "rate" in metric or "quality" in metric else ".1f"
+        fmt = ".2f" if "rate" in metric or "quality" in metric or "fidelity" in metric or "score" in metric else ".1f"
         line = f"  {metric:<28s}  {v_on:>8{fmt}}  {v_off:>8{fmt}}"
         if include_smart and agg_smart:
             v_smart = agg_smart[metric]
@@ -519,7 +650,7 @@ def main():
     args = parser.parse_args()
 
     if args.novidium:
-        tasks = NOVIDIUM_TASKS
+        tasks = ALL_NOVEL_TASKS
     elif args.tasks:
         all_tasks = ABLATION_TASKS + NOVIDIUM_TASKS
         tasks = [t for t in all_tasks if t["id"] in args.tasks]

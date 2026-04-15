@@ -270,6 +270,98 @@ NOVIDIUM_TASKS = [
     },
 ]
 
+CRYONITE_TASKS = [
+    {
+        "id": "C1",
+        "difficulty": "novel",
+        "description": (
+            "Simulate 2D steady-state heat conduction in a Cryonite insulation "
+            "panel. Left wall at 350 K, right wall at 280 K, top and bottom "
+            "insulated. Use a 48×48 mesh. Look up the correct material "
+            "properties for Cryonite from the knowledge graph."
+        ),
+        "ground_truth": {
+            "dim": 2, "nx": 48, "ny": 48,
+            "k_range": [0.38, 0.46],
+            "rho_range": [1150.0, 1210.0],
+            "cp_range": [1900.0, 1980.0],
+            "T_max_range": [345, 355],
+            "T_min_range": [275, 285],
+            "should_succeed": True,
+            "needs_kg": True,
+            "requires_novel_material": True,
+        },
+    },
+    {
+        "id": "C2",
+        "difficulty": "novel",
+        "description": (
+            "Model heat transfer through a Cryonite wall with convective "
+            "cooling on the right face (h=15 W/m²K, T_amb=250 K). Left face "
+            "at 400 K, top and bottom insulated. 32×32 mesh, simulate for "
+            "500 seconds. Use the thermal properties of Cryonite."
+        ),
+        "ground_truth": {
+            "dim": 2, "nx": 32, "ny": 32,
+            "k_range": [0.38, 0.46],
+            "rho_range": [1150.0, 1210.0],
+            "cp_range": [1900.0, 1980.0],
+            "has_robin_bc": True,
+            "T_max_range": [395, 405],
+            "should_succeed": True,
+            "needs_kg": True,
+            "requires_novel_material": True,
+        },
+    },
+]
+
+PYRATHANE_TASKS = [
+    {
+        "id": "P1",
+        "difficulty": "novel",
+        "description": (
+            "Simulate 2D steady-state heat conduction in a Pyrathane "
+            "crucible wall. Left face at 1500 K, right face at 400 K, top "
+            "and bottom insulated. Use a 48×48 mesh. Look up the correct "
+            "material properties for Pyrathane from the knowledge graph."
+        ),
+        "ground_truth": {
+            "dim": 2, "nx": 48, "ny": 48,
+            "k_range": [305.0, 320.0],
+            "rho_range": [3800.0, 3900.0],
+            "cp_range": [270.0, 286.0],
+            "T_max_range": [1495, 1505],
+            "T_min_range": [395, 405],
+            "should_succeed": True,
+            "needs_kg": True,
+            "requires_novel_material": True,
+        },
+    },
+    {
+        "id": "P2",
+        "difficulty": "novel",
+        "description": (
+            "Simulate transient heat diffusion in a Pyrathane component (2D). "
+            "All boundaries at 400 K, initial temperature 2000 K. "
+            "Use 32×32 mesh, simulate for 15 seconds with dt=0.1. "
+            "Use the thermal properties of Pyrathane."
+        ),
+        "ground_truth": {
+            "dim": 2, "nx": 32, "ny": 32,
+            "k_range": [305.0, 320.0],
+            "rho_range": [3800.0, 3900.0],
+            "cp_range": [270.0, 286.0],
+            "T_max_range": [400, 2000],
+            "T_min_range": [395, 405],
+            "should_succeed": True,
+            "needs_kg": True,
+            "requires_novel_material": True,
+        },
+    },
+]
+
+ALL_NOVEL_TASKS = NOVIDIUM_TASKS + CRYONITE_TASKS + PYRATHANE_TASKS
+
 
 def get_tasks_by_difficulty(difficulty: str | None = None) -> list[dict]:
     if difficulty is None:
@@ -282,6 +374,11 @@ def get_novidium_tasks() -> list[dict]:
     return NOVIDIUM_TASKS
 
 
+def get_novel_tasks() -> list[dict]:
+    """Return all novel-material benchmark tasks (Novidium + Cryonite + Pyrathane)."""
+    return ALL_NOVEL_TASKS
+
+
 def get_all_tasks() -> list[dict]:
     """Return all tasks including the novel-material tasks."""
-    return ABLATION_TASKS + NOVIDIUM_TASKS
+    return ABLATION_TASKS + ALL_NOVEL_TASKS

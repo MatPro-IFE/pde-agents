@@ -676,37 +676,43 @@ Three KG modes in `SimulationAgent.__init__`:
 Key finding: **Integration pattern, not KG content, determines utility.**
 KG Smart recovers 23pp over mandatory KG by eliminating attention dilution.
 
-### Novel Material Experiment: Novidium (implemented 2026-04-15)
+### Novel Material Experiment (expanded 2026-04-15)
 
 **Purpose**: Prove KG value for genuinely novel/proprietary data that LLMs
-have never seen during training.
+have never seen during training. Three fictional materials cover different
+thermal regimes.
 
-**Novidium** is a fictional ceramic-metallic composite seeded ONLY into Neo4j:
-- k = 73 W/(m·K), rho = 5420 kg/m³, cp = 612 J/(kg·K)
-- 3 Reference chunks (properties, temperature dependence, applications)
-- Safe operating range: 200–850 K
+**Materials** (seeded ONLY into Neo4j):
+- **Novidium**: k=73 W/(m·K), ρ=5420 kg/m³, cp=612 — moderate conductor
+- **Cryonite**: k=0.42, ρ=1180, cp=1940 — extreme insulator (α≈1.8e-7)
+- **Pyrathane**: k=312, ρ=3850, cp=278 — refractory super-conductor (α≈2.9e-4)
 
-**Benchmark tasks** (G1–G3 in `evaluation/ablation/benchmark_tasks.py`):
-- G1: Steady-state Dirichlet, 48×48 mesh
-- G2: Transient cooling, 32×32, t_end=200s
-- G3: Mixed BCs (Robin h=50), 64×64
+**Benchmark tasks** (7 total in `evaluation/ablation/benchmark_tasks.py`):
+- G1–G3: Novidium (steady, transient, mixed BCs)
+- C1–C2: Cryonite (steady, Robin BC)
+- P1–P2: Pyrathane (steady, transient)
 
-**Results** — KG Smart achieves 1.9× higher quality than KG Off:
+**New metrics**:
+- **Material Property Fidelity (MPF)**: 1 - mean(|p_agent - p_truth| / p_truth)
+- **Physics Score**: 0.5×MPF + 0.5×T_score (T_max/T_min range checks)
+
+**Results** — KG Smart achieves 2.9× higher MPF than KG Off:
 | Metric          | KG On | KG Off | KG Smart |
 |-----------------|-------|--------|----------|
-| Success rate    | 100%  | 100%   | **100%** |
-| Config quality  | 0.25  | 0.42   | **0.79** |
-| k used          | 73.0  | 10–50  | **73.0** |
-| ρ used          | 5420  | 3k–9k  | **5420** |
-| cp used         | 612   | 390–500| **612**  |
+| Success rate    | 57%   | 100%   | **100%** |
+| Config quality  | 0.55  | 0.61   | **0.96** |
+| Property fidelity (MPF) | 0.57 | 0.34 | **1.00** |
+| Physics score   | 0.71  | 0.63   | **1.00** |
 
-KG Off fabricates entirely wrong properties; KG Smart retrieves correct ones
-via warm-start HNSW match on Reference chunks.
+**Critical finding**: KG Off fabricates wrong properties for ALL materials:
+- Pyrathane: uses k=0.15 vs truth k=312 (**2,080× error**)
+  - P2 result: T_max=2,950K from initial 2,000K (physically impossible)
+- KG Smart retrieves exact properties via warm-start HNSW vector search
 
 **Files added/modified**:
-- `knowledge_graph/seeder.py`: Novidium in MATERIALS list
-- `knowledge_graph/references.py`: 3 Novidium Reference entries
-- `evaluation/ablation/seed_novidium.py`: Seeding script
-- `evaluation/ablation/benchmark_tasks.py`: NOVIDIUM_TASKS (G1–G3)
-- `tools/knowledge_tools.py`: Made `question` param optional (was required, caused tool call failure)
-- `paper/main.tex`: Section 6.4 (Novel Material Experiment), updated abstract/conclusion
+- `knowledge_graph/seeder.py`: 3 fictional materials in MATERIALS list
+- `knowledge_graph/references.py`: References for Novidium, Cryonite, Pyrathane
+- `evaluation/ablation/benchmark_tasks.py`: 7 novel tasks (G1–G3, C1–C2, P1–P2)
+- `evaluation/ablation/run_ablation.py`: MPF/physics_score metrics, physics-aware scoring
+- `tools/knowledge_tools.py`: Made `question` param optional
+- `paper/main.tex`: Expanded §6.4, new tables (novel-props, novidium), MPF figure

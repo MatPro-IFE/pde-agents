@@ -447,9 +447,87 @@ NOVIDIUM_REFERENCES: list[dict] = [
 ]
 
 
+# ─── Cryonite (fictional ultra-insulator) references ─────────────────────────
+
+CRYONITE_REFERENCES: list[dict] = [
+    {
+        "ref_id":  "mat_cryonite_properties",
+        "type":    "material_property",
+        "subject": "Cryonite thermal properties",
+        "text": (
+            "Cryonite is a polymer-aerogel hybrid for extreme thermal insulation. "
+            "k = 0.42 W/(m·K), ρ = 1180 kg/m³, cp = 1940 J/(kg·K). "
+            "Thermal diffusivity α = k/(ρ·cp) ≈ 1.83×10⁻⁷ m²/s — extremely low. "
+            "Maximum service temperature: 420 K. Degrades above 450 K. "
+            "Use these exact values; no public data exists for Cryonite."
+        ),
+        "source": "Cryonite Technical Datasheet v2.1 (proprietary)",
+        "url":    "",
+        "tags":   ["cryonite", "conductivity", "insulator", "low_diffusivity", "novel_material"],
+        "material_names": ["cryonite"],
+    },
+    {
+        "ref_id":  "mat_cryonite_simulation_guidance",
+        "type":    "material_property",
+        "subject": "Cryonite simulation guidance",
+        "text": (
+            "Cryonite has extremely low thermal diffusivity. For a plate of "
+            "thickness L = 0.1 m, thermal time constant τ ≈ ρ·cp·L²/(π²·k) "
+            "≈ 1180×1940×0.01/(9.87×0.42) ≈ 5520 s (≈92 min). "
+            "Transient simulations need very long t_end (≥ 15000 s for 95% "
+            "steady state). Steady-state runs are recommended. "
+            "Keep all boundary temperatures below 420 K."
+        ),
+        "source": "Cryonite Technical Datasheet v2.1 (proprietary)",
+        "url":    "",
+        "tags":   ["cryonite", "simulation_guidance", "slow_transient", "novel_material"],
+        "material_names": ["cryonite"],
+    },
+]
+
+# ─── Pyrathane (fictional high-conductivity cermet) references ────────────────
+
+PYRATHANE_REFERENCES: list[dict] = [
+    {
+        "ref_id":  "mat_pyrathane_properties",
+        "type":    "material_property",
+        "subject": "Pyrathane thermal properties",
+        "text": (
+            "Pyrathane is a refractory metal-carbide cermet. "
+            "k = 312 W/(m·K), ρ = 3850 kg/m³, cp = 278 J/(kg·K). "
+            "Thermal diffusivity α = k/(ρ·cp) ≈ 2.91×10⁻⁴ m²/s — very high. "
+            "Stable up to 2800 K. No phase transitions below 2400 K. "
+            "Use these exact property values for simulations."
+        ),
+        "source": "Pyrathane Materials Specification R-7 (proprietary)",
+        "url":    "",
+        "tags":   ["pyrathane", "conductivity", "high_diffusivity", "refractory", "novel_material"],
+        "material_names": ["pyrathane"],
+    },
+    {
+        "ref_id":  "mat_pyrathane_simulation_guidance",
+        "type":    "material_property",
+        "subject": "Pyrathane simulation guidance and time stepping",
+        "text": (
+            "Pyrathane has extremely high thermal diffusivity "
+            "(α ≈ 2.91×10⁻⁴ m²/s). Transients resolve in under 1 second "
+            "for component-scale domains. For a 0.1 m plate: "
+            "τ ≈ 3850×278×0.01/(9.87×312) ≈ 3.5 s. "
+            "Use t_end ≥ 10 s for steady state. Fine time stepping required "
+            "(dt ≤ 0.01 s for explicit schemes) due to high diffusivity. "
+            "Implicit schemes (theta ≥ 0.5) strongly recommended."
+        ),
+        "source": "Pyrathane Materials Specification R-7 (proprietary)",
+        "url":    "",
+        "tags":   ["pyrathane", "simulation_guidance", "fast_transient", "time_stepping", "novel_material"],
+        "material_names": ["pyrathane"],
+    },
+]
+
+
 # ─── All references combined ──────────────────────────────────────────────────
 
 ALL_REFERENCES: list[dict] = (
     MATERIAL_REFERENCES + BC_REFERENCES + SOLVER_REFERENCES + DOMAIN_REFERENCES
-    + NOVIDIUM_REFERENCES
+    + NOVIDIUM_REFERENCES + CRYONITE_REFERENCES + PYRATHANE_REFERENCES
 )

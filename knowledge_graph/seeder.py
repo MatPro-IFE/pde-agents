@@ -112,6 +112,38 @@ MATERIALS: list[dict] = [
                         "aerospace re-entry shielding, fusion blanket components",
         "k_range": (70.0, 76.0),
     },
+    {
+        "name": "Cryonite",
+        "k": 0.42, "rho": 1180.0, "cp": 1940.0,
+        "alpha": 0.42 / (1180.0 * 1940.0),
+        "description": (
+            "Cryonite is a polymer-aerogel hybrid engineered for extreme thermal "
+            "insulation. Thermal conductivity k = 0.42 W/(m·K) — lower than most "
+            "polymers. Density 1180 kg/m³, specific heat 1940 J/(kg·K). "
+            "Very slow thermal response due to extremely low diffusivity "
+            "(α ≈ 1.83×10⁻⁷ m²/s). Maximum service temperature: 420 K. "
+            "Degrades above 450 K. Brittle below 100 K."
+        ),
+        "typical_uses": "cryogenic pipe insulation, LNG tank liners, "
+                        "spacecraft thermal protection, cold-chain packaging",
+        "k_range": (0.38, 0.46),
+    },
+    {
+        "name": "Pyrathane",
+        "k": 312.0, "rho": 3850.0, "cp": 278.0,
+        "alpha": 312.0 / (3850.0 * 278.0),
+        "description": (
+            "Pyrathane is a refractory metal-carbide cermet with very high "
+            "thermal conductivity (312 W/m·K) and moderate density (3850 kg/m³). "
+            "Specific heat is unusually low (278 J/kg·K), giving it extremely "
+            "high thermal diffusivity (α ≈ 2.91×10⁻⁴ m²/s). "
+            "Transients resolve very quickly — fine time stepping required. "
+            "Stable up to 2800 K. No phase transitions below 2400 K."
+        ),
+        "typical_uses": "plasma-facing components, rocket nozzle liners, "
+                        "induction furnace crucibles, concentrated solar receivers",
+        "k_range": (305.0, 320.0),
+    },
 ]
 
 
