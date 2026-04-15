@@ -3,22 +3,27 @@
 \caption{Three-way KG ablation: mandatory invocation (KG On) vs.\ no KG
          (KG Off) vs.\ warm-start with lazy conditional retrieval (KG Smart).
          KG Smart recovers most of the KG Off performance while retaining
-         access to knowledge graph tools for failure diagnosis.}
+         access to knowledge graph tools for failure diagnosis.
+         Novel tasks (G1--G3) use a fictional material (Novidium) unknown to
+         the LLM.}
 \label{tab:ablation}
 \begin{tabular}{lccc}
 \toprule
 Metric & KG On & KG Off & KG Smart \\
 \midrule
-  Success rate       & 60\%  & 100\%  & \textbf{90\%}  \\
-  First-try rate     & 60\%  & 100\%  & \textbf{90\%}  \\
-  Config quality     & 0.38  & 0.75   & \textbf{0.69}  \\
-  Avg.\ iterations   & 5.3   & 3.0    & \textbf{3.8}   \\
-  Avg.\ time (s)     & 25.3  & 14.0   & \textbf{15.9}  \\
+  Success rate       & 69\%  & 100\%  & \textbf{92\%}  \\
+  First-try rate     & 69\%  & 100\%  & \textbf{92\%}  \\
+  Config quality     & 0.34  & 0.68   & \textbf{0.72}  \\
+  Avg.\ iterations   & 5.7   & 3.0    & \textbf{4.1}   \\
+  Avg.\ time (s)     & 30.0  & 13.5   & \textbf{16.0}  \\
 \midrule
 \multicolumn{4}{l}{\textit{By difficulty}} \\
-  \quad Easy          & 100\%  & 100\%   & 100\% \\
-  \quad Medium        &  33\%  & 100\%   & \textbf{100\%} \\
-  \quad Hard          &  50\%  & 100\%   & 75\%  \\
+  \quad Easy (E1--E3)    & 100\%  & 100\%   & 100\% \\
+  \quad Medium (M1--M3)  &  33\%  & 100\%   & \textbf{100\%} \\
+  \quad Hard (H1--H4)    &  50\%  & 100\%   & 75\%  \\
+  \quad Novel (G1--G3)   & 100\%  & 100\%*  & \textbf{100\%} \\
 \bottomrule
+\multicolumn{4}{l}{\scriptsize *KG Off succeeds but uses fabricated properties ($\bar{Q}{=}0.42$}\\
+\multicolumn{4}{l}{\scriptsize \phantom{*}vs.\ KG Smart $\bar{Q}{=}0.79$); see \cref{tab:novidium}.}\\
 \end{tabular}
 \end{table}

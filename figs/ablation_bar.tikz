@@ -1,20 +1,20 @@
 % 3-way ablation bar chart — KG On vs KG Off vs KG Smart
-% Data from 3-way ablation run 2026-04-07
+% Includes standard tasks (Easy/Medium/Hard) and novel-material tasks
 \begin{tikzpicture}
 \begin{axis}[
   ybar,
-  bar width=9pt,
+  bar width=8pt,
   width=0.95\columnwidth,
   height=0.65\columnwidth,
   ylabel={Success rate (\%)},
   ylabel style={font=\small},
-  symbolic x coords={Easy, Medium, Hard, Overall},
+  symbolic x coords={Easy, Medium, Hard, Novel, Overall},
   xtick=data,
   xticklabel style={font=\small},
   tick label style={font=\scriptsize},
   ymin=0, ymax=119,
   ytick={0,20,40,60,80,100},
-  enlarge x limits=0.22,
+  enlarge x limits=0.18,
   legend style={font=\scriptsize, at={(0.5,1.04)}, anchor=south,
                 fill=white, draw=gray!60, rounded corners=2pt,
                 column sep=6pt},
@@ -31,7 +31,8 @@
   (Easy,   100)
   (Medium,  33)
   (Hard,    50)
-  (Overall, 60)
+  (Novel,  100)
+  (Overall, 69)
 };
 \addlegendentry{KG On}
 
@@ -40,6 +41,7 @@
   (Easy,   100)
   (Medium, 100)
   (Hard,   100)
+  (Novel,  100)
   (Overall,100)
 };
 \addlegendentry{KG Off}
@@ -49,7 +51,8 @@
   (Easy,   100)
   (Medium, 100)
   (Hard,    75)
-  (Overall, 90)
+  (Novel,  100)
+  (Overall, 92)
 };
 \addlegendentry{KG Smart}
 
