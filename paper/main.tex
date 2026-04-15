@@ -947,11 +947,20 @@ The current solver supports only scalar heat equations.  Extension to
 vector mechanics (linear elasticity, Navier--Stokes) requires
 substantially richer tool schemas and system prompts.
 
-\paragraph{Model scale and open-source lag.}
-\texttt{qwen2.5-coder:32b} and \texttt{llama3.3:70b} are competitive
-open-source models but trail state-of-the-art closed models
-(GPT-4o, Claude~3.7~Sonnet) in complex multi-step reasoning.  As open
-models improve, PDE-Agents will benefit without architectural changes.
+\paragraph{Model scale and open-source evolution.}
+The experiments reported here use \texttt{qwen2.5-coder:32b} and
+\texttt{llama3.3:70b}, which were competitive at the time of evaluation.
+However, the open-source landscape has advanced rapidly: Qwen3-Coder-Next
+(80B total, 3B active MoE) \citep{qwen3coder2026} achieves
+Claude~Sonnet--class performance on agentic coding benchmarks while
+requiring only $\approx$50\,GB VRAM at 4-bit quantization; Llama~4~Scout
+(109B total, 17B active MoE) \citep{llama4} supports 10M-token context
+and native tool calling; and Qwen3-Coder-30B-A3B provides strong
+tool-calling at under 20\,GB.  PDE-Agents' architecture is
+model-agnostic---each agent's model is configurable via environment
+variables---making drop-in upgrades to these newer models straightforward.
+A systematic multi-model ablation across model families (Qwen3, Llama~4,
+GLM-5) is planned as immediate future work.
 
 \paragraph{KG integration.}
 The KG Smart pattern (\cref{sec:ablation-disc}) recovers most lost
