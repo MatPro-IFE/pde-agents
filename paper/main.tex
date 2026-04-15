@@ -92,15 +92,16 @@ material properties, known failure patterns, and prior run lineage.
 We report four empirical contributions: (i) a formal verification and
 validation (V\&V) study confirming second-order spatial convergence (\(\mathcal{O}(h^2)\))
 for all three benchmark cases on the heat equation solver; (ii) a three-way
-ablation study across 13 benchmark tasks revealing that mandatory KG
-invocation paradoxically \emph{reduces} success to 69\% versus a 100\%
+ablation study across 17 benchmark tasks revealing that mandatory KG
+invocation paradoxically \emph{reduces} success to 59\% versus a 100\%
 LLM-only baseline, but that our proposed \emph{KG Smart} integration---combining
 HNSW-based warm-start injection with lazy conditional retrieval---recovers
-92\% success while retaining knowledge graph access; (iii) a novel-material
-experiment using a fictional material (Novidium) whose properties exist only
-in the KG, demonstrating that KG Smart achieves $\bar{Q}{=}0.79$ configuration
-quality versus $\bar{Q}{=}0.42$ for the KG-free baseline---proving the KG's
-value for proprietary or unseen data; and (iv) production-scale
+94\% success while retaining knowledge graph access; (iii) a novel-material
+experiment using three fictional materials whose properties exist only
+in the KG, demonstrating that KG Smart achieves perfect material property
+fidelity (1.00) versus 0.34 for the KG-free baseline, which fabricates
+physically incorrect properties leading to simulation errors exceeding
+$2{,}000\times$ in thermal conductivity; and (iv) production-scale
 agent quality metrics from 1{,}135 real simulation runs showing 97.4\%
 overall success and a 57.6\% first-try rate.  All code, models, and
 evaluation artifacts are released openly.  Our findings demonstrate that
@@ -158,13 +159,13 @@ stability rules form a rich, interconnected knowledge base.
   \item We run a three-way ablation study isolating the KG contribution,
         identify a paradoxical performance \emph{inversion} with mandatory
         KG invocation, and propose a \emph{KG Smart} integration that
-        recovers 92\% success via warm-start injection and lazy retrieval
+        recovers 94\% success via warm-start injection and lazy retrieval
         (\cref{sec:ablation}).
-  \item We introduce a \emph{novel-material experiment} using a fictional
-        material (Novidium) absent from any LLM training corpus,
-        demonstrating that KG Smart achieves $1.9\times$ higher
-        configuration quality than the KG-free baseline on
-        unseen-data tasks (\cref{sec:novidium}).
+  \item We introduce a \emph{novel-material experiment} using three
+        fictional materials absent from any LLM training corpus,
+        demonstrating that KG Smart achieves $2.9\times$ higher
+        material property fidelity than the KG-free baseline, which
+        fabricates physically incorrect properties (\cref{sec:novidium}).
   \item We report production-scale agent quality metrics derived from
         1{,}135 real simulation runs (\cref{sec:metrics}).
 \end{enumerate}
@@ -607,16 +608,17 @@ across three conditions:
         few-shot reference examples (warm-start).
 \end{itemize}
 
-Thirteen benchmark tasks span four difficulty levels:
+Seventeen benchmark tasks span four difficulty levels:
 \begin{itemize}
   \item \textbf{Easy (E1--E3)}: Explicit numerical parameters, straightforward setup.
   \item \textbf{Medium (M1--M3)}: Material-by-name requests requiring
         property lookup (AISI 1010 steel, copper, aluminium).
   \item \textbf{Hard (H1--H4)}: Ambiguous descriptions, mixed BCs,
         computationally expensive or 3D problems.
-  \item \textbf{Novel (G1--G3)}: Tasks referencing a fictional material
-        (Novidium) whose properties exist \emph{only} in the KG,
-        testing retrieval of genuinely unseen data (see \cref{sec:novidium}).
+  \item \textbf{Novel (G1--G3, C1--C2, P1--P2)}: Tasks referencing three
+        fictional materials (Novidium, Cryonite, Pyrathane) whose
+        properties exist \emph{only} in the KG, testing retrieval of
+        genuinely unseen data (see \cref{sec:novidium}).
 \end{itemize}
 
 Each task is scored on: (i) binary success (simulation ran and completed),
@@ -667,13 +669,15 @@ fails H4, plus H3 (Crank-Nicolson titanium), demonstrating that the
 improvement is consistent.
 
 \paragraph{Overall: KG Smart as a middle path.}
-KG Smart achieves $90\%$ overall success with $\bar{Q} = 0.69$, compared
-to $60\%$ / $\bar{Q} = 0.38$ for KG On and $100\%$ / $\bar{Q} = 0.75$
-for KG Off.  The improvement from KG On $\to$ KG Smart is 30 percentage
-points in success rate and $1.8\times$ in quality---confirming that the
-integration pattern, not the KG content, was the bottleneck.  KG Smart's
-average iterations (3.8) are close to KG Off's (3.0), indicating that
-the warm-start context allows the agent to bypass most KG round-trips.
+Across all 17 tasks (standard + novel), KG Smart achieves $94\%$ overall
+success with $\bar{Q} = 0.82$, compared to $59\%$ / $\bar{Q} = 0.45$ for
+KG On and $100\%$ / $\bar{Q} = 0.69$ for KG Off.  The improvement from
+KG On $\to$ KG Smart is 35 percentage points in success rate and
+$1.8\times$ in quality---confirming that the integration pattern, not the
+KG content, was the bottleneck.  Critically, when we evaluate with
+physics-aware metrics on novel materials (\cref{sec:novidium}), KG
+Smart's advantage becomes decisive: perfect property fidelity (1.00)
+vs.\ KG Off's 0.34.
 
 \begin{figure}[htbp]
   \centering
@@ -681,8 +685,10 @@ the warm-start context allows the agent to bypass most KG round-trips.
   \caption{Success rate by difficulty level across three KG integration
     strategies.  KG Smart (warm-start + lazy retrieval) recovers most of
     the KG Off performance while retaining access to knowledge graph tools.
-    The ``Novel'' category (G1--G3) uses a fictional material (Novidium)
-    whose properties exist only in the KG.}
+    The ``Novel'' category (7 tasks) uses three fictional materials
+    whose properties exist only in the KG.  Note: success rate alone
+    is misleading for Novel tasks --- see \cref{tab:novidium} for
+    property fidelity and physics scores.}
   \label{fig:ablation}
 \end{figure}
 
@@ -730,100 +736,158 @@ implemented a \emph{KG Smart} integration that combines two strategies:
         unknown.  This eliminates the mandatory KG-first workflow.
 \end{enumerate}
 
-As \cref{tab:ablation} shows, KG Smart achieves 90\% overall success
-(vs.\ 60\% for mandatory KG), recovers 100\% success on medium tasks, and
-reduces average iterations from 5.3 to 3.8.  The 30 percentage-point
+As \cref{tab:ablation} shows, KG Smart achieves 94\% overall success
+(vs.\ 59\% for mandatory KG), recovers 100\% success on medium and novel
+tasks, and reduces average iterations significantly.  The 35 percentage-point
 improvement confirms that the \emph{integration pattern}, not the KG
 content itself, was the bottleneck in the mandatory design.
 
-\subsection{Novel Material Experiment: Novidium}
+\subsection{Novel Material Experiment}
 \label{sec:novidium}
 
 The ablation results in \cref{sec:ablation-disc} raise a natural
 question: if KG Off achieves 100\% success on standard tasks, does
 the knowledge graph provide any value at all?
 For well-known materials (steel, copper, aluminium), the LLM's
-pre-trained parametric knowledge is sufficient---material properties
-are widely documented in the training corpus.  To isolate the KG's
+pre-trained parametric knowledge is sufficient.  To isolate the KG's
 contribution to \emph{genuinely novel} information, we introduce
-\textbf{Novidium}, a fictional ceramic-metallic composite whose
-properties exist \emph{only} inside the knowledge graph.
+three fictional materials whose properties exist \emph{only} inside
+the knowledge graph:
 
-\paragraph{Material design.}
-Novidium is seeded as a \texttt{Material} node with three linked
-\texttt{Reference} chunks:
-$k = 73$\,W/(m\,K),
-$\rho = 5420$\,kg/m$^3$,
-$c_p = 612$\,J/(kg\,K),
-$\alpha \approx 2.20 \times 10^{-5}$\,m$^2$/s.
-It exhibits non-linear behaviour outside its safe operating range
-(200--850\,K), making physically plausible but deliberately unretrievable
-by any pre-trained model.
-
-\paragraph{Benchmark tasks (G1--G3).}
-Three tasks of increasing complexity reference Novidium by name and
-instruct the agent to retrieve its properties:
 \begin{itemize}
-  \item \textbf{G1}: 2D steady-state Dirichlet (400\,K / 300\,K), 48$\times$48 mesh.
-  \item \textbf{G2}: 2D transient cooling (600\,K $\to$ 293\,K), 32$\times$32, $t_\text{end}=200$\,s.
-  \item \textbf{G3}: 2D mixed BCs (Dirichlet 700\,K + Robin $h{=}50$), 64$\times$64.
+  \item \textbf{Novidium}: a ceramic-metallic composite ($k{=}73$\,W/m\,K,
+        $\rho{=}5420$\,kg/m$^3$, $c_p{=}612$\,J/kg\,K) ---
+        moderate conductor with unusual density.
+  \item \textbf{Cryonite}: a polymer-aerogel hybrid ($k{=}0.42$,
+        $\rho{=}1180$, $c_p{=}1940$) --- extreme insulator with
+        very low diffusivity ($\alpha \approx 1.8{\times}10^{-7}$\,m$^2$/s).
+  \item \textbf{Pyrathane}: a refractory cermet ($k{=}312$,
+        $\rho{=}3850$, $c_p{=}278$) --- very high conductivity
+        and diffusivity ($\alpha \approx 2.9{\times}10^{-4}$\,m$^2$/s).
+\end{itemize}
+
+Each material is seeded as a \texttt{Material} node with linked
+\texttt{Reference} chunks containing exact property values and
+simulation guidance.  Seven benchmark tasks (G1--G3, C1--C2, P1--P2)
+span steady-state, transient, and mixed-BC configurations.
+
+\paragraph{New metrics.}
+Standard success rate is inadequate for evaluating KG utility because
+a simulation with fabricated properties still ``succeeds''
+computationally.  We therefore introduce two physics-aware metrics:
+\begin{itemize}
+  \item \textbf{Material Property Fidelity (MPF):}
+        $\text{MPF} = 1 - \frac{1}{3}\sum_{p \in \{k,\rho,c_p\}}
+        |p_\text{agent} - p_\text{truth}| / p_\text{truth}$, measuring
+        how accurately the agent retrieves the correct material constants.
+  \item \textbf{Physics Score:} $0.5 \cdot \text{MPF} + 0.5 \cdot
+        T_\text{score}$, where $T_\text{score}$ checks whether the
+        simulation's actual $T_\text{max}$ and $T_\text{min}$ fall within
+        physically expected ranges.
 \end{itemize}
 
 \paragraph{Results.}
-\cref{tab:novidium} summarises the outcome.  All three modes achieve
-100\% simulation \emph{completion}, but they differ starkly in
-configuration quality:
+\cref{tab:novidium} presents the aggregate outcome across all seven
+novel-material tasks.
 
 \begin{table}[htbp]
 \centering\footnotesize
-\caption{Novel material experiment (Novidium, G1--G3).  KG Smart
-  consistently retrieves the correct proprietary properties while KG Off
-  fabricates plausible but incorrect values.}
+\caption{Novel material experiment (7 tasks across 3 fictional materials).
+  KG Smart achieves perfect property retrieval and physics scores.
+  KG Off fabricates incorrect properties for every material.}
 \label{tab:novidium}
-\setlength{\tabcolsep}{5pt}
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lccc}
 \toprule
 Metric & KG On & KG Off & KG Smart \\
 \midrule
-  Success rate          & 100\% & 100\%  & \textbf{100\%} \\
-  Config quality $\bar{Q}$ & 0.25 & 0.42  & \textbf{0.79} \\
-  Avg.\ iterations      & 7.3   & 3.0    & \textbf{5.0}   \\
-  Avg.\ time (s)        & 45.3  & 11.9   & \textbf{16.6}  \\
-\midrule
-  \multicolumn{4}{l}{\textit{Properties used (truth: $k$=73, $\rho$=5420, $c_p$=612)}} \\
-  \quad $k$ (W/m\,K)     & 73.0 & 10--50      & \textbf{73.0} \\
-  \quad $\rho$ (kg/m$^3$)& 5420 & 3000--8960  & \textbf{5420} \\
-  \quad $c_p$ (J/kg\,K)  & 612  & 390--500    & \textbf{612} \\
+  Success rate              & 57\%  & 100\%          & \textbf{100\%} \\
+  Config quality $\bar{Q}$  & 0.55  & 0.61           & \textbf{0.96}  \\
+  Property fidelity (MPF)   & 0.57  & 0.34           & \textbf{1.00}  \\
+  Physics score             & 0.71  & 0.63           & \textbf{1.00}  \\
+  Avg.\ iterations          & 5.3   & 3.1            & \textbf{5.0}   \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\textbf{KG Off} completes all simulations but invents entirely wrong
-material properties.  For G1, the LLM selects $k{=}10$, $\rho{=}3000$,
-$c_p{=}500$---far from Novidium's actual values.  Each task produces
-different fabricated values, confirming that the model has no parametric
-knowledge of this material and falls back to plausible-looking defaults.
+\textbf{KG Smart achieves perfect scores} (MPF$\,{=}\,$1.00, physics$\,{=}\,$1.00)
+across all seven tasks and all three materials.  The warm-start injection
+retrieves exact property values from the HNSW vector index before the
+agent loop begins, and the agent consistently uses them.
 
-\textbf{KG Smart} retrieves the correct properties ($k{=}73$,
-$\rho{=}5420$, $c_p{=}612$) in all three tasks via its warm-start
-injection mechanism.  The warm-start query matches Novidium's
-\texttt{Reference} chunks in the HNSW vector index, and the few-shot
-context informs the LLM of the exact values before the agent loop
-begins.  The quality score ($\bar{Q} = 0.79$) reflects near-perfect
-property retrieval with minor differences in mesh or BC configuration.
+\textbf{KG Off fabricates wrong properties} for every material.
+\cref{tab:novel-props} shows the agent-chosen vs.\ ground-truth
+properties.  The errors are severe: for Pyrathane the LLM assigns
+$k{=}0.15$\,W/m\,K---a $2{,}080\times$ underestimate of the true
+$k{=}312$---effectively treating a refractory super-conductor as an
+insulator.  For task P2 (transient cooling from 2000\,K), this causes
+$T_\text{max}{=}2{,}950$\,K --- exceeding the initial condition,
+a physically impossible result arising from numerical instability
+on a system made artificially stiff by the wrong conductivity.
 
-\textbf{KG On} retrieves correct properties for G1 ($Q{=}0.75$) but
-the mandatory KG-first workflow consumes more iterations (7.3 avg),
-and the config extraction from the verbose KG On responses was less
-reliable, yielding a lower overall quality score.
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{Material properties chosen by each mode (KG Off fabricates;
+  KG Smart retrieves correctly).  The $k$ error for Pyrathane is
+  $2{,}080\times$.}
+\label{tab:novel-props}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llrrr}
+\toprule
+Material & Mode & $k$ (W/m\,K) & $\rho$ (kg/m$^3$) & $c_p$ (J/kg\,K) \\
+\midrule
+\multirow{2}{*}{Novidium}
+  & KG Off  & 10--45  & 3000--8960 & 137--500 \\
+  & \textbf{KG Smart} & \textbf{73.0} & \textbf{5420} & \textbf{612} \\
+\addlinespace
+\multirow{2}{*}{Cryonite}
+  & KG Off  & 0.15--1.0 & 960--8960 & 450--1730 \\
+  & \textbf{KG Smart} & \textbf{0.42} & \textbf{1180} & \textbf{1940} \\
+\addlinespace
+\multirow{2}{*}{Pyrathane}
+  & KG Off  & 0.15  & 1600--1700 & 840--900 \\
+  & \textbf{KG Smart} & \textbf{312.0} & \textbf{3850} & \textbf{278} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-This experiment confirms the KG's value proposition: for \emph{novel
-or proprietary data} absent from the LLM's training corpus, KG Smart
-provides accurate, consistent property retrieval while maintaining
-computational efficiency comparable to the KG Off baseline.
-The result directly addresses the concern that high KG Off success rates on
-standard materials render the knowledge graph unnecessary---they do not,
-provided the target domain contains proprietary or novel information.
+\begin{figure}[htbp]
+  \centering
+  \input{figs/mpf_comparison.tikz}
+  \caption{Material Property Fidelity (MPF) per fictional material.
+    KG Off scores below 0.5 for all three materials, with Pyrathane
+    at 0.15 (conductivity error: $2{,}080\times$).  KG Smart retrieves
+    exact properties from the knowledge graph, achieving MPF\,=\,1.00
+    across all materials.}
+  \label{fig:mpf}
+\end{figure}
+
+\paragraph{Physical consequences of wrong properties.}
+The fabricated properties produce physically meaningless simulation
+outputs even though the runs complete without error:
+\begin{itemize}
+  \item \textbf{Pyrathane P2}: KG Off yields $T_\text{max}{=}2{,}950$\,K
+        (initial condition: 2000\,K) due to numerical instability from
+        using $k{=}0.15$ instead of $k{=}312$. KG Smart yields
+        $T_\text{max}{=}2{,}000$\,K (correct).
+  \item \textbf{Novidium G3}: KG Off yields $T_\text{min}{=}636$\,K;
+        KG Smart yields $T_\text{min}{=}488$\,K --- a 148\,K
+        discrepancy caused by wrong thermal conductivity.
+  \item \textbf{Cryonite C2}: KG Off uses $\rho{=}8{,}960$
+        (7.6$\times$ overestimate), producing a thermal time constant
+        $\tau$ that is wrong by nearly an order of magnitude.
+\end{itemize}
+
+\paragraph{Key takeaway.}
+The KG's value is not in making simulations \emph{run} --- LLMs can
+already do that.  The KG's value is in making simulations produce
+\emph{correct physics}.  For any domain with proprietary materials,
+novel compounds, or in-house measurement data, the KG Smart pattern
+transforms the system from an ``expensive random number generator''
+into a reliable engineering tool.  Property fidelity (MPF) is the
+critical metric: KG Smart scores 1.00 vs.\ KG Off's 0.34 --- a
+$2.9\times$ improvement on the dimension that actually matters for
+engineering decisions.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Production Agent Quality Metrics}
@@ -891,15 +955,15 @@ models improve, PDE-Agents will benefit without architectural changes.
 
 \paragraph{KG integration.}
 The KG Smart pattern (\cref{sec:ablation-disc}) recovers most lost
-performance, but the 8\% failure gap versus KG Off suggests further
-improvements.  The novel-material experiment (\cref{sec:novidium})
-confirms the KG's value for proprietary data, but a broader evaluation
-with multiple unseen materials is needed.  Future work will explore:
-(a) reinforcement learning from simulation outcomes to tune KG retrieval
-relevance, (b) dynamic confidence-based retrieval (only query KG when
-the LLM's self-assessed uncertainty exceeds a threshold), and
-(c) richer warm-start context that includes not just similar configs
-but also their failure diagnostics.
+performance, but a 6\% failure gap versus KG Off remains on standard tasks.
+The novel-material experiment (\cref{sec:novidium}) confirms the KG's value
+for proprietary data across three fictional materials spanning insulator,
+moderate-conductor, and refractory-cermet regimes.  Future work will explore:
+(a) sensitivity-weighted MPF that accounts for each property's influence on
+simulation output, (b) reinforcement learning from simulation outcomes to
+tune KG retrieval relevance, (c) dynamic confidence-based retrieval (only
+query KG when the LLM's uncertainty exceeds a threshold), and
+(d) richer warm-start context including failure diagnostics from similar past runs.
 
 \paragraph{Verification scope.}
 The V\&V study covers only steady-state and simple transient heat
@@ -932,22 +996,26 @@ with locally-deployed open-source LLMs.  The system achieves 97.4\% overall
 success across 1{,}135 production runs and demonstrates $\mathcal{O}(h^2)$
 spatial convergence validated against analytical solutions.
 
-Our three-way ablation study across 13 benchmark tasks reveals an important
+Our three-way ablation study across 17 benchmark tasks reveals an important
 and counter-intuitive finding: mandatory GraphRAG knowledge augmentation
-\emph{reduces} success on complex tasks (69\%) relative to the LLM-only
+\emph{reduces} success (59\%) relative to the LLM-only
 baseline (100\%).  However, our proposed \emph{KG Smart}
 integration---combining warm-start injection of similar past runs with lazy
-conditional retrieval---recovers 92\% success while retaining access to
+conditional retrieval---recovers 94\% success while retaining access to
 knowledge graph tools.  This demonstrates that the \emph{integration
 pattern}, not the knowledge source, determines KG utility for LLM agents.
 
 Crucially, the novel-material experiment (\cref{sec:novidium}) resolves
 the apparent paradox of high KG Off performance: when the task requires
 proprietary data absent from the LLM's training corpus, KG Smart achieves
-$1.9\times$ higher configuration quality ($\bar{Q} = 0.79$ vs.\ $0.42$)
-while the KG-free baseline fabricates incorrect material properties.
-This confirms the KG's essential role in domains with novel or proprietary
-information.
+$2.9\times$ higher material property fidelity (1.00 vs.\ 0.34) while the
+KG-free baseline fabricates physically incorrect properties---in one case
+assigning $k{=}0.15$\,W/m\,K to a material whose true conductivity is
+$312$\,W/m\,K, producing an unphysical simulation result ($T_\text{max}$
+exceeding the initial condition).  This confirms the KG's essential role
+in any domain with proprietary or novel information, and demonstrates
+that \emph{success rate alone is an insufficient metric}---physics
+correctness must be evaluated separately.
 
 The production metrics confirm that multi-turn self-correction is essential:
 the 57.6\% first-try rate improves to 97.4\% through iterative debugging,

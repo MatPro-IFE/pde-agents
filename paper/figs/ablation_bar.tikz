@@ -1,5 +1,5 @@
 % 3-way ablation bar chart — KG On vs KG Off vs KG Smart
-% Includes standard tasks (Easy/Medium/Hard) and novel-material tasks
+% 17 tasks: Easy/Medium/Hard (standard) + Novel (3 fictional materials)
 \begin{tikzpicture}
 \begin{axis}[
   ybar,
@@ -31,8 +31,8 @@
   (Easy,   100)
   (Medium,  33)
   (Hard,    50)
-  (Novel,  100)
-  (Overall, 69)
+  (Novel,   57)
+  (Overall, 59)
 };
 \addlegendentry{KG On}
 
@@ -52,7 +52,7 @@
   (Medium, 100)
   (Hard,    75)
   (Novel,  100)
-  (Overall, 92)
+  (Overall, 94)
 };
 \addlegendentry{KG Smart}
 
