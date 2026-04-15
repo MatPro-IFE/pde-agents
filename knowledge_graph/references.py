@@ -384,8 +384,72 @@ DOMAIN_REFERENCES: list[dict] = [
 ]
 
 
+# ─── Novidium (fictional novel material) references ───────────────────────────
+
+NOVIDIUM_REFERENCES: list[dict] = [
+    {
+        "ref_id":  "mat_novidium_properties",
+        "type":    "material_property",
+        "subject": "Novidium thermal properties",
+        "text": (
+            "Novidium is a ceramic-metallic composite with thermal conductivity "
+            "k = 73 W/(m·K), density ρ = 5420 kg/m³, and specific heat capacity "
+            "cp = 612 J/(kg·K). Thermal diffusivity α = k/(ρ·cp) ≈ 2.20×10⁻⁵ m²/s. "
+            "These properties are valid in the operating range 200–850 K. "
+            "Novidium should be used with these exact values; there are no publicly "
+            "available alternative property measurements."
+        ),
+        "source": "Novidium Materials Datasheet v1.0 (proprietary)",
+        "url":    "",
+        "tags":   ["novidium", "conductivity", "density", "specific_heat", "novel_material"],
+        "material_names": ["novidium"],
+    },
+    {
+        "ref_id":  "mat_novidium_temp_dependence",
+        "type":    "material_property",
+        "subject": "Novidium temperature-dependent conductivity",
+        "text": (
+            "Novidium exhibits strong non-linear thermal behaviour outside its "
+            "safe operating range (200–850 K). Above 850 K, micro-cracking at "
+            "grain boundaries causes conductivity to drop sharply from 73 to "
+            "~45 W/(m·K). Below 200 K, phonon scattering reduces k to ~0.5 W/(m·K), "
+            "making it a near-perfect insulator. Simulations with boundary temperatures "
+            "above 850 K must use a temperature-dependent k(T) model or restrict the "
+            "domain to the linear regime. Melting point: 2150 K. "
+            "Phase transition (ceramic matrix delamination) at 1680 K."
+        ),
+        "source": "Novidium Materials Datasheet v1.0 (proprietary)",
+        "url":    "",
+        "tags":   ["novidium", "temperature-dependent", "conductivity", "phase_change",
+                   "validity_limit", "novel_material"],
+        "material_names": ["novidium"],
+    },
+    {
+        "ref_id":  "mat_novidium_applications",
+        "type":    "material_property",
+        "subject": "Novidium typical applications and simulation guidance",
+        "text": (
+            "Novidium is designed for thermal barrier coatings, high-temperature "
+            "reactor liners, aerospace re-entry shielding, and fusion blanket "
+            "components. When simulating Novidium, ensure boundary temperatures "
+            "stay within 200–850 K for constant-property simulations. "
+            "For a Novidium plate of thickness L = 0.1 m, the thermal time constant "
+            "τ = ρ·cp·L²/(π²·k) ≈ 5420×612×0.01/(9.87×73) ≈ 46.1 s. "
+            "Use t_end ≥ 3τ ≈ 138 s to reach 95% of steady state. "
+            "Recommended mesh: at least 32×32 for 2D, 16×16×16 for 3D."
+        ),
+        "source": "Novidium Materials Datasheet v1.0 (proprietary)",
+        "url":    "",
+        "tags":   ["novidium", "applications", "simulation_guidance", "thermal_barrier",
+                   "novel_material"],
+        "material_names": ["novidium"],
+    },
+]
+
+
 # ─── All references combined ──────────────────────────────────────────────────
 
 ALL_REFERENCES: list[dict] = (
     MATERIAL_REFERENCES + BC_REFERENCES + SOLVER_REFERENCES + DOMAIN_REFERENCES
+    + NOVIDIUM_REFERENCES
 )

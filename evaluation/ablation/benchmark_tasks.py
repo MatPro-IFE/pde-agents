@@ -197,7 +197,91 @@ ABLATION_TASKS = [
 ]
 
 
+# ── Novel material (Novidium): KG-dependent tasks ────────────────────────────
+# These tasks reference a fictional material that LLMs have never seen during
+# pre-training.  Only the KG contains Novidium's properties.
+# Expected outcome: KG On / KG Smart >> KG Off.
+
+NOVIDIUM_TASKS = [
+    {
+        "id": "G1",
+        "difficulty": "novel",
+        "description": (
+            "Simulate 2D steady-state heat conduction in a Novidium plate. "
+            "Left wall at 400 K, right wall at 300 K, top and bottom insulated. "
+            "Use a 48×48 mesh. Look up the correct material properties for "
+            "Novidium from the knowledge graph."
+        ),
+        "ground_truth": {
+            "dim": 2, "nx": 48, "ny": 48,
+            "k_range": [70.0, 76.0],
+            "rho_range": [5400.0, 5440.0],
+            "cp_range": [600.0, 625.0],
+            "T_max_range": [395, 405],
+            "T_min_range": [295, 305],
+            "should_succeed": True,
+            "needs_kg": True,
+            "requires_novel_material": True,
+        },
+    },
+    {
+        "id": "G2",
+        "difficulty": "novel",
+        "description": (
+            "Model transient heat diffusion in a Novidium block (2D). "
+            "All four boundaries at 293 K, initial temperature 600 K. "
+            "Use 32×32 mesh, simulate for 200 seconds with dt=1.0. "
+            "Use the material properties of Novidium."
+        ),
+        "ground_truth": {
+            "dim": 2, "nx": 32, "ny": 32,
+            "k_range": [70.0, 76.0],
+            "rho_range": [5400.0, 5440.0],
+            "cp_range": [600.0, 625.0],
+            "t_end": 200.0,
+            "T_max_range": [293, 600],
+            "T_min_range": [290, 296],
+            "should_succeed": True,
+            "needs_kg": True,
+            "requires_novel_material": True,
+        },
+    },
+    {
+        "id": "G3",
+        "difficulty": "novel",
+        "description": (
+            "Simulate heat conduction in a Novidium component with mixed "
+            "boundary conditions. Left face heated to 700 K, right face "
+            "cooled by convection (h=50 W/m²K, T_amb=293 K). Top and bottom "
+            "insulated. 64×64 mesh, run for 150 seconds. "
+            "Use the thermal properties of the novel material Novidium."
+        ),
+        "ground_truth": {
+            "dim": 2, "nx": 64, "ny": 64,
+            "k_range": [70.0, 76.0],
+            "rho_range": [5400.0, 5440.0],
+            "cp_range": [600.0, 625.0],
+            "has_robin_bc": True,
+            "T_max_range": [695, 705],
+            "should_succeed": True,
+            "needs_kg": True,
+            "requires_novel_material": True,
+        },
+    },
+]
+
+
 def get_tasks_by_difficulty(difficulty: str | None = None) -> list[dict]:
     if difficulty is None:
         return ABLATION_TASKS
     return [t for t in ABLATION_TASKS if t["difficulty"] == difficulty]
+
+
+def get_novidium_tasks() -> list[dict]:
+    """Return only the novel-material (Novidium) benchmark tasks."""
+    return NOVIDIUM_TASKS
+
+
+def get_all_tasks() -> list[dict]:
+    """Return all tasks including the novel-material tasks."""
+    return ABLATION_TASKS + NOVIDIUM_TASKS

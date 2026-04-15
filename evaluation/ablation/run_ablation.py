@@ -39,7 +39,7 @@ from pathlib import Path
 import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from ablation.benchmark_tasks import ABLATION_TASKS
+from ablation.benchmark_tasks import ABLATION_TASKS, NOVIDIUM_TASKS
 
 DEFAULT_API_URL = "http://localhost:8000"
 TIMEOUT = 600  # 10 minutes per task
@@ -371,7 +371,8 @@ def aggregate(results: list[TaskResult]) -> dict:
                 "success_rate": sum(1 for r in subset if r.success) / max(len(subset), 1),
                 "avg_quality": sum(r.config_quality_score for r in subset) / max(len(subset), 1),
             }
-            for diff in ("easy", "medium", "hard")
+            for diff in ("easy", "medium", "hard", "novel")
+            if any(r.difficulty == diff for r in results)
         },
     }
 
@@ -464,12 +465,14 @@ def run_ablation(api_url: str, tasks: list[dict] | None = None,
         print(line)
 
     print(f"\n  By difficulty (success rate):")
-    for diff in ("easy", "medium", "hard"):
+    for diff in ("easy", "medium", "hard", "novel"):
+        if diff not in agg_on["by_difficulty"]:
+            continue
         on_sr = agg_on["by_difficulty"][diff]["success_rate"]
         off_sr = agg_off["by_difficulty"][diff]["success_rate"]
         line = f"    {diff:<10s}  KG On: {on_sr:.2f}  KG Off: {off_sr:.2f}"
         if include_smart and agg_smart:
-            smart_sr = agg_smart["by_difficulty"][diff]["success_rate"]
+            smart_sr = agg_smart["by_difficulty"].get(diff, {}).get("success_rate", 0)
             line += f"  KG Smart: {smart_sr:.2f}"
         print(line)
 
@@ -511,10 +514,15 @@ def main():
                         help="Include KG Smart (warm-start + lazy) as a third condition")
     parser.add_argument("--smart-only", action="store_true",
                         help="Run only the KG Smart condition (skip KG On and KG Off)")
+    parser.add_argument("--novidium", action="store_true",
+                        help="Run only the novel-material (Novidium) tasks (G1-G3)")
     args = parser.parse_args()
 
-    if args.tasks:
-        tasks = [t for t in ABLATION_TASKS if t["id"] in args.tasks]
+    if args.novidium:
+        tasks = NOVIDIUM_TASKS
+    elif args.tasks:
+        all_tasks = ABLATION_TASKS + NOVIDIUM_TASKS
+        tasks = [t for t in all_tasks if t["id"] in args.tasks]
     else:
         tasks = ABLATION_TASKS
 

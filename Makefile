@@ -7,7 +7,7 @@
         db-shell db-init \
         jupyter shell-fenics shell-agents \
         test lint \
-        eval-vv eval-ablation eval-ablation-smart eval-metrics eval-tables eval-examples eval-all \
+        eval-vv eval-ablation eval-ablation-smart eval-novidium-seed eval-novidium eval-metrics eval-tables eval-examples eval-all \
         paper-push paper-pull paper-status paper-pdf
 
 COMPOSE = docker compose
@@ -189,6 +189,14 @@ eval-examples:
 	docker exec pde-fenics bash /workspace/evaluation/examples/run_all.sh
 	cp evaluation/examples/output/sim_examples.png paper/figs/sim_examples.png
 	@echo "Done. Composite figure copied to paper/figs/sim_examples.png"
+
+eval-novidium-seed:
+	@echo "Seeding Novidium (fictional material) into Neo4j KG..."
+	$(COMPOSE) exec agents python /app/evaluation/ablation/seed_novidium.py
+
+eval-novidium:
+	@echo "Running 3-way ablation on novel-material (Novidium) tasks G1-G3..."
+	$(COMPOSE) exec -T agents python /app/evaluation/ablation/run_ablation.py --novidium --include-smart
 
 eval-all: eval-vv eval-ablation-smart eval-metrics eval-tables eval-examples
 	@echo "All evaluation experiments complete (3-way ablation included). Results in evaluation/results/"

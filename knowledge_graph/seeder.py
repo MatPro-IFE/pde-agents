@@ -95,6 +95,23 @@ MATERIALS: list[dict] = [
         "typical_uses": "optical components, laboratory glassware, oven windows",
         "k_range": (0.8, 1.2),
     },
+    {
+        "name": "Novidium",
+        "k": 73.0, "rho": 5420.0, "cp": 612.0,
+        "alpha": 73.0 / (5420.0 * 612.0),
+        "description": (
+            "Novidium is a novel ceramic-metallic composite with moderate thermal "
+            "conductivity (73 W/m·K) and an unusually high density (5420 kg/m³). "
+            "It exhibits a non-linear thermal response above 850 K where conductivity "
+            "drops sharply to ~45 W/m·K due to micro-cracking at grain boundaries. "
+            "Below 200 K it becomes a near-perfect insulator (k ≈ 0.5 W/m·K). "
+            "Safe operating range: 200–850 K. "
+            "Melting point: 2150 K. Phase transition at 1680 K."
+        ),
+        "typical_uses": "thermal barrier coatings, high-temperature reactor liners, "
+                        "aerospace re-entry shielding, fusion blanket components",
+        "k_range": (70.0, 76.0),
+    },
 ]
 
 

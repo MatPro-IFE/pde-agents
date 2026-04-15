@@ -660,15 +660,53 @@ Three KG modes in `SimulationAgent.__init__`:
 2. **Lazy conditional retrieval**: KG tools remain available but prompt says "only use after
    failure or when material properties genuinely unknown" — eliminates mandatory KG-first loop
 
-**3-way ablation results** (10 tasks, 3 difficulty levels):
+**3-way ablation results** (13 tasks, 4 difficulty levels incl. Novel):
 | Metric          | KG On | KG Off | KG Smart |
 |-----------------|-------|--------|----------|
-| Success rate    | 60%   | 100%   | **90%**  |
-| Config quality  | 0.38  | 0.75   | **0.69** |
-| Avg iterations  | 5.3   | 3.0    | **3.8**  |
-| Avg time (s)    | 25.3  | 14.0   | **15.9** |
+| Success rate    | 69%   | 100%   | **92%**  |
+| Config quality  | 0.34  | 0.68   | **0.72** |
+| Avg iterations  | 5.7   | 3.0    | **4.1**  |
+| Avg time (s)    | 30.0  | 13.5   | **16.0** |
 | Medium success  | 33%   | 100%   | **100%** |
 | Hard success    | 50%   | 100%   | **75%**  |
+| Novel success   | 100%  | 100%*  | **100%** |
+
+*KG Off succeeds on novel tasks but fabricates wrong material properties (avg quality 0.42).
 
 Key finding: **Integration pattern, not KG content, determines utility.**
-KG Smart recovers 30pp over mandatory KG by eliminating attention dilution.
+KG Smart recovers 23pp over mandatory KG by eliminating attention dilution.
+
+### Novel Material Experiment: Novidium (implemented 2026-04-15)
+
+**Purpose**: Prove KG value for genuinely novel/proprietary data that LLMs
+have never seen during training.
+
+**Novidium** is a fictional ceramic-metallic composite seeded ONLY into Neo4j:
+- k = 73 W/(m·K), rho = 5420 kg/m³, cp = 612 J/(kg·K)
+- 3 Reference chunks (properties, temperature dependence, applications)
+- Safe operating range: 200–850 K
+
+**Benchmark tasks** (G1–G3 in `evaluation/ablation/benchmark_tasks.py`):
+- G1: Steady-state Dirichlet, 48×48 mesh
+- G2: Transient cooling, 32×32, t_end=200s
+- G3: Mixed BCs (Robin h=50), 64×64
+
+**Results** — KG Smart achieves 1.9× higher quality than KG Off:
+| Metric          | KG On | KG Off | KG Smart |
+|-----------------|-------|--------|----------|
+| Success rate    | 100%  | 100%   | **100%** |
+| Config quality  | 0.25  | 0.42   | **0.79** |
+| k used          | 73.0  | 10–50  | **73.0** |
+| ρ used          | 5420  | 3k–9k  | **5420** |
+| cp used         | 612   | 390–500| **612**  |
+
+KG Off fabricates entirely wrong properties; KG Smart retrieves correct ones
+via warm-start HNSW match on Reference chunks.
+
+**Files added/modified**:
+- `knowledge_graph/seeder.py`: Novidium in MATERIALS list
+- `knowledge_graph/references.py`: 3 Novidium Reference entries
+- `evaluation/ablation/seed_novidium.py`: Seeding script
+- `evaluation/ablation/benchmark_tasks.py`: NOVIDIUM_TASKS (G1–G3)
+- `tools/knowledge_tools.py`: Made `question` param optional (was required, caused tool call failure)
+- `paper/main.tex`: Section 6.4 (Novel Material Experiment), updated abstract/conclusion

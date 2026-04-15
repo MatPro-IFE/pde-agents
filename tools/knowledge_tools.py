@@ -31,7 +31,7 @@ def _kg():
 
 @tool
 def query_knowledge_graph(
-    question: str,
+    question: str = "",
     material: str = "",
     k: float = 0.0,
     dim: int = 0,
@@ -44,7 +44,7 @@ def query_knowledge_graph(
     and learned patterns. Use this tool to:
 
       1. Look up material properties
-         → set material="copper" or material="steel"
+         → set material="copper" or material="steel" or material="novidium"
       2. Find similar past simulations before running a new one
          → set k=50.0, dim=2 (or 3)
       3. Narrow similarity search by boundary conditions or domain size
@@ -59,8 +59,8 @@ def query_knowledge_graph(
          → set question="What material has k≈200?"
 
     Args:
-        question:     Natural language question or intent
-        material:     Optional material name (e.g. "aluminium", "copper")
+        question:     Natural language question or intent (optional if material is provided)
+        material:     Optional material name (e.g. "aluminium", "copper", "novidium")
         k:            Optional thermal conductivity — find nearest material or similar runs
         dim:          Optional simulation dimension (2 or 3) for run similarity search
         run_id:       Optional run ID to get lineage/ancestry
