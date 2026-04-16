@@ -18,6 +18,7 @@ ABLATION_TASKS = [
     {
         "id": "E1",
         "difficulty": "easy",
+        "material_novelty": "explicit_params",
         "description": (
             "Run a 2D heat equation on a unit square. "
             "Left wall at 0 K, right wall at 1 K, top and bottom insulated. "
@@ -35,6 +36,7 @@ ABLATION_TASKS = [
     {
         "id": "E2",
         "difficulty": "easy",
+        "material_novelty": "explicit_params",
         "description": (
             "Simulate heat conduction in 2D with k=10 W/(mK), rho=1000 kg/m3, "
             "cp=500 J/(kgK). Left=273K, right=373K, top and bottom Neumann zero. "
@@ -52,6 +54,7 @@ ABLATION_TASKS = [
     {
         "id": "E3",
         "difficulty": "easy",
+        "material_novelty": "explicit_params",
         "description": (
             "2D heat equation, all walls at T=500K, uniform initial temperature 300K. "
             "k=50, rho=7800, cp=500. 32x32, t_end=10.0, dt=0.5."
@@ -70,6 +73,7 @@ ABLATION_TASKS = [
     {
         "id": "M1",
         "difficulty": "medium",
+        "material_novelty": "known",
         "description": (
             "Simulate heat conduction in a steel plate (AISI 1010). "
             "Left wall at 300K, right wall at 500K. "
@@ -89,6 +93,7 @@ ABLATION_TASKS = [
     {
         "id": "M2",
         "difficulty": "medium",
+        "material_novelty": "known",
         "description": (
             "Model heat transfer in a copper block. The left face is at 400K "
             "and the right face is cooled by convection (h=25 W/m2K, T_amb=293K). "
@@ -108,6 +113,7 @@ ABLATION_TASKS = [
     {
         "id": "M3",
         "difficulty": "medium",
+        "material_novelty": "known",
         "description": (
             "Simulate heat diffusion in aluminium with a constant volumetric heat "
             "source of 1000 W/m3. All boundaries at 293K. 32x32 mesh, t_end=2s."
@@ -126,6 +132,7 @@ ABLATION_TASKS = [
     {
         "id": "H1",
         "difficulty": "hard",
+        "material_novelty": "known",
         "description": (
             "Simulate rapid quenching of a hot steel plate. Initial temperature "
             "is 1200K. All surfaces are convectively cooled with h=500 W/m2K and "
@@ -143,6 +150,7 @@ ABLATION_TASKS = [
     {
         "id": "H2",
         "difficulty": "hard",
+        "material_novelty": "known",
         "description": (
             "Run a 3D heat equation for a ceramic insulator. "
             "One face at 1000K, opposite face at 300K, other four faces insulated. "
@@ -159,6 +167,7 @@ ABLATION_TASKS = [
     {
         "id": "H3",
         "difficulty": "hard",
+        "material_novelty": "known",
         "description": (
             "Model steady-state heat conduction with a very small time step. "
             "Material: titanium. Left=500K, right=300K. "
@@ -178,6 +187,7 @@ ABLATION_TASKS = [
     {
         "id": "H4",
         "difficulty": "hard",
+        "material_novelty": "known",
         "description": (
             "I need to simulate heat in 'something like stainless steel 304' "
             "with mixed boundary conditions. Left heated to 800K, top cooled by "
@@ -206,6 +216,7 @@ NOVIDIUM_TASKS = [
     {
         "id": "G1",
         "difficulty": "novel",
+        "material_novelty": "novel",
         "description": (
             "Simulate 2D steady-state heat conduction in a Novidium plate. "
             "Left wall at 400 K, right wall at 300 K, top and bottom insulated. "
@@ -227,6 +238,7 @@ NOVIDIUM_TASKS = [
     {
         "id": "G2",
         "difficulty": "novel",
+        "material_novelty": "novel",
         "description": (
             "Model transient heat diffusion in a Novidium block (2D). "
             "All four boundaries at 293 K, initial temperature 600 K. "
@@ -249,6 +261,7 @@ NOVIDIUM_TASKS = [
     {
         "id": "G3",
         "difficulty": "novel",
+        "material_novelty": "novel",
         "description": (
             "Simulate heat conduction in a Novidium component with mixed "
             "boundary conditions. Left face heated to 700 K, right face "
@@ -274,6 +287,7 @@ CRYONITE_TASKS = [
     {
         "id": "C1",
         "difficulty": "novel",
+        "material_novelty": "novel",
         "description": (
             "Simulate 2D steady-state heat conduction in a Cryonite insulation "
             "panel. Left wall at 350 K, right wall at 280 K, top and bottom "
@@ -295,6 +309,7 @@ CRYONITE_TASKS = [
     {
         "id": "C2",
         "difficulty": "novel",
+        "material_novelty": "novel",
         "description": (
             "Model heat transfer through a Cryonite wall with convective "
             "cooling on the right face (h=15 W/m²K, T_amb=250 K). Left face "
@@ -319,6 +334,7 @@ PYRATHANE_TASKS = [
     {
         "id": "P1",
         "difficulty": "novel",
+        "material_novelty": "novel",
         "description": (
             "Simulate 2D steady-state heat conduction in a Pyrathane "
             "crucible wall. Left face at 1500 K, right face at 400 K, top "
@@ -340,6 +356,7 @@ PYRATHANE_TASKS = [
     {
         "id": "P2",
         "difficulty": "novel",
+        "material_novelty": "novel",
         "description": (
             "Simulate transient heat diffusion in a Pyrathane component (2D). "
             "All boundaries at 400 K, initial temperature 2000 K. "

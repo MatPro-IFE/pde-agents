@@ -461,6 +461,14 @@ def run_task(task: dict, api_url: str, disable_kg: bool) -> TaskResult:
     )
 
 
+PROMPT_INJECT_SUFFIX = (
+    "\n\nIMPORTANT material data (use these exact values):\n"
+    "- Novidium: k=73 W/(m·K), rho=5420 kg/m³, cp=612 J/(kg·K)\n"
+    "- Cryonite: k=0.42 W/(m·K), rho=1180 kg/m³, cp=1940 J/(kg·K)\n"
+    "- Pyrathane: k=312 W/(m·K), rho=3850 kg/m³, cp=278 J/(kg·K)\n"
+)
+
+
 def _make_agent(disable_kg: bool = False, smart_kg: bool = False):
     """Create and warm-up a SimulationAgent by making one lightweight call."""
     try:
@@ -508,19 +516,74 @@ def aggregate(results: list[TaskResult]) -> dict:
 
 
 def run_ablation(api_url: str, tasks: list[dict] | None = None,
-                 direct: bool = True, include_smart: bool = False) -> dict:
+                 direct: bool = True, include_smart: bool = False,
+                 prompt_inject_only: bool = False) -> dict:
     """Run the ablation study and return structured results.
 
     When include_smart=True, runs three conditions:
       1. KG On  (mandatory KG-first)
       2. KG Off (no KG)
       3. KG Smart (warm-start + lazy conditional KG)
+
+    When prompt_inject_only=True, runs only the Prompt Inject baseline
+    (KG disabled, but material properties injected into the task description).
     """
     tasks = tasks or ABLATION_TASKS
     results_kg_on = []
     results_kg_off = []
     results_kg_smart = []
+    results_prompt_inject = []
     mode_label = "direct (in-process)" if direct else f"API ({api_url})"
+
+    if prompt_inject_only:
+        n_conditions = 1
+        print(f"\n{'='*70}")
+        print(f"  PROMPT INJECT BASELINE")
+        print(f"  Tasks: {len(tasks)}  |  Mode: {mode_label}")
+        print(f"{'='*70}")
+
+        if direct:
+            print("\n─── Initialising agent (KG disabled + prompt inject) ───")
+            print("  PROMPT INJECT →", end=" ")
+            agent_pi = _make_agent(disable_kg=True)
+
+        print(f"\n─── Running Prompt Inject baseline ───")
+        for task in tasks:
+            injected_task = dict(task)
+            injected_task["description"] = task["description"] + PROMPT_INJECT_SUFFIX
+            if direct:
+                r = run_task_direct(injected_task, disable_kg=True, agent=agent_pi)
+                r.mode = "prompt_inject"
+                r.task_id = task["id"]
+                results_prompt_inject.append(r)
+
+        agg_pi = aggregate(results_prompt_inject)
+
+        print(f"\n\n{'='*70}")
+        print(f"  PROMPT INJECT RESULTS")
+        print(f"{'='*70}")
+        for metric in ("success_rate", "avg_quality", "avg_property_fidelity",
+                        "avg_physics_score", "avg_iterations", "avg_wall_time"):
+            v = agg_pi[metric]
+            fmt = ".2f" if "rate" in metric or "quality" in metric or "fidelity" in metric or "score" in metric else ".1f"
+            print(f"  {metric:<28s}  {v:>8{fmt}}")
+
+        summary = {
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
+            "n_tasks": len(tasks),
+            "prompt_inject": {
+                "aggregate": agg_pi,
+                "tasks": [asdict(r) for r in results_prompt_inject],
+            },
+        }
+        output_dir = Path(__file__).resolve().parents[1] / "results"
+        output_dir.mkdir(parents=True, exist_ok=True)
+        output_file = output_dir / "ablation_prompt_inject.json"
+        with open(output_file, "w") as f:
+            json.dump(summary, f, indent=2, default=str)
+        print(f"\n  Results saved to {output_file}")
+        return summary
+
     n_conditions = 3 if include_smart else 2
 
     print(f"\n{'='*70}")
@@ -647,6 +710,8 @@ def main():
                         help="Run only the KG Smart condition (skip KG On and KG Off)")
     parser.add_argument("--novidium", action="store_true",
                         help="Run only the novel-material (Novidium) tasks (G1-G3)")
+    parser.add_argument("--prompt-inject", action="store_true",
+                        help="Run the Prompt Inject baseline (properties in system prompt, no KG)")
     args = parser.parse_args()
 
     if args.novidium:
@@ -658,7 +723,8 @@ def main():
         tasks = ABLATION_TASKS
 
     run_ablation(args.api_url, tasks, direct=not args.api_mode,
-                 include_smart=args.include_smart or args.smart_only)
+                 include_smart=args.include_smart or args.smart_only,
+                 prompt_inject_only=args.prompt_inject)
 
 
 if __name__ == "__main__":
