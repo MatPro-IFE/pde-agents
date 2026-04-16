@@ -1,0 +1,31 @@
+% Error propagation: how wrong material properties affect simulation output
+\begin{table}[t]
+\centering
+\caption{Error propagation from fabricated properties (KG~Off) to
+simulation output.  Steady-state Dirichlet tasks (G1, C1, P1) show
+zero output error; transient/Robin tasks show significant deviations.}
+\label{tab:error-propagation}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llrrrrrr@{}}
+\toprule
+Task & Mat. & $|\Delta T_{\!\max}|$ & $|\Delta T_{\!\min}|$ &
+  $|\Delta T_{\!\mathrm{mean}}|$ & $\epsilon_k$ & $\epsilon_\rho$ & $\epsilon_{c_p}$ \\
+  &  & (K) & (K) & (K) & (\%) & (\%) & (\%) \\
+\midrule
+G1 & Nov. &   $<$0.1 &   $<$0.1 &    $<$0.1 &  86 &  45 &  18 \\
+G2 & Nov. &   $<$0.1 &   $<$0.1 &    20.7 &  38 &  65 &  78 \\
+G3 & Nov. &   $<$0.1 &   46.6 &     1.3 &  86 &  45 &  18 \\
+\midrule
+C1 & Cryo. &   $<$0.1 &   $<$0.1 &    $<$0.1 & 64 &  19 &  29 \\
+C2 & Cryo. &   $<$0.1 &    9.5 &     0.3 & 138 & 659 &  77 \\
+\midrule
+P1 & Pyra. &   $<$0.1 &   $<$0.1 &    $<$0.1 & 100 &  58 & 224 \\
+P2 & Pyra. & \textbf{949} & $<$0.1 & \textbf{363} & 100 &  58 & 188 \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.3em}
+{\scriptsize $\epsilon_p = |p_{\text{fab}} - p_{\text{true}}|/p_{\text{true}}$.
+P2's $k$ error ($2{,}080\times$) produces 949\,K $T_{\max}$ overshoot.}
+\end{table}

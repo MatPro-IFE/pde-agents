@@ -1,0 +1,28 @@
+% Multi-model cross-validation: novel-material tasks (n=7)
+\begin{table}[t]
+\centering
+\caption{Cross-model validation on novel tasks ($n{=}7$).  KG~Smart
+achieves perfect MPF with both LLM backends.}
+\label{tab:multi-model}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llcccc@{}}
+\toprule
+Model & Mode & Succ. & Qual. & MPF & Phys. \\
+\midrule
+\multirow{3}{*}{Qwen2.5-Coder 32B}
+  & KG On    & 57\% & 0.41 & 0.43 & 0.64 \\
+  & KG Off   & 100\% & 0.61 & 0.34 & 0.63 \\
+  & KG Smart & 100\% & 0.96 & \textbf{1.00} & \textbf{1.00} \\
+\midrule
+\multirow{3}{*}{Qwen3-Coder-Next 80B}
+  & KG On    &  71\% & 0.14 & 0.14 & 0.57 \\
+  & KG Off   &  86\% & 0.54 & 0.40 & 0.70 \\
+  & KG Smart & 100\% & 0.96 & \textbf{1.00} & \textbf{1.00} \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.3em}
+{\scriptsize Warm-start vector search retrieves exact properties before the
+LLM reasons, eliminating dependence on memorised material data.}
+\end{table}

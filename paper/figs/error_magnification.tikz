@@ -1,0 +1,50 @@
+% Error magnification: mean property error (%) vs output error (%)
+% for the tasks where output errors are non-negligible
+\begin{tikzpicture}
+\begin{axis}[
+    ybar,
+    bar width=12pt,
+    width=0.85\columnwidth,
+    height=5.5cm,
+    ylabel={Relative error (\%)},
+    symbolic x coords={G2,G3,C2,P2},
+    xtick=data,
+    xticklabel style={font=\small},
+    yticklabel style={font=\small},
+    ylabel style={font=\small},
+    legend style={
+        at={(0.02,0.98)},
+        anchor=north west,
+        font=\footnotesize,
+        draw=none,
+        fill=white,
+        fill opacity=0.8,
+        text opacity=1,
+    },
+    ymin=0,
+    ymax=55,
+    enlarge x limits=0.25,
+    nodes near coords,
+    every node near coord/.append style={font=\tiny, rotate=90, anchor=west},
+]
+
+% Mean property error (avg of k, rho, cp relative errors)
+\addplot[fill=red!60!white] coordinates {
+    (G2, 27.2)
+    (G3, 49.7)
+    (C2, 51.3)
+    (P2, 47.5)
+};
+
+% Output T_mean relative error
+\addplot[fill=blue!60!white] coordinates {
+    (G2, 4.1)
+    (G3, 0.2)
+    (C2, 0.1)
+    (P2, 24.4)
+};
+
+\legend{Avg.\ property error, $T_\text{mean}$ error}
+
+\end{axis}
+\end{tikzpicture}

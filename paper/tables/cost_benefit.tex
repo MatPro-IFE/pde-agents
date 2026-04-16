@@ -1,0 +1,22 @@
+% Cost-benefit analysis of KG modes on 7 novel-material tasks
+\begin{table}[t]
+\centering
+\caption{Cost-benefit of KG modes on novel tasks ($n{=}7$).
+Efficiency $=$ MPF / wall-time ($\times10^{-2}$).}
+\label{tab:cost-benefit}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+Mode & Succ. & Time & Iter. & MPF & Phys. & Eff. \\
+     &       & (s)  &       &     & Score & ($\!\times\!10^{-2}$) \\
+\midrule
+KG Off   & 100\% & 14.2 & 3.0 & 0.34 & 0.63 & 2.39 \\
+KG On    &  57\% & 64.1 & 7.1 & 0.43 & 0.64 & 0.67 \\
+KG Smart & 100\% & 23.8 & 4.9 & \textbf{1.00} & \textbf{1.00} & \textbf{4.20} \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.3em}
+{\scriptsize KG Smart: +68\% time, +194\% MPF, +76\% efficiency vs.\ KG Off.}
+\end{table}
