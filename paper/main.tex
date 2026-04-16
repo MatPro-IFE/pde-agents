@@ -1090,6 +1090,42 @@ or CFL stability adjustments.  This is consistent with the complexity
 of translating free-form natural language to precise numerical
 configurations.
 
+\subsection{KG Growth and Learning Curve}
+\label{sec:kg-growth}
+
+The knowledge graph is built \emph{successively}: each completed
+simulation creates a new \texttt{Run} node with HNSW-indexed embeddings
+and up to five \texttt{SIMILAR\_TO} edges to its nearest neighbours.
+\cref{fig:kg-growth} plots both the cumulative and rolling-window
+(50-run) success rates against run number, which serves as a proxy
+for KG size.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{\linewidth}{!}{\input{figs/kg_growth.tikz}}
+  \caption{Success rate versus KG size.  During the \textit{Bootstrap}
+    phase (first 16 runs, KG nearly empty) success is 68.8\%.  Once the
+    KG exceeds $\sim$20 run nodes (\textit{Sweep~1}), the rate climbs to
+    99.7\%.  The dip around run 700 corresponds to a deliberate
+    stress-test with extreme boundary conditions.  The final
+    \textit{Ablation+} phase (235 runs, mature KG with $>$1{,}100 nodes)
+    achieves 100\% success.}
+  \label{fig:kg-growth}
+\end{figure}
+
+Four phases emerge: (1)~a \textit{bootstrap} phase with only 16 runs
+where the KG offers minimal context and 31.2\% of runs fail;
+(2)~\textit{Sweep~1} (313 runs, 99.7\%), where even a modest KG already
+provides enough similar-run context for warm-start injection;
+(3)~\textit{Sweep~2} (805 runs, 97.0\%), the large parameter sweep that
+deliberately tests edge cases; and (4)~the \textit{Ablation+} phase
+(235 runs, 100\%), during which the mature KG (1{,}329 \texttt{Run}
+nodes, 6{,}661 \texttt{SIMILAR\_TO} edges) provides rich context for
+every query.  This progression supports the hypothesis that the KG
+acts as a growing episodic memory: as the neighbourhood graph densifies,
+the agent's warm-start context becomes increasingly informative,
+reducing first-try failures.
+
 \subsection{Comparison with Prior Work}
 
 \citet{bauer2023llm} report $\approx 60\%$ one-shot success for

@@ -1,0 +1,59 @@
+{
+  "total_runs": 1369,
+  "total_success": 1339,
+  "total_failed": 30,
+  "overall_success_rate": 97.8,
+  "phases": [
+    {
+      "phase": 1,
+      "name": "Bootstrap",
+      "runs": "1\u201316",
+      "count": 16,
+      "date_start": "2026-02-19",
+      "date_end": "2026-02-26",
+      "success_rate": 68.8,
+      "failures": 5,
+      "kg_size_start": 0,
+      "kg_size_end": 16
+    },
+    {
+      "phase": 2,
+      "name": "Sweep 1",
+      "runs": "17\u2013329",
+      "count": 313,
+      "date_start": "2026-03-05",
+      "date_end": "2026-03-06",
+      "success_rate": 99.7,
+      "failures": 1,
+      "kg_size_start": 16,
+      "kg_size_end": 329
+    },
+    {
+      "phase": 3,
+      "name": "Sweep 2",
+      "runs": "330\u20131134",
+      "count": 805,
+      "date_start": "2026-03-17",
+      "date_end": "2026-03-17",
+      "success_rate": 97.0,
+      "failures": 24,
+      "kg_size_start": 329,
+      "kg_size_end": 1134
+    },
+    {
+      "phase": 4,
+      "name": "Ablation+",
+      "runs": "1135\u20131369",
+      "count": 235,
+      "date_start": "2026-03-23",
+      "date_end": "2026-04-16",
+      "success_rate": 100.0,
+      "failures": 0,
+      "kg_size_start": 1134,
+      "kg_size_end": 1369
+    }
+  ],
+  "neo4j_run_nodes": 1329,
+  "neo4j_similar_to_edges": 6661,
+  "neo4j_avg_similarity": 0.996
+}
