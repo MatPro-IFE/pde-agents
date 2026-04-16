@@ -1,0 +1,122 @@
+% Three KG integration modes — clean non-overlapping layout
+\begin{tikzpicture}[
+  font=\small,
+  >=Latex,
+  sbox/.style={draw, rounded corners=3pt, minimum width=2.4cm,
+               minimum height=0.58cm, thick, align=center,
+               font=\scriptsize},
+  kgcall/.style={sbox, fill=nodeblue!15, draw=nodeblue!70},
+  agentstep/.style={sbox, fill=nodegreen!12, draw=nodegreen!70},
+  warmstart/.style={sbox, fill=nodeorange!18, draw=nodeorange!70},
+  succeed/.style={sbox, fill=nodegreen!22, draw=nodegreen!80,
+                  font=\scriptsize\bfseries},
+  failbox/.style={sbox, fill=nodered!12, draw=nodered!70},
+  colhead/.style={font=\small\bfseries, align=center},
+  arr/.style={->, thick, black!55},
+  darr/.style={->, thick, dashed, #1},
+  lbl/.style={font=\tiny, text=black!50, align=center},
+  ann/.style={font=\tiny, text=black!45, align=left},
+]
+
+% Column x-positions — wide enough so nothing crosses columns
+\def\colA{0}
+\def\colB{5.0}
+\def\colC{10.0}
+
+% Row step
+\def\rs{1.05}
+
+% ═══════════ HEADERS ═══════════
+\node[colhead] at (\colA, 0.5) {(a) KG Off};
+\node[lbl, text=black!35] at (\colA, 0.0) {\scriptsize No KG tools};
+
+\node[colhead] at (\colB, 0.5) {(b) KG On};
+\node[lbl, text=nodered!60] at (\colB, 0.0) {\scriptsize Mandatory KG-first};
+
+\node[colhead] at (\colC, 0.5) {(c) KG Smart};
+\node[lbl, text=nodegreen!60] at (\colC, 0.0) {\scriptsize Warm-start + lazy};
+
+% ═══════════ COLUMN A — KG Off ═══════════
+\node[agentstep] (a1) at (\colA, {-1*\rs}) {Parse task};
+\node[agentstep] (a2) at (\colA, {-2*\rs}) {Validate config};
+\node[agentstep] (a3) at (\colA, {-3*\rs}) {Run simulation};
+\node[succeed]   (a4) at (\colA, {-4*\rs}) {Report result};
+
+\draw[arr] (a1) -- (a2);
+\draw[arr] (a2) -- (a3);
+\draw[arr] (a3) -- (a4);
+
+\node[ann, anchor=west] at ($(a1.east)+(0.1,0)$)
+  {LLM guesses\\[-1pt]properties};
+
+\node[lbl] at (\colA, -5.0) {\textit{Fast (14\,s avg.)}};
+\node[lbl] at (\colA, -5.35) {\textit{Wrong physics}};
+\node[lbl] at (\colA, -5.7) {\textit{MPF\,=\,0.34}};
+
+% ═══════════ COLUMN B — KG On ═══════════
+\node[agentstep] (b1) at (\colB, {-1*\rs})  {Parse task};
+\node[kgcall]    (b2) at (\colB, {-2*\rs})  {Query KG};
+\node[kgcall]    (b3) at (\colB, {-3*\rs})  {Check warnings};
+\node[agentstep] (b4) at (\colB, {-4*\rs})  {Validate config};
+\node[agentstep] (b5) at (\colB, {-5*\rs})  {Run simulation};
+\node[failbox]   (b6) at (\colB, {-6*\rs})  {Retry / timeout};
+
+\draw[arr] (b1) -- (b2);
+\draw[arr] (b2) -- (b3);
+\draw[arr] (b3) -- (b4);
+\draw[arr] (b4) -- (b5);
+\draw[arr] (b5) -- (b6);
+
+% Retry loop — stay within column, route left with tight clearance
+\coordinate (bloop) at (\colB-1.6, {-4*\rs});
+\draw[darr=nodered!60]
+  (b6.west) -| (bloop) |- (b2.west);
+\node[font=\tiny, text=nodered!55, rotate=90, anchor=south]
+  at (\colB-1.7, {-4*\rs}) {retry};
+
+\node[ann, anchor=west] at ($(b2.east)+(0.1,0)$)
+  {Required\\[-1pt]every run};
+
+\node[lbl] at (\colB, -7.2) {\textit{Slow (64\,s avg.)}};
+\node[lbl] at (\colB, -7.55) {\textit{57\% success}};
+\node[lbl] at (\colB, -7.9) {\textit{MPF\,=\,0.43}};
+
+% ═══════════ COLUMN C — KG Smart ═══════════
+\node[warmstart] (c0) at (\colC, {-0.4*\rs}) {Warm-start inject};
+\node[agentstep] (c1) at (\colC, {-1.5*\rs}) {Parse task};
+\node[agentstep] (c2) at (\colC, {-2.5*\rs}) {Validate config};
+\node[agentstep] (c3) at (\colC, {-3.5*\rs}) {Run simulation};
+\node[succeed]   (c4) at (\colC, {-4.5*\rs}) {Report result};
+
+\draw[arr] (c0) -- (c1);
+\draw[arr] (c1) -- (c2);
+\draw[arr] (c2) -- (c3);
+\draw[arr] (c3) -- (c4);
+
+% Failure path — single right-side loop, no crossing
+\node[kgcall] (c5) at (\colC, {-5.8*\rs}) {Query KG};
+% Down from Report result to Query KG
+\draw[darr=nodeblue!55] (c4) -- (c5);
+% Return: right-side loop from Query KG back up to Validate config
+\coordinate (cR) at (\colC+2.0, {-5.8*\rs});   % right of KG
+\coordinate (cT) at (\colC+2.0, {-2.5*\rs});    % right of Validate
+\draw[darr=nodeblue!55] (c5.east) -- (cR) -- (cT) -- (c2.east);
+% Label on the right-side vertical segment
+\node[font=\tiny, text=nodeblue!50, rotate=-90, anchor=south]
+  at (\colC+2.15, {-4.15*\rs}) {retry on failure};
+
+% Annotations — to the left, clear of the right-side loop
+\node[ann, anchor=east] at ($(c0.west)+(-0.1,0)$)
+  {HNSW top-3\\[-1pt]past runs};
+\node[ann, anchor=east] at ($(c1.west)+(-0.1,0)$)
+  {Uses injected\\[-1pt]context};
+
+\node[lbl] at (\colC, -7.2) {\textit{Balanced (24\,s avg.)}};
+\node[lbl] at (\colC, -7.55) {\textit{100\% success}};
+\node[lbl] at (\colC, -7.9) {\textit{MPF\,=\,1.00}};
+
+% ═══════════ SEPARATORS ═══════════
+\draw[black!12, thin] (2.5, 0.9) -- (2.5, -8.2);
+\draw[black!12, thin] (7.5, 0.9) -- (7.5, -8.2);
+
+\end{tikzpicture}

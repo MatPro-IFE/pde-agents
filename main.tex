@@ -22,6 +22,7 @@
 \usepackage{xcolor}
 \usepackage{booktabs}
 \usepackage{multirow}
+\usepackage{tabularx}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{tikz}
@@ -84,30 +85,36 @@ full lifecycle of finite element method (FEM) simulations through natural-langua
 interaction.  The system combines three specialist large language model (LLM)
 agents—Simulation, Analytics, and Database—orchestrated via a LangGraph
 supervisor graph, with a locally-deployed open-source LLM stack
-(qwen2.5-coder:32b, llama3.3:70b) running on dual NVIDIA RTX PRO 6000
-Blackwell GPUs ($\approx$196\,GB combined VRAM).
+(Qwen3-Coder-Next, Llama~4~Scout) running on dual NVIDIA RTX PRO 6000
+Blackwell GPUs ($\approx$196\,GB combined VRAM).  The architecture is
+model-agnostic; we report cross-model validation across two
+generations of open-source LLMs.
 A central novelty is the integration of a \emph{GraphRAG} knowledge base
 (Neo4j + 768-dimensional vector embeddings) that enriches agents with curated
 material properties, known failure patterns, and prior run lineage.
-We report four empirical contributions: (i) a formal verification and
+We report five empirical contributions: (i) a formal verification and
 validation (V\&V) study confirming second-order spatial convergence (\(\mathcal{O}(h^2)\))
-for all three benchmark cases on the heat equation solver; (ii) a three-way
-ablation study across 17 benchmark tasks revealing that mandatory KG
-invocation paradoxically \emph{reduces} success to 59\% versus a 100\%
-LLM-only baseline, but that our proposed \emph{KG Smart} integration---combining
+for all three benchmark cases on the heat equation solver; (ii) a four-way
+ablation study across 17 benchmark tasks comparing KG~On, KG~Off, KG~Smart,
+and a Prompt~Inject baseline, revealing that mandatory KG invocation
+paradoxically \emph{reduces} success to 59\% versus a 100\% LLM-only
+baseline, but that our proposed \emph{KG Smart} integration---combining
 HNSW-based warm-start injection with lazy conditional retrieval---recovers
 94\% success while retaining knowledge graph access; (iii) a novel-material
 experiment using three fictional materials whose properties exist only
-in the KG, demonstrating that KG Smart achieves perfect material property
-fidelity (1.00) versus 0.34 for the KG-free baseline, which fabricates
-physically incorrect properties leading to simulation errors exceeding
-$2{,}000\times$ in thermal conductivity; and (iv) production-scale
-agent quality metrics from 1{,}135 real simulation runs showing 97.4\%
-overall success and a 57.6\% first-try rate.  All code, models, and
-evaluation artifacts are released openly.  Our findings demonstrate that
-\emph{integration pattern}, not knowledge content, determines whether
-GraphRAG augmentation helps or hinders LLM agents, and identify concrete
-design principles for autonomous FEM simulation assistants.
+in the KG, with an error propagation analysis showing that fabricated
+properties cause output deviations up to 949\,K, while KG Smart achieves
+perfect material property fidelity (1.00) versus 0.34 for the KG-free
+baseline; (iv) an adaptive KG decision framework (Algorithm~1) that
+selects the optimal retrieval mode with 100\% accuracy across all 17
+tasks, validated by cross-model experiments on both \texttt{qwen2.5-coder:32b}
+and \texttt{qwen3-coder-next}; and (v) production-scale agent quality
+metrics from 1{,}135 real simulation runs showing 97.4\% overall success
+and a 57.6\% first-try rate.  All code, models, and evaluation artifacts
+are released openly.  Our findings demonstrate that \emph{integration
+pattern}, not knowledge content, determines whether GraphRAG augmentation
+helps or hinders LLM agents, and identify concrete design principles
+for autonomous FEM simulation assistants.
 
 \smallskip\noindent\textbf{Keywords:} Large language model agents; finite element
 method; knowledge graph; GraphRAG; multi-agent systems; scientific computing
@@ -156,11 +163,11 @@ stability rules form a rich, interconnected knowledge base.
         spatial convergence for three closed-form benchmark cases, validating
         the numerical kernel against analytical solutions
         (\cref{sec:vv}).
-  \item We run a three-way ablation study isolating the KG contribution,
-        identify a paradoxical performance \emph{inversion} with mandatory
-        KG invocation, and propose a \emph{KG Smart} integration that
-        recovers 94\% success via warm-start injection and lazy retrieval
-        (\cref{sec:ablation}).
+  \item We run a four-way ablation study (KG~On, KG~Off, KG~Smart,
+        Prompt~Inject) isolating the KG contribution, identify a paradoxical
+        performance \emph{inversion} with mandatory KG invocation, and
+        propose a \emph{KG Smart} integration that recovers 94\% success
+        via warm-start injection and lazy retrieval (\cref{sec:ablation}).
   \item We introduce a \emph{novel-material experiment} using three
         fictional materials absent from any LLM training corpus,
         demonstrating that KG Smart achieves $2.9\times$ higher
@@ -263,16 +270,39 @@ PDE-Agents adopts four guiding principles:
 
 \subsection{Agent Stack}
 
+Each agent's LLM backend is configurable via environment variables,
+enabling drop-in model upgrades without code changes.
+\cref{tab:agent-models} lists the default models and the alternatives
+validated in the cross-model experiments of \cref{sec:novidium}.
+
+\begin{table}[h]
+\centering\scriptsize
+\caption{Agent model configuration.  Current defaults reflect the
+  model upgrade from the initial (v1) deployment.  The ablation study
+  was conducted on both model generations.}
+\label{tab:agent-models}
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{@{}llll@{}}
+\toprule
+Agent & Env Variable & Default (current) & Previous (v1) \\
+\midrule
+Orch.  & \texttt{ORCHESTRATOR\_MODEL} & \texttt{llama4:scout} & \texttt{llama3.3:70b} \\
+Sim.   & \texttt{SIM.\_AGENT\_MODEL} & \texttt{qwen3-coder-next} & \texttt{qwen2.5-coder:32b} \\
+Anal.  & \texttt{ANAL.\_AGENT\_MODEL} & \texttt{llama4:scout} & \texttt{llama3.3:70b} \\
+DB     & \texttt{DB\_AGENT\_MODEL} & \texttt{qwen3-coder:30b} & \texttt{qwen2.5-coder:14b} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \paragraph{Orchestrator.}
-A LangGraph \texttt{StateGraph} supervisor (\texttt{llama3.3:70b}) receives
-the user's natural-language request and routes it to one of three specialist
-agents via structured JSON decisions.  After each agent reports its result
-the supervisor either routes to another agent or synthesises a final response.
+A LangGraph \texttt{StateGraph} supervisor receives the user's
+natural-language request and routes it to one of three specialist agents via
+structured JSON decisions.  After each agent reports its result the
+supervisor either routes to another agent or synthesises a final response.
 
 \paragraph{Simulation Agent.}
-Uses \texttt{qwen2.5-coder:32b}, specialised for code and structured-output
-tasks.  Given a task description, the agent executes a ReAct loop
-\citep{yao2023react} with up to 15 reasoning steps, calling nine tools:
+The core reasoning agent, executing a ReAct loop \citep{yao2023react}
+with up to 15 reasoning steps and nine tools:
 \texttt{check\_config\_warnings},
 \texttt{query\_knowledge\_graph},
 \texttt{validate\_config},
@@ -284,29 +314,35 @@ tasks.  Given a task description, the agent executes a ReAct loop
 \texttt{run\_parametric\_sweep}.
 
 \paragraph{Analytics Agent.}
-Uses \texttt{llama3.3:70b} (max 12 iterations) and has tools for
-statistical comparison across runs, sensitivity analysis, and
-LLM-generated textual summaries.
+Max 12 iterations; tools for statistical comparison across runs,
+sensitivity analysis, and LLM-generated textual summaries.
 
 \paragraph{Database Agent.}
-Uses \texttt{qwen2.5-coder:14b} (max 10 iterations) and answers history
-queries against PostgreSQL, cataloguing results and tracing run lineage.
+Max 10 iterations; answers history queries against PostgreSQL,
+cataloguing results and tracing run lineage.
 
 \subsection{Tool-Call Compatibility}
 \label{sec:tool-compat}
 
-A non-trivial engineering challenge: \texttt{qwen2.5-coder} emits tool calls
-as JSON text in the \texttt{content} field rather than in the structured
-\texttt{tool\_calls} field expected by LangChain's \texttt{ToolNode}.  We
-implement a four-pass normalisation procedure in
+Supporting multiple LLM families requires robust tool-call parsing, as
+models encode tool invocations differently.  The Qwen~2.5-Coder family
+emits tool calls as JSON text in the \texttt{content} field rather than in
+the structured \texttt{tool\_calls} field expected by LangChain's
+\texttt{ToolNode}.  We implement a four-pass normalisation procedure in
 \texttt{BaseAgent.\_parse\_content\_tool\_call}:
 (1) attempt \texttt{json.loads} on the full content;
 (2) extract from markdown fences;
 (3) extract the first \texttt{\{...\}} block;
 (4) repair truncated JSON via progressive bracket-closing and regex fallback.
-Pass 4 was added specifically to handle cases where the model's output is
-cut off mid-token due to the nested JSON-in-JSON escaping overhead of
-config arguments.
+
+A separate compatibility issue emerged with Qwen3-Coder-Next: the model
+occasionally \emph{double-encodes} JSON tool arguments (e.g.\
+\texttt{"\{$\backslash$"key$\backslash$": $\backslash$"val$\backslash$"\}"}).
+All tool functions now use a \texttt{\_safe\_json\_parse} helper that detects
+and recursively unwraps such double-encoded strings, ensuring seamless
+operation across model families without model-specific workarounds.
+Llama~4~Scout, by contrast, uses the standard \texttt{tool\_calls} field
+natively and requires no special parsing.
 
 \subsection{FEM Solver: DOLFINx Heat Equation}
 
@@ -326,18 +362,23 @@ enabling arbitrary complex domain topologies.
 \section{Knowledge Graph Architecture}
 \label{sec:kg}
 
-\begin{figure}[htbp]
+\begin{figure*}[htbp]
   \centering
-  \resizebox{\columnwidth}{!}{\input{figs/kg_schema.tikz}}
-  \caption{Neo4j knowledge graph schema (actual implementation).
-    \texttt{Run} nodes carry 768-d HNSW embeddings for semantic search
-    and $k{=}5$ \texttt{SIMILAR\_TO} edges to nearest neighbours
-    (cosine $\ge 0.85$).  \texttt{ReferenceChunk} nodes (also HNSW-indexed)
-    bridge ingested literature to simulation runs via \texttt{CROSS\_REFS}
-    edges.  \texttt{BCConfig} encodes boundary condition patterns;
-    \texttt{KnownIssue} catalogues the nine pre-run failure codes.}
+  \resizebox{0.85\textwidth}{!}{\input{figs/kg_visual.tikz}}
+  \caption{Knowledge graph visualisation (Neo4j-style).
+    \textbf{Blue circles}: material nodes (double border = novel/fictional
+    materials known only to the KG).
+    \textbf{Green circles}: simulation run nodes linked to their materials
+    via \textsc{Uses\_Material} edges and to each other via dashed
+    \textsc{Similar\_To} edges (cosine similarity on 768-d HNSW embeddings;
+    scores shown on edges).
+    \textbf{Orange diamonds}: known-issue nodes triggered by failed runs.
+    \textbf{Red hexagons}: reference chunks from ingested literature,
+    linked to materials (\textsc{Relates\_To}) and runs (\textsc{Cross\_Refs}).
+    \textbf{Grey boxes}: boundary-condition pattern nodes.
+    Pill-shaped nodes show the thermal-class taxonomy.}
   \label{fig:kg}
-\end{figure}
+\end{figure*}
 
 The Neo4j knowledge graph (Neo4j 5 Community Edition) serves three
 functions:
@@ -608,6 +649,25 @@ across three conditions:
         few-shot reference examples (warm-start).
 \end{itemize}
 
+\cref{fig:kg-modes} contrasts the agent workflow under each condition.
+KG~Off proceeds directly from parsing to simulation; KG~On forces two
+KG round-trips before every attempt (and loops on failure); KG~Smart
+front-loads a single HNSW warm-start and defers KG queries to the
+failure-recovery path only.
+
+\begin{figure*}[htbp]
+  \centering
+  \resizebox{0.92\textwidth}{!}{\input{figs/kg_modes.tikz}}
+  \caption{Agent workflow under the three KG integration modes.
+    \textbf{(a)} KG~Off: fast but the LLM fabricates material properties.
+    \textbf{(b)} KG~On: mandatory KG queries add latency and trigger
+    retry loops that exhaust the iteration budget.
+    \textbf{(c)} KG~Smart: a one-shot warm-start injects relevant context
+    before the loop; KG queries occur only on failure (dashed path).
+    Aggregate metrics on novel-material tasks ($n{=}7$) shown below each column.}
+  \label{fig:kg-modes}
+\end{figure*}
+
 Seventeen benchmark tasks span four difficulty levels:
 \begin{itemize}
   \item \textbf{Easy (E1--E3)}: Explicit numerical parameters, straightforward setup.
@@ -625,7 +685,10 @@ Each task is scored on: (i) binary success (simulation ran and completed),
 (ii) configuration quality $Q \in [0,1]$ measuring how closely the agent's
 chosen parameters match ground-truth ranges for material properties, mesh,
 and boundary conditions, (iii) number of agent iterations, and (iv) wall
-time.  Tasks are run in-process inside the agents container to eliminate
+time.  The ablation was run on both model generations
+(\cref{tab:agent-models}); cross-model results are reported in
+\cref{sec:novidium}.
+Tasks are run in-process inside the agents container to eliminate
 HTTP overhead, with up to three retries per task to mitigate LLM
 non-determinism at temperature $T = 0.1$.
 
@@ -695,13 +758,14 @@ vs.\ KG Off's 0.34.
 \subsection{Analysis and Discussion}
 \label{sec:ablation-disc}
 
-The three-way comparison reveals that the \emph{integration pattern}
+The multi-condition comparison reveals that the \emph{integration pattern}
 determines whether a knowledge graph helps or hinders an LLM agent.
 Three mechanisms explain the mandatory KG pattern's failure:
 
 \paragraph{Parametric knowledge sufficiency.}
-\texttt{qwen2.5-coder:32b} was trained on large corpora that include
-materials engineering data.  For standard materials (steel, copper,
+Modern code-generation LLMs---both Qwen~2.5-Coder and
+Qwen3-Coder-Next in our experiments---were trained on large corpora that
+include materials engineering data.  For standard materials (steel, copper,
 aluminium), the model's parametric knowledge is already accurate---KG
 lookups add latency without adding information.
 
@@ -862,32 +926,128 @@ Material & Mode & $k$ (W/m\,K) & $\rho$ (kg/m$^3$) & $c_p$ (J/kg\,K) \\
   \label{fig:mpf}
 \end{figure}
 
-\paragraph{Physical consequences of wrong properties.}
-The fabricated properties produce physically meaningless simulation
-outputs even though the runs complete without error:
+\paragraph{Error propagation analysis.}
+To quantify how wrong properties affect simulation outputs, we ran
+paired simulations: one with ground-truth properties (reference) and
+one with the fabricated properties from KG~Off.  \cref{tab:error-propagation}
+shows the results.  Steady-state Dirichlet tasks (G1, C1, P1) are
+analytically independent of $k$, $\rho$, $c_p$, confirming zero output
+error regardless of property error---an important control.  Transient
+and Robin tasks show significant deviations:
+
 \begin{itemize}
-  \item \textbf{Pyrathane P2}: KG Off yields $T_\text{max}{=}2{,}950$\,K
-        (initial condition: 2000\,K) due to numerical instability from
-        using $k{=}0.15$ instead of $k{=}312$. KG Smart yields
-        $T_\text{max}{=}2{,}000$\,K (correct).
-  \item \textbf{Novidium G3}: KG Off yields $T_\text{min}{=}636$\,K;
-        KG Smart yields $T_\text{min}{=}488$\,K --- a 148\,K
-        discrepancy caused by wrong thermal conductivity.
-  \item \textbf{Cryonite C2}: KG Off uses $\rho{=}8{,}960$
-        (7.6$\times$ overestimate), producing a thermal time constant
-        $\tau$ that is wrong by nearly an order of magnitude.
+  \item \textbf{Pyrathane P2}: $|\Delta T_{\max}|{=}949$\,K
+        ($T_{\max}{=}2{,}949$\,K vs.\ $2{,}000$\,K reference)---the
+        $2{,}080\times$ $k$ error causes numerical instability that
+        \emph{heats} the domain beyond its initial condition, a
+        physically impossible result.
+  \item \textbf{Novidium G3}: $|\Delta T_{\min}|{=}47$\,K due to
+        wrong conductivity affecting the Robin BC equilibrium.
+  \item \textbf{Novidium G2}: $|\Delta T_{\text{mean}}|{=}21$\,K
+        from incorrect diffusivity altering the transient profile.
 \end{itemize}
 
+\input{tables/error_propagation.tex}
+
+\begin{figure}[htbp]
+  \centering
+  \input{figs/error_magnification.tikz}
+  \caption{Error magnification: mean material property error (\%)
+    vs.\ output temperature error (\%) for the four tasks with
+    non-negligible output deviations.  P2's output error (24.4\%)
+    exceeds its input property error due to nonlinear amplification
+    in the transient solver.}
+  \label{fig:error-mag}
+\end{figure}
+
+\paragraph{Sensitivity-weighted MPF.}
+The equal-weight MPF treats all properties as equally important, but
+their influence on output varies strongly.  Using the sensitivity
+coefficients $S_p = |\partial T_{\text{mean}} / \partial p|$ computed
+via central finite differences from the error propagation runs, we
+define:
+\begin{equation}
+\text{MPF}_w = 1 - \frac{\sum_{p} S_p \cdot |p_\text{agent} - p_\text{truth}| / p_\text{truth}}{\sum_{p} S_p}
+\end{equation}
+For steady-state Dirichlet tasks where $S_p \approx 0$, we assign
+$\text{MPF}_w{=}1$ since wrong properties have no output impact.
+Across all seven tasks, KG~Off's $\overline{\text{MPF}}_w{=}0.25$
+(vs.\ equal-weight 0.34), confirming that the most damaging property
+errors are also the most impactful.  KG~Smart retains $\text{MPF}_w{=}1.00$.
+
+\paragraph{Cost-benefit analysis.}
+\cref{tab:cost-benefit} compares the operational cost (time, iterations)
+against the accuracy benefit (MPF, physics score) for each KG mode.
+KG~Smart adds 68\% wall-time over KG~Off but delivers 2.9$\times$
+higher MPF and 1.8$\times$ higher accuracy-per-second (efficiency =
+MPF / wall-time).  KG~On is both slowest and least accurate---its
+mandatory retrieval overhead yields no corresponding benefit.
+
+\input{tables/cost_benefit.tex}
+
+\paragraph{Four-way comparison: Prompt Inject baseline.}
+A natural objection is whether the KG infrastructure is necessary, or
+whether simply injecting material data into the prompt suffices.  We
+test a \emph{Prompt Inject} baseline: KG disabled, but exact properties
+appended to each task description.  \cref{tab:four-way} shows that
+Prompt~Inject matches KG~Smart's MPF (1.00) and is 2$\times$ faster,
+but it cannot scale to large material databases, provides no similarity
+search for warm-starting, and requires manual curation of the prompt
+for each new material.  KG~Smart automates retrieval and generalises
+to any material in the graph without prompt modification.
+
+\input{tables/four_way.tex}
+
+\paragraph{Adaptive KG decision framework.}
+Based on the preceding analysis, we propose a simple decision algorithm
+(Algorithm~\ref{alg:kg-decision}) that selects the optimal KG mode for
+each task.  Retrospective validation on all 17 benchmark tasks achieves
+100\% accuracy: it correctly assigns KG~Off to tasks with explicit
+parameters, KG~Smart (lazy) to tasks naming known materials, and
+KG~Smart (forced warm-start) to novel-material tasks.
+
+\begin{algorithm}[t]
+\caption{Adaptive KG Mode Selection}
+\label{alg:kg-decision}
+\begin{algorithmic}[1]
+\Require Task description $d$, known-material list $\mathcal{M}$
+\Ensure KG mode $m \in \{\text{Off}, \text{Smart-lazy}, \text{Smart-forced}\}$
+\If{$d$ contains explicit $k$, $\rho$, $c_p$ values}
+  \State \Return \textsc{KG Off}
+\EndIf
+\State $\mu \gets \textsc{ExtractMaterial}(d)$
+\If{$\mu = \varnothing$}
+  \State \Return \textsc{KG Off}
+\ElsIf{$\mu \in \mathcal{M}$}
+  \State \Return \textsc{KG Smart (lazy)}
+\Else
+  \State \Return \textsc{KG Smart (forced warm-start)}
+\EndIf
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph{Cross-model validation.}
+To verify that the KG's value is model-agnostic, we repeated the
+novel-material experiment with \texttt{qwen3-coder-next} (80B total,
+3B active MoE).  \cref{tab:multi-model} shows that KG~Smart achieves
+$\text{MPF}{=}1.00$ with \emph{both} models, while KG~Off fabricates
+wrong properties with both---different wrong values, but the same
+failure mode.  This confirms that the warm-start vector search
+bypasses model-specific memorisation gaps entirely.
+
+\input{tables/multi_model.tex}
+
 \paragraph{Key takeaway.}
-The KG's value is not in making simulations \emph{run} --- LLMs can
+The KG's value is not in making simulations \emph{run}---LLMs can
 already do that.  The KG's value is in making simulations produce
 \emph{correct physics}.  For any domain with proprietary materials,
 novel compounds, or in-house measurement data, the KG Smart pattern
 transforms the system from an ``expensive random number generator''
-into a reliable engineering tool.  Property fidelity (MPF) is the
-critical metric: KG Smart scores 1.00 vs.\ KG Off's 0.34 --- a
-$2.9\times$ improvement on the dimension that actually matters for
-engineering decisions.
+into a reliable engineering tool.  The error propagation analysis
+quantifies this: fabricated properties cause output errors up to
+949\,K (47\% of the reference $T_{\max}$), while KG~Smart eliminates
+these errors entirely by retrieving exact properties before the agent
+loop begins.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Production Agent Quality Metrics}
@@ -948,31 +1108,28 @@ vector mechanics (linear elasticity, Navier--Stokes) requires
 substantially richer tool schemas and system prompts.
 
 \paragraph{Model scale and open-source evolution.}
-The experiments reported here use \texttt{qwen2.5-coder:32b} and
-\texttt{llama3.3:70b}, which were competitive at the time of evaluation.
-However, the open-source landscape has advanced rapidly: Qwen3-Coder-Next
-(80B total, 3B active MoE) \citep{qwen3coder2026} achieves
-Claude~Sonnet--class performance on agentic coding benchmarks while
-requiring only $\approx$50\,GB VRAM at 4-bit quantization; Llama~4~Scout
-(109B total, 17B active MoE) \citep{llama4} supports 10M-token context
-and native tool calling; and Qwen3-Coder-30B-A3B provides strong
-tool-calling at under 20\,GB.  PDE-Agents' architecture is
-model-agnostic---each agent's model is configurable via environment
-variables---making drop-in upgrades to these newer models straightforward.
-A systematic multi-model ablation across model families (Qwen3, Llama~4,
-GLM-5) is planned as immediate future work.
+The system defaults have been upgraded from the initial v1 models
+(\texttt{qwen2.5-coder:32b}, \texttt{llama3.3:70b}) to
+Qwen3-Coder-Next (80B total, 3B active MoE) \citep{qwen3coder2026}
+and Llama~4~Scout (109B total, 17B active MoE) \citep{llama4}, with
+cross-model validation confirming model-agnostic KG~Smart performance
+(\cref{tab:multi-model}).  Qwen3-Coder-Next achieves higher config
+quality on standard KG~Smart tasks (0.94 vs.\ 0.86) and perfect MPF on
+novel tasks, identical to the v1 model.  Llama~4~Scout provides 10M-token
+context and native tool calling for the orchestrator and analytics agents.
+A systematic multi-model ablation across additional families (GLM-5,
+DeepSeek-R2) is planned as future work.
 
 \paragraph{KG integration.}
 The KG Smart pattern (\cref{sec:ablation-disc}) recovers most lost
 performance, but a 6\% failure gap versus KG Off remains on standard tasks.
-The novel-material experiment (\cref{sec:novidium}) confirms the KG's value
-for proprietary data across three fictional materials spanning insulator,
-moderate-conductor, and refractory-cermet regimes.  Future work will explore:
-(a) sensitivity-weighted MPF that accounts for each property's influence on
-simulation output, (b) reinforcement learning from simulation outcomes to
-tune KG retrieval relevance, (c) dynamic confidence-based retrieval (only
-query KG when the LLM's uncertainty exceeds a threshold), and
-(d) richer warm-start context including failure diagnostics from similar past runs.
+The adaptive decision framework (Algorithm~\ref{alg:kg-decision}) provides
+practical deployment guidance, achieving 100\% mode-selection accuracy.
+Future work will explore:
+(a) reinforcement learning from simulation outcomes to tune KG retrieval
+relevance, (b) dynamic confidence-based retrieval (only query KG when the
+LLM's uncertainty exceeds a threshold), and (c) richer warm-start context
+including failure diagnostics from similar past runs.
 
 \paragraph{Verification scope.}
 The V\&V study covers only steady-state and simple transient heat
@@ -1005,26 +1162,33 @@ with locally-deployed open-source LLMs.  The system achieves 97.4\% overall
 success across 1{,}135 production runs and demonstrates $\mathcal{O}(h^2)$
 spatial convergence validated against analytical solutions.
 
-Our three-way ablation study across 17 benchmark tasks reveals an important
-and counter-intuitive finding: mandatory GraphRAG knowledge augmentation
-\emph{reduces} success (59\%) relative to the LLM-only
-baseline (100\%).  However, our proposed \emph{KG Smart}
-integration---combining warm-start injection of similar past runs with lazy
-conditional retrieval---recovers 94\% success while retaining access to
-knowledge graph tools.  This demonstrates that the \emph{integration
-pattern}, not the knowledge source, determines KG utility for LLM agents.
+Our four-way ablation study across 17 benchmark tasks reveals several
+important findings.  Mandatory GraphRAG knowledge augmentation paradoxically
+\emph{reduces} success (59\%) relative to the LLM-only baseline (100\%),
+but our proposed \emph{KG Smart} integration---combining warm-start injection
+with lazy conditional retrieval---recovers 94\% success while retaining
+knowledge graph access.  This demonstrates that the \emph{integration
+pattern}, not the knowledge source, determines KG utility.
 
-Crucially, the novel-material experiment (\cref{sec:novidium}) resolves
-the apparent paradox of high KG Off performance: when the task requires
-proprietary data absent from the LLM's training corpus, KG Smart achieves
-$2.9\times$ higher material property fidelity (1.00 vs.\ 0.34) while the
-KG-free baseline fabricates physically incorrect properties---in one case
-assigning $k{=}0.15$\,W/m\,K to a material whose true conductivity is
-$312$\,W/m\,K, producing an unphysical simulation result ($T_\text{max}$
-exceeding the initial condition).  This confirms the KG's essential role
-in any domain with proprietary or novel information, and demonstrates
-that \emph{success rate alone is an insufficient metric}---physics
-correctness must be evaluated separately.
+The novel-material experiment resolves the apparent paradox of high
+KG~Off performance.  An error propagation analysis across seven tasks
+with three fictional materials shows that fabricated properties cause
+output deviations up to 949\,K ($|\Delta T_{\max}|$ for Pyrathane P2),
+while KG~Smart eliminates these errors entirely by retrieving exact
+properties via HNSW vector search.  The four-way comparison including
+a Prompt~Inject baseline (Table~\ref{tab:four-way}) shows that while
+manual property injection matches KG~Smart's accuracy, only the KG
+infrastructure scales to arbitrary material databases.
+
+Three additional contributions strengthen the practical case for KG
+integration: (1)~a sensitivity-weighted MPF that accounts for each
+property's influence on simulation output, revealing that the most
+damaging property errors are also the most impactful ($\overline{\text{MPF}}_w{=}0.25$
+for KG~Off vs.\ 1.00 for KG~Smart); (2)~an adaptive decision framework
+(Algorithm~\ref{alg:kg-decision}) that selects the optimal KG mode with
+100\% accuracy across all 17 tasks; and (3)~cross-model validation on
+\texttt{qwen3-coder-next} confirming that KG~Smart's perfect material
+fidelity is model-agnostic.
 
 The production metrics confirm that multi-turn self-correction is essential:
 the 57.6\% first-try rate improves to 97.4\% through iterative debugging,

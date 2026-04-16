@@ -1,0 +1,178 @@
+% Knowledge graph visualization — Neo4j-style node-link diagram
+% Edges drawn on background layer so they never obscure nodes or labels
+\pgfdeclarelayer{bg}
+\pgfsetlayers{bg,main}
+\begin{tikzpicture}[
+  font=\scriptsize,
+  >=Latex,
+  mat/.style={circle, draw=nodeblue!80, fill=nodeblue!15, thick,
+              minimum size=1.05cm, align=center, inner sep=1pt,
+              font=\scriptsize\bfseries},
+  nmat/.style={mat, draw=nodeblue!80, fill=nodeblue!30,
+               double, double distance=1pt},
+  run/.style={circle, draw=nodegreen!80, fill=nodegreen!12, thick,
+              minimum size=0.8cm, align=center, inner sep=1pt,
+              font=\tiny},
+  issue/.style={diamond, draw=nodeorange!80, fill=nodeorange!12, thick,
+                minimum size=0.65cm, align=center, inner sep=1pt,
+                font=\tiny, aspect=1.6},
+  bc/.style={rounded corners=4pt, draw=nodegray!70, fill=nodegray!10,
+             thick, minimum width=1.0cm, minimum height=0.55cm,
+             align=center, inner sep=2pt, font=\tiny},
+  ref/.style={regular polygon, regular polygon sides=6,
+              draw=nodered!70, fill=nodered!10, thick,
+              minimum size=0.75cm, align=center, inner sep=1pt,
+              font=\tiny},
+  tc/.style={rounded corners=6pt, draw=nodeblue!50, fill=nodeblue!6,
+             minimum width=0.9cm, minimum height=0.35cm,
+             font=\tiny, align=center, inner sep=1pt},
+  dedge/.style={->, thick, #1!50},
+  sedge/.style={-, dashed, thick, #1!35},
+  elbl/.style={font=\tiny\itshape, text=#1!70, fill=white,
+               inner sep=1pt, outer sep=0pt},
+]
+
+% ═══════════════════════════════════════════════════════════════════════
+%  ALL NODES (drawn on main layer — will be on top of edges)
+% ═══════════════════════════════════════════════════════════════════════
+
+% Material nodes (top arc)
+\node[mat]  (steel)  at (-3.8,  2.8) {Steel\\(C)};
+\node[mat]  (ss316)  at (-1.2,  3.6) {SS\\316};
+\node[mat]  (al)     at ( 1.3,  3.6) {Al\\6061};
+\node[mat]  (cu)     at ( 3.5,  2.8) {Cu};
+\node[mat]  (ti)     at ( 5.2,  2.0) {Ti-6\\Al-4V};
+
+% Novel materials (left side, distinctive double border)
+\node[nmat] (nov)    at (-5.4,  1.3) {Novi-\\dium};
+\node[nmat] (cryo)   at (-5.8, -0.8) {Cryo-\\nite};
+\node[nmat] (pyra)   at (-4.8, -2.5) {Pyra-\\thane};
+
+% ThermalClass nodes (small pills at periphery)
+\node[tc] (tc_hi)  at ( 5.8, 3.6) {high-k};
+\node[tc] (tc_med) at (-2.5, 4.6) {med-k};
+\node[tc] (tc_low) at (-6.8, 0.3) {low-k};
+\node[tc] (tc_ins) at (-7.2, -1.5) {insulator};
+
+% Run nodes (central cluster)
+\node[run] (r1) at (-1.0,  1.2) {R-1\\E1};
+\node[run] (r2) at ( 0.8,  1.8) {R-2\\E2};
+\node[run] (r3) at ( 2.6,  1.0) {R-3\\M1};
+\node[run] (r4) at ( 1.8, -0.5) {R-4\\M2};
+\node[run] (r5) at (-0.3, -0.3) {R-5\\H1};
+\node[run] (r6) at ( 3.8, -0.6) {R-6\\H4};
+\node[run] (r7) at (-2.6, -0.2) {R-7\\G1};
+\node[run] (r8) at (-2.0, -1.8) {R-8\\C1};
+\node[run] (r9) at ( 0.5, -1.8) {R-9\\P2};
+
+% BCConfig nodes (right side)
+\node[bc] (bc_dd) at (5.4,  0.2) {Dirichlet\\+Neumann};
+\node[bc] (bc_dr) at (5.8, -1.5) {Dirichlet\\+Robin};
+\node[bc] (bc_mr) at (5.0, -2.8) {Mixed\\BCs};
+
+% KnownIssue nodes (bottom)
+\node[issue] (i1) at (2.0, -3.5) {CFL\\viol.};
+\node[issue] (i2) at (3.8, -3.8) {Stiff\\system};
+\node[issue] (i3) at (0.3, -3.5) {BC\\mismatch};
+
+% Reference chunks (bottom left)
+\node[ref] (ref1) at (-3.5, -4.3) {Heat\\transfer\\textbook};
+\node[ref] (ref2) at (-1.5, -4.0) {CFL\\stability\\guide};
+\node[ref] (ref3) at (-5.8, -3.8) {Novidium\\data\\sheet};
+
+% HNSW index annotation
+\node[rounded corners=3pt, draw=nodegreen!50, fill=nodegreen!5,
+      font=\tiny, inner sep=2pt] at (1.0, 2.8) {768-d HNSW index};
+
+% ═══════════════════════════════════════════════════════════════════════
+%  ALL EDGES (drawn on background layer — appear behind nodes)
+% ═══════════════════════════════════════════════════════════════════════
+
+\begin{pgfonlayer}{bg}
+
+  % ── Material → ThermalClass (IN_CLASS) ──
+  \draw[dedge=nodeblue] (cu)    -- (tc_hi);
+  \draw[dedge=nodeblue] (al)    -- (tc_hi);
+  \draw[dedge=nodeblue] (steel) -- (tc_med);
+  \draw[dedge=nodeblue] (ss316) -- (tc_med);
+  \draw[dedge=nodeblue] (nov)   to[bend right=12] (tc_med);
+  \draw[dedge=nodeblue] (cryo)  -- (tc_ins);
+  \draw[dedge=nodeblue] (ti)    to[bend left=18] (tc_low);
+  \draw[dedge=nodeblue] (pyra)  to[bend right=25] (tc_hi);
+
+  % ── Run → Material (USES_MATERIAL) ──
+  \draw[dedge=nodeblue] (r1) to[bend left=8] (steel);
+  \draw[dedge=nodeblue] (r2) to[bend left=5] (al);
+  \draw[dedge=nodeblue] (r3) -- (cu);
+  \draw[dedge=nodeblue] (r4) to[bend right=8] (cu);
+  \draw[dedge=nodeblue] (r5) to[bend left=12] (steel);
+  \draw[dedge=nodeblue] (r6) to[bend right=10] (ti);
+  \draw[dedge=nodeblue] (r7) -- (nov);
+  \draw[dedge=nodeblue] (r8) -- (cryo);
+  \draw[dedge=nodeblue] (r9) to[bend right=15] (pyra);
+
+  % ── SIMILAR_TO edges (dashed, between runs) ──
+  \draw[sedge=nodegreen] (r1) -- (r2)
+    node[elbl=nodegreen, midway, above, font=\tiny] {0.94};
+  \draw[sedge=nodegreen] (r3) -- (r5)
+    node[elbl=nodegreen, midway, below, font=\tiny] {0.87};
+  \draw[sedge=nodegreen] (r4) -- (r6)
+    node[elbl=nodegreen, midway, below, font=\tiny] {0.82};
+  \draw[sedge=nodegreen] (r7) -- (r8)
+    node[elbl=nodegreen, midway, left, font=\tiny] {0.79};
+
+  % ── Run → BCConfig (HAS_BC) ──
+  \draw[dedge=nodegray] (r1) to[bend left=10] (bc_dd);
+  \draw[dedge=nodegray] (r2) to[bend left=8] (bc_dd);
+  \draw[dedge=nodegray] (r4) -- (bc_dr);
+  \draw[dedge=nodegray] (r6) -- (bc_mr);
+
+  % ── Run → KnownIssue (TRIGGERED) ──
+  \draw[dedge=nodeorange] (r5) to[bend right=8] (i1);
+  \draw[dedge=nodeorange] (r9) -- (i2);
+  \draw[dedge=nodeorange] (r8) to[bend left=12] (i3);
+
+  % ── ReferenceChunk → Material (RELATES_TO) ──
+  \draw[dedge=nodered] (ref1) to[bend left=12] (steel);
+  \draw[dedge=nodered] (ref3) -- (nov);
+
+  % ── ReferenceChunk → Run (CROSS_REFS) ──
+  \draw[dedge=nodered] (ref2) to[bend left=10] (r5);
+  \draw[dedge=nodered] (ref1) to[bend left=12] (r3);
+
+\end{pgfonlayer}
+
+% ═══════════════════════════════════════════════════════════════════════
+%  LEGEND (positioned outside the graph area)
+% ═══════════════════════════════════════════════════════════════════════
+\begin{scope}[shift={(7.5, -4.5)}, local bounding box=legend]
+  \node[font=\tiny\bfseries, anchor=west] at (0, 1.2) {Node types};
+  \node[mat, minimum size=0.35cm, font=\tiny]  at (0.2, 0.7) {};
+  \node[font=\tiny, anchor=west] at (0.5, 0.7) {Material};
+  \node[nmat, minimum size=0.35cm, font=\tiny] at (0.2, 0.25) {};
+  \node[font=\tiny, anchor=west] at (0.5, 0.25) {Novel mat.};
+  \node[run, minimum size=0.3cm, font=\tiny]   at (0.2,-0.2) {};
+  \node[font=\tiny, anchor=west] at (0.5,-0.2) {Run};
+  \node[issue, minimum size=0.25cm, font=\tiny] at (0.2,-0.65) {};
+  \node[font=\tiny, anchor=west] at (0.5,-0.65) {KnownIssue};
+  \node[ref, minimum size=0.3cm, font=\tiny]   at (0.2,-1.1) {};
+  \node[font=\tiny, anchor=west] at (0.5,-1.1) {Reference};
+  \node[bc, minimum width=0.4cm, minimum height=0.2cm, font=\tiny]
+    at (0.2,-1.5) {};
+  \node[font=\tiny, anchor=west] at (0.5,-1.5) {BCConfig};
+  \node[tc, minimum width=0.4cm, minimum height=0.18cm, font=\tiny]
+    at (0.2,-1.9) {};
+  \node[font=\tiny, anchor=west] at (0.5,-1.9) {ThermalClass};
+
+  \node[font=\tiny\bfseries, anchor=west] at (0, -2.4) {Edge types};
+  \draw[dedge=nodeblue, thick]   (0,-2.8) -- (0.4,-2.8);
+  \node[font=\tiny, anchor=west] at (0.5,-2.8) {USES\_MAT.};
+  \draw[sedge=nodegreen, thick]  (0,-3.2) -- (0.4,-3.2);
+  \node[font=\tiny, anchor=west] at (0.5,-3.2) {SIMILAR\_TO};
+  \draw[dedge=nodeorange, thick] (0,-3.6) -- (0.4,-3.6);
+  \node[font=\tiny, anchor=west] at (0.5,-3.6) {TRIGGERED};
+  \draw[dedge=nodered, thick]    (0,-4.0) -- (0.4,-4.0);
+  \node[font=\tiny, anchor=west] at (0.5,-4.0) {CROSS\_REFS};
+\end{scope}
+
+\end{tikzpicture}
