@@ -709,10 +709,52 @@ thermal regimes.
   - P2 result: T_max=2,950K from initial 2,000K (physically impossible)
 - KG Smart retrieves exact properties via warm-start HNSW vector search
 
+### Strengthened KG Evidence (2026-04-16)
+
+**Error Propagation Analysis** (`evaluation/error_propagation.py`):
+- Paired reference vs wrong-property simulations for all 7 novel tasks
+- Sensitivity coefficients via central finite differences (56 total runs)
+- Key findings: P2 |ΔT_max|=949K, G3 |ΔT_min|=47K, G2 |ΔT_mean|=21K
+- Steady-state Dirichlet tasks correctly show zero output error (control)
+
+**Sensitivity-Weighted MPF**:
+- MPF_w = 1 - Σ(S_p × |Δp|/p) / Σ(S_p) where S_p = |∂T_mean/∂p|
+- KG Off: MPF_w=0.25 (worse than equal-weight 0.34 — most damaging errors are most impactful)
+- KG Smart: MPF_w=1.00
+
+**Cost-Benefit Analysis** (`paper/tables/cost_benefit.tex`):
+- KG Smart: +68% time, +194% MPF, +76% efficiency (MPF/time) vs KG Off
+- KG On: slowest AND least accurate
+
+**Four-Way Comparison** including Prompt Inject baseline:
+- Prompt Inject: MPF=1.00, 100% success, 11.7s avg (fastest)
+- But cannot scale, no similarity search, no warm-start
+- KG Smart: MPF=1.00, 100% success, 23.8s avg (automated & scalable)
+
+**Adaptive Decision Framework** (`evaluation/decision_framework.py`):
+- Algorithm: explicit params → KG Off, known material → KG Smart lazy, novel → KG Smart forced
+- 100% accuracy on all 17 tasks retrospectively
+
+**Cross-Model Validation**:
+- KG Smart achieves MPF=1.00 with both qwen2.5-coder:32b AND qwen3-coder-next
+- KG Off fabricates wrong properties with BOTH models (different wrong values)
+- Confirms KG Smart is model-agnostic
+
+**New paper content** (all in §6.4 Novel Material Experiment):
+- Table: Error propagation (`tables/error_propagation.tex`)
+- Table: Cost-benefit (`tables/cost_benefit.tex`)
+- Table: Four-way comparison (`tables/four_way.tex`)
+- Table: Multi-model (`tables/multi_model.tex`)
+- Figure: Error magnification bar chart (`figs/error_magnification.tikz`)
+- Algorithm 1: Adaptive KG Mode Selection
+- Updated abstract, limitations, and conclusion
+
 **Files added/modified**:
 - `knowledge_graph/seeder.py`: 3 fictional materials in MATERIALS list
 - `knowledge_graph/references.py`: References for Novidium, Cryonite, Pyrathane
-- `evaluation/ablation/benchmark_tasks.py`: 7 novel tasks (G1–G3, C1–C2, P1–P2)
-- `evaluation/ablation/run_ablation.py`: MPF/physics_score metrics, physics-aware scoring
+- `evaluation/ablation/benchmark_tasks.py`: 7 novel tasks (G1–G3, C1–C2, P1–P2), material_novelty field
+- `evaluation/ablation/run_ablation.py`: MPF/physics_score metrics, prompt_inject mode
+- `evaluation/error_propagation.py`: Error propagation + sensitivity analysis
+- `evaluation/decision_framework.py`: Adaptive KG mode selection + validation
 - `tools/knowledge_tools.py`: Made `question` param optional
-- `paper/main.tex`: Expanded §6.4, new tables (novel-props, novidium), MPF figure
+- `paper/main.tex`: Major update to §6.4, abstract, limitations, conclusion
