@@ -28,7 +28,7 @@ from tools.database_tools import (
     upload_to_minio,
 )
 
-DB_MODEL = os.getenv("DATABASE_AGENT_MODEL", "qwen2.5-coder:14b")
+DB_MODEL = os.getenv("DATABASE_AGENT_MODEL", "qwen3-coder:30b")
 
 
 DATABASE_SYSTEM_PROMPT = """You are Agent-3: the Database Agent in a multi-agent PDE solving ecosystem.

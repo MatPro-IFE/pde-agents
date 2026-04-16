@@ -25,7 +25,7 @@ from tools.analytics_tools import (
     suggest_next_run,
 )
 
-ANALYTICS_MODEL = os.getenv("ANALYTICS_AGENT_MODEL", "llama3.3:70b")
+ANALYTICS_MODEL = os.getenv("ANALYTICS_AGENT_MODEL", "llama4:scout")
 
 
 ANALYTICS_SYSTEM_PROMPT = """You are Agent-2: the Analytics & Visualization Agent in a multi-agent PDE solving ecosystem.

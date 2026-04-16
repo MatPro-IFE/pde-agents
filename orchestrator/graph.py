@@ -33,7 +33,7 @@ from agents.analytics_agent import AnalyticsAgent
 from agents.database_agent import DatabaseAgent
 
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-ORCHESTRATOR_MODEL = os.getenv("ORCHESTRATOR_MODEL", "llama3.3:70b")
+ORCHESTRATOR_MODEL = os.getenv("ORCHESTRATOR_MODEL", "llama4:scout")
 
 MEMBERS = ["simulation_agent", "analytics_agent", "database_agent", "FINISH"]
 

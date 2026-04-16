@@ -35,7 +35,7 @@ from tools.knowledge_tools import check_config_warnings, query_knowledge_graph
 
 log = logging.getLogger(__name__)
 
-SIM_MODEL = os.getenv("SIMULATION_AGENT_MODEL", "qwen2.5-coder:32b")
+SIM_MODEL = os.getenv("SIMULATION_AGENT_MODEL", "qwen3-coder-next")
 
 
 # ─── Base system prompt (shared preamble) ──────────────────────────────────────
