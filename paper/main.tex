@@ -81,8 +81,8 @@
 % ─────────────────────────────────────────────────────────────────────────────
 \begin{abstract}
 We present \textit{PDE-Agents}, a multi-agent ecosystem that automates the
-full lifecycle of finite element method (FEM) simulations through natural-language
-interaction.  The system combines three specialist large language model (LLM)
+full lifecycle of partial differential equation (PDE) / finite element method
+(FEM) simulations through natural-language interaction.  The system combines three specialist large language model (LLM)
 agents—Simulation, Analytics, and Database—orchestrated via a LangGraph
 supervisor graph, with a locally-deployed open-source LLM stack
 (Qwen3-Coder-Next, Llama~4~Scout) running on dual NVIDIA RTX PRO 6000
@@ -92,7 +92,7 @@ generations of open-source LLMs.
 A central novelty is the integration of a \emph{GraphRAG} knowledge base
 (Neo4j + 768-dimensional vector embeddings) that enriches agents with curated
 material properties, known failure patterns, and prior run lineage.
-We report five empirical contributions: (i) a formal verification and
+We report six empirical contributions: (i) a formal verification and
 validation (V\&V) study confirming second-order spatial convergence (\(\mathcal{O}(h^2)\))
 for all three benchmark cases on the heat equation solver; (ii) a four-way
 ablation study across 17 benchmark tasks comparing KG~On, KG~Off, KG~Smart,
@@ -108,9 +108,11 @@ perfect material property fidelity (1.00) versus 0.34 for the KG-free
 baseline; (iv) an adaptive KG decision framework (Algorithm~1) that
 selects the optimal retrieval mode with 100\% accuracy across all 17
 tasks, validated by cross-model experiments on both \texttt{qwen2.5-coder:32b}
-and \texttt{qwen3-coder-next}; and (v) production-scale agent quality
-metrics from 1{,}135 real simulation runs showing 97.4\% overall success
-and a 57.6\% first-try rate.  All code, models, and evaluation artifacts
+and \texttt{qwen3-coder-next}; (v) production-scale agent quality
+metrics from 1{,}369 real simulation runs showing 97.8\% overall success
+and a 57.6\% first-try rate; and (vi) a KG growth analysis demonstrating
+that success rate correlates with knowledge graph size, rising from
+68.8\% during bootstrap to 100\% with a mature graph.  All code, models, and evaluation artifacts
 are released openly.  Our findings demonstrate that \emph{integration
 pattern}, not knowledge content, determines whether GraphRAG augmentation
 helps or hinders LLM agents, and identify concrete design principles
@@ -174,7 +176,9 @@ stability rules form a rich, interconnected knowledge base.
         material property fidelity than the KG-free baseline, which
         fabricates physically incorrect properties (\cref{sec:novidium}).
   \item We report production-scale agent quality metrics derived from
-        1{,}135 real simulation runs (\cref{sec:metrics}).
+        1{,}369 real simulation runs, including a KG growth analysis
+        showing success rate correlated with knowledge graph size
+        (\cref{sec:metrics}).
 \end{enumerate}
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -417,7 +421,8 @@ functions:
 
   \item \textbf{Run lineage and semantic retrieval.}  Each completed
         \texttt{Run} node is embedded with \texttt{nomic-embed-text}
-        (768 dimensions) and indexed in an HNSW vector index.  Up to
+        (768 dimensions) and indexed in a Hierarchical Navigable Small
+        World (HNSW) vector index.  Up to
         $k{=}5$ \texttt{SIMILAR\_TO} edges are created to the nearest
         neighbours with cosine similarity $\ge 0.85$, precomputing the
         neighbourhood graph for fast agent traversal.  The Simulation
@@ -633,7 +638,7 @@ the solver.
 \subsection{Experimental Design}
 
 We isolate the knowledge graph contribution using a controlled ablation
-across three conditions:
+across four conditions:
 \begin{itemize}
   \item \textbf{KG On} (mandatory): Full system with
         \texttt{check\_config\_warnings} and \texttt{query\_knowledge\_graph}
@@ -647,6 +652,10 @@ across three conditions:
         embedded via \texttt{nomic-embed-text} and the top-3 most similar
         past successful runs are injected into the system prompt as
         few-shot reference examples (warm-start).
+  \item \textbf{Prompt Inject} (oracle baseline): KG disabled, but exact
+        material properties manually appended to the task description ---
+        an upper-bound on what perfect retrieval could achieve (see
+        \cref{sec:novidium} for results).
 \end{itemize}
 
 \cref{fig:kg-modes} contrasts the agent workflow under each condition.
@@ -694,10 +703,12 @@ non-determinism at temperature $T = 0.1$.
 
 \subsection{Results}
 
-\cref{tab:ablation} presents aggregate results across all three conditions
-and \cref{fig:ablation} visualises success rates by difficulty tier.
+\cref{tab:ablation} presents aggregate results across the three primary
+conditions and \cref{fig:ablation} visualises success rates by difficulty tier.
 We compare: (1)~KG~On (mandatory KG-first workflow), (2)~KG~Off (no KG
 tools), and (3)~KG~Smart (warm-start injection + lazy conditional retrieval).
+The Prompt~Inject baseline is evaluated on novel-material tasks in
+\cref{sec:novidium}.
 
 \input{tables/ablation.tex}
 
@@ -1054,8 +1065,8 @@ loop begins.
 \label{sec:metrics}
 
 Beyond the controlled ablation, we analyse the system's behaviour across all
-1{,}135 simulation runs accumulated during development and testing.  Of these,
-805 originate from a comprehensive automated parameter sweep across 8 physics
+1{,}369 simulation runs accumulated during development, testing, and ablation
+experiments.  Of these, 805 originate from a comprehensive automated parameter sweep across 8 physics
 studies (geometry, material, boundary conditions, initial conditions,
 time-stepping, 3D geometry, Robin convection, and multi-material) run via
 \texttt{scripts/sweep\_full\_study.py}; the remainder are interactive and
@@ -1065,9 +1076,9 @@ ablation runs accumulated through normal system use.
 
 \subsection{Success and Failure Modes}
 
-The 97.4\% overall success rate (from PostgreSQL \texttt{agent\_run\_logs})
-demonstrates production-grade reliability for the full agent stack.  Of the
-2.6\% failures, the majority are attributable to invalid boundary condition
+The 97.8\% overall success rate (1{,}339/1{,}369 from PostgreSQL
+\texttt{simulation\_runs}) demonstrates production-grade reliability
+for the full agent stack.  Of the 2.2\% failures, the majority are attributable to invalid boundary condition
 combinations (e.g.\ pure Neumann systems without a reference point), mesh
 resolution requests exceeding GPU memory, and numerical divergence on
 stiff transients.
@@ -1103,28 +1114,34 @@ for KG size.
 \begin{figure}[htbp]
   \centering
   \resizebox{\linewidth}{!}{\input{figs/kg_growth.tikz}}
-  \caption{Success rate versus KG size.  During the \textit{Bootstrap}
-    phase (first 16 runs, KG nearly empty) success is 68.8\%.  Once the
-    KG exceeds $\sim$20 run nodes (\textit{Sweep~1}), the rate climbs to
-    99.7\%.  The dip around run 700 corresponds to a deliberate
-    stress-test with extreme boundary conditions.  The final
-    \textit{Ablation+} phase (235 runs, mature KG with $>$1{,}100 nodes)
-    achieves 100\% success.}
+  \caption{Success rate versus KG size (1{,}369 runs).  Dashed vertical
+    lines mark three phase boundaries.
+    \textbf{Phase~I} (runs 1--329):  the KG grows from empty to
+    $\sim$300 nodes; cumulative success rises from 68.8\% to 98\%.
+    \textbf{Phase~II} (runs 330--1{,}134): the 805-run parameter sweep
+    stress-tests edge cases; the dip near run~700 is a cluster of
+    24 deliberate extreme-BC failures.
+    \textbf{Phase~III} (runs 1{,}135--1{,}369): ablation and
+    novel-material experiments on a mature KG ($>$1{,}100 nodes, 6{,}661
+    \textsc{Similar\_To} edges); 235 runs, 100\% success.
+    Red rug ticks mark individual failures.}
   \label{fig:kg-growth}
 \end{figure}
 
-Four phases emerge: (1)~a \textit{bootstrap} phase with only 16 runs
-where the KG offers minimal context and 31.2\% of runs fail;
-(2)~\textit{Sweep~1} (313 runs, 99.7\%), where even a modest KG already
-provides enough similar-run context for warm-start injection;
-(3)~\textit{Sweep~2} (805 runs, 97.0\%), the large parameter sweep that
-deliberately tests edge cases; and (4)~the \textit{Ablation+} phase
-(235 runs, 100\%), during which the mature KG (1{,}329 \texttt{Run}
-nodes, 6{,}661 \texttt{SIMILAR\_TO} edges) provides rich context for
-every query.  This progression supports the hypothesis that the KG
-acts as a growing episodic memory: as the neighbourhood graph densifies,
-the agent's warm-start context becomes increasingly informative,
-reducing first-try failures.
+Three phases emerge, separated by dashed lines in the figure.
+\textit{Phase~I} (runs 1--329) covers the bootstrap and first sweep:
+with a near-empty KG, 31\% of early runs fail, but as the graph
+grows to $\sim$300 nodes the cumulative rate climbs to 98\%.
+\textit{Phase~II} (runs 330--1{,}134) is the 805-run parameter sweep
+that deliberately tests edge cases; the dip near run~700 reflects
+24 extreme-BC stress-test failures.
+\textit{Phase~III} (runs 1{,}135--1{,}369) covers ablation and
+novel-material experiments on a mature KG (1{,}329 \texttt{Run} nodes,
+6{,}661 \texttt{SIMILAR\_TO} edges); all 235 runs succeed.
+This progression supports the hypothesis that the KG acts as a growing
+episodic memory: as the neighbourhood graph densifies, the agent's
+warm-start context becomes increasingly informative, reducing
+first-try failures.
 
 \subsection{Comparison with Prior Work}
 
@@ -1132,7 +1149,7 @@ reducing first-try failures.
 GPT-4-driven FEniCS script generation; our 57.6\% first-try rate is
 broadly comparable using a fully local, open-source model stack.
 Unlike their single-turn approach, PDE-Agents recovers from failures
-through multi-turn self-correction, achieving 97.4\% final success.
+through multi-turn self-correction, achieving 97.8\% final success.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{System Limitations and Future Work}
@@ -1194,8 +1211,8 @@ parameter choices, providing a fully auditable reasoning trail.
 
 We have presented PDE-Agents, an open, containerised multi-agent ecosystem
 that automates finite element simulations through natural-language interaction
-with locally-deployed open-source LLMs.  The system achieves 97.4\% overall
-success across 1{,}135 production runs and demonstrates $\mathcal{O}(h^2)$
+with locally-deployed open-source LLMs.  The system achieves 97.8\% overall
+success across 1{,}369 production runs and demonstrates $\mathcal{O}(h^2)$
 spatial convergence validated against analytical solutions.
 
 Our four-way ablation study across 17 benchmark tasks reveals several
@@ -1227,7 +1244,7 @@ for KG~Off vs.\ 1.00 for KG~Smart); (2)~an adaptive decision framework
 fidelity is model-agnostic.
 
 The production metrics confirm that multi-turn self-correction is essential:
-the 57.6\% first-try rate improves to 97.4\% through iterative debugging,
+the 57.6\% first-try rate improves to 97.8\% through iterative debugging,
 underscoring the value of agent-level orchestration over single-turn
 code generation.  PDE-Agents establishes both a working platform and a
 rigorous empirical baseline for the emerging field of LLM-driven
