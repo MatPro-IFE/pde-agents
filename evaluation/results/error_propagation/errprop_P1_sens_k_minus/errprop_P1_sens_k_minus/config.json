@@ -1,0 +1,48 @@
+{
+  "dim": 2,
+  "nx": 48,
+  "ny": 48,
+  "nz": 16,
+  "Lx": 1.0,
+  "Ly": 1.0,
+  "Lz": 1.0,
+  "rho": 3850.0,
+  "cp": 278.0,
+  "k": 296.4,
+  "source": 0,
+  "bcs": [
+    {
+      "type": "dirichlet",
+      "value": 1500,
+      "location": "left"
+    },
+    {
+      "type": "dirichlet",
+      "value": 400,
+      "location": "right"
+    },
+    {
+      "type": "neumann",
+      "value": 0,
+      "location": "top"
+    },
+    {
+      "type": "neumann",
+      "value": 0,
+      "location": "bottom"
+    }
+  ],
+  "geometry": null,
+  "u_init": 950,
+  "t_start": 0.0,
+  "t_end": 0.001,
+  "dt": 1e-06,
+  "theta": 1.0,
+  "element_degree": 1,
+  "output_dir": "/workspace/evaluation/results/error_propagation/errprop_P1_sens_k_minus",
+  "run_id": "errprop_P1_sens_k_minus",
+  "save_every": 10,
+  "save_format": "xdmf",
+  "petsc_solver": "cg",
+  "petsc_preconditioner": "hypre"
+}

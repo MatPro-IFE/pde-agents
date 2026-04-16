@@ -1,0 +1,614 @@
+{
+  "timestamp": "2026-04-16T09:08:26",
+  "n_tasks": 7,
+  "prompt_inject": {
+    "aggregate": {
+      "n_tasks": 7,
+      "success_rate": 1.0,
+      "first_try_rate": 1.0,
+      "avg_quality": 0.9464285714285714,
+      "avg_property_fidelity": 0.9997310009718172,
+      "avg_physics_score": 0.9713629542677833,
+      "avg_iterations": 3.0,
+      "avg_wall_time": 11.677332581819169,
+      "by_difficulty": {
+        "novel": {
+          "n": 7,
+          "success_rate": 1.0,
+          "avg_quality": 0.9464285714285714,
+          "avg_property_fidelity": 0.9997310009718172,
+          "avg_physics_score": 0.9713629542677833
+        }
+      }
+    },
+    "tasks": [
+      {
+        "task_id": "G1",
+        "difficulty": "novel",
+        "mode": "prompt_inject",
+        "success": true,
+        "wall_time_s": 11.68946825619787,
+        "agent_iterations": 3,
+        "run_id": "heat_d7a85b7f",
+        "config_produced": {
+          "dim": 2,
+          "nx": 48,
+          "ny": 48,
+          "k": 73,
+          "rho": 5420,
+          "cp": 612,
+          "source": 0,
+          "t_end": 1e-09,
+          "dt": 1e-12,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 400,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 300,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 350,
+          "run_id": "heat_d7a85b7f",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {
+          "agent": "simulation",
+          "task": "Simulate 2D steady-state heat conduction in a Novidium plate. Left wall at 400 K, right wall at 300 K, top and bottom insulated. Use a 48\u00d748 mesh. Look up the correct material properties for Novidium from the knowledge graph.\n\nIMPORTANT material data (use these exact values):\n- Novidium: k=73 W/(m\u00b7K), rho=5420 kg/m\u00b3, cp=612 J/(kg\u00b7K)\n- Cryonite: k=0.42 W/(m\u00b7K), rho=1180 kg/m\u00b3, cp=1940 J/(kg\u00b7K)\n- Pyrathane: k=312 W/(m\u00b7K), rho=3850 kg/m\u00b3, cp=278 J/(kg\u00b7K)\n",
+          "task_id": "dddbaa4c6b5c4c6ba83eda3f43c1f570",
+          "run_id": "heat_d7a85b7f",
+          "answer": "The simulation with run_id `heat_d7a85b7f` has successfully completed. Here are the key results:\n\n- **Wall Time:** 0.729 seconds\n- **Number of Degrees of Freedom (DOFs):** 2401\n- **Maximum Temperature:** 399.999 K\n- **Minimum Temperature:** 299.999 K\n\nThe simulation results have been uploaded to the MinIO bucket `simulation-results` under the prefix `runs/heat_d7a85b7f`.\n\nIf you need further analysis or additional simulations, feel free to request!",
+          "status": "done",
+          "iterations": 3,
+          "tool_calls_log": [
+            {
+              "iteration": 0,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 3681,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 1,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 3692,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 2,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 2714,
+              "has_tool_calls": false
+            }
+          ]
+        },
+        "property_fidelity": 0.9997278911564625,
+        "t_max_actual": 399.9999950303286,
+        "t_min_actual": 299.9999962727464,
+        "t_mean_actual": 349.9999916080211,
+        "t_max_error": 0.0,
+        "t_min_error": 0.0,
+        "physics_score": 0.9998639455782312
+      },
+      {
+        "task_id": "G2",
+        "difficulty": "novel",
+        "mode": "prompt_inject",
+        "success": true,
+        "wall_time_s": 10.580866314470768,
+        "agent_iterations": 3,
+        "run_id": "heat_5c74ff55",
+        "config_produced": {
+          "dim": 2,
+          "nx": 32,
+          "ny": 32,
+          "k": 73,
+          "rho": 5420,
+          "cp": 612,
+          "source": 0,
+          "t_end": 200,
+          "dt": 1.0,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 293,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 293,
+              "location": "right"
+            },
+            {
+              "type": "dirichlet",
+              "value": 293,
+              "location": "top"
+            },
+            {
+              "type": "dirichlet",
+              "value": 293,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 600,
+          "run_id": "heat_5c74ff55",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.875,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {
+          "agent": "simulation",
+          "task": "Model transient heat diffusion in a Novidium block (2D). All four boundaries at 293 K, initial temperature 600 K. Use 32\u00d732 mesh, simulate for 200 seconds with dt=1.0. Use the material properties of Novidium.\n\nIMPORTANT material data (use these exact values):\n- Novidium: k=73 W/(m\u00b7K), rho=5420 kg/m\u00b3, cp=612 J/(kg\u00b7K)\n- Cryonite: k=0.42 W/(m\u00b7K), rho=1180 kg/m\u00b3, cp=1940 J/(kg\u00b7K)\n- Pyrathane: k=312 W/(m\u00b7K), rho=3850 kg/m\u00b3, cp=278 J/(kg\u00b7K)\n",
+          "task_id": "09775dce1af94df5a4f94337e70b8e8e",
+          "run_id": "heat_5c74ff55",
+          "answer": "The simulation with run_id `heat_5c74ff55` has successfully completed. Here are the key results:\n\n- **Wall Time**: 0.082 seconds\n- **Number of Degrees of Freedom (DOFs)**: 1089\n- **Maximum Temperature**: 600.0 K\n- **Minimum Temperature**: 293.0 K\n\nThe simulation output files have been uploaded to the MinIO bucket `simulation-results` under the prefix `runs/heat_5c74ff55`.\n\nIf you need further analysis or additional simulations, feel free to request!",
+          "status": "done",
+          "iterations": 3,
+          "tool_calls_log": [
+            {
+              "iteration": 0,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 3683,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 1,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 3762,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 2,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 2689,
+              "has_tool_calls": false
+            }
+          ]
+        },
+        "property_fidelity": 0.9997278911564625,
+        "t_max_actual": 600.0005562942381,
+        "t_min_actual": 293.0000001566205,
+        "t_mean_actual": 501.3000001517305,
+        "t_max_error": 0.0005562942380947788,
+        "t_min_error": 0.0,
+        "physics_score": 0.9998630395615569
+      },
+      {
+        "task_id": "G3",
+        "difficulty": "novel",
+        "mode": "prompt_inject",
+        "success": true,
+        "wall_time_s": 12.880573547445238,
+        "agent_iterations": 3,
+        "run_id": "heat_5f2fe619",
+        "config_produced": {
+          "dim": 2,
+          "nx": 64,
+          "ny": 64,
+          "k": 73,
+          "rho": 5420,
+          "cp": 612,
+          "source": 0,
+          "t_end": 150,
+          "dt": 0.1,
+          "theta": 1,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 700,
+              "location": "left"
+            },
+            {
+              "type": "robin",
+              "alpha": 50,
+              "u_inf": 293,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 700,
+          "run_id": "heat_5f2fe619",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {
+          "agent": "simulation",
+          "task": "Simulate heat conduction in a Novidium component with mixed boundary conditions. Left face heated to 700 K, right face cooled by convection (h=50 W/m\u00b2K, T_amb=293 K). Top and bottom insulated. 64\u00d764 mesh, run for 150 seconds. Use the thermal properties of the novel material Novidium.\n\nIMPORTANT material data (use these exact values):\n- Novidium: k=73 W/(m\u00b7K), rho=5420 kg/m\u00b3, cp=612 J/(kg\u00b7K)\n- Cryonite: k=0.42 W/(m\u00b7K), rho=1180 kg/m\u00b3, cp=1940 J/(kg\u00b7K)\n- Pyrathane: k=312 W/(m\u00b7K), rho=3850 kg/m\u00b3, cp=278 J/(kg\u00b7K)\n",
+          "task_id": "09edd72c13d0452695d3130895f89877",
+          "run_id": "heat_5f2fe619",
+          "answer": "The simulation with run_id `heat_5f2fe619` has successfully completed. Here are the key results:\n\n- **Wall Time**: 1.6 seconds\n- **Number of Degrees of Freedom (DOFs)**: 4225\n- **Maximum Temperature**: 700.0 K\n- **Minimum Temperature**: 682.46 K\n\nThe simulation output files have been uploaded to the MinIO bucket `simulation-results` under the prefix `runs/heat_5f2fe619`.\n\nIf you need further analysis or additional simulations, feel free to request!",
+          "status": "done",
+          "iterations": 3,
+          "tool_calls_log": [
+            {
+              "iteration": 0,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 3695,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 1,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 3705,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 2,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 2648,
+              "has_tool_calls": false
+            }
+          ]
+        },
+        "property_fidelity": 0.9997278911564625,
+        "t_max_actual": 700.0016276680725,
+        "t_min_actual": 682.46097813652,
+        "t_mean_actual": 698.9858713533654,
+        "t_max_error": 0.0,
+        "t_min_error": null,
+        "physics_score": 0.9998639455782312
+      },
+      {
+        "task_id": "C1",
+        "difficulty": "novel",
+        "mode": "prompt_inject",
+        "success": true,
+        "wall_time_s": 9.154694925993681,
+        "agent_iterations": 3,
+        "run_id": "heat_a34f519f",
+        "config_produced": {
+          "dim": 2,
+          "nx": 48,
+          "ny": 48,
+          "k": 0.42,
+          "rho": 1180,
+          "cp": 1940,
+          "source": 0,
+          "t_end": 1e-06,
+          "dt": 1e-07,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 350,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 280,
+              "location": "right"
+            }
+          ],
+          "u_init": 315,
+          "run_id": "heat_a34f519f",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {
+          "agent": "simulation",
+          "task": "Simulate 2D steady-state heat conduction in a Cryonite insulation panel. Left wall at 350 K, right wall at 280 K, top and bottom insulated. Use a 48\u00d748 mesh. Look up the correct material properties for Cryonite from the knowledge graph.\n\nIMPORTANT material data (use these exact values):\n- Novidium: k=73 W/(m\u00b7K), rho=5420 kg/m\u00b3, cp=612 J/(kg\u00b7K)\n- Cryonite: k=0.42 W/(m\u00b7K), rho=1180 kg/m\u00b3, cp=1940 J/(kg\u00b7K)\n- Pyrathane: k=312 W/(m\u00b7K), rho=3850 kg/m\u00b3, cp=278 J/(kg\u00b7K)\n",
+          "task_id": "f86d00e8887e407a815a71f58a03716a",
+          "run_id": "heat_a34f519f",
+          "answer": "The simulation with run_id `heat_a34f519f` has successfully completed. Here are the key results:\n\n- **Wall Time**: 0.064 seconds\n- **Number of Degrees of Freedom (DOFs)**: 2401\n- **Maximum Temperature**: 349.99 K\n- **Minimum Temperature**: 279.99 K\n\nThe simulation output files have been uploaded to the MinIO bucket `simulation-results` under the prefix `runs/heat_a34f519f`.\n\nIf you need further analysis or additional simulations, feel free to request!",
+          "status": "done",
+          "iterations": 3,
+          "tool_calls_log": [
+            {
+              "iteration": 0,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 2972,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 1,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 3072,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 2,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 2683,
+              "has_tool_calls": false
+            }
+          ]
+        },
+        "property_fidelity": 1.0,
+        "t_max_actual": 349.9999956330198,
+        "t_min_actual": 279.9999965064159,
+        "t_mean_actual": 314.99999979841374,
+        "t_max_error": 0.0,
+        "t_min_error": 0.0,
+        "physics_score": 1.0
+      },
+      {
+        "task_id": "C2",
+        "difficulty": "novel",
+        "mode": "prompt_inject",
+        "success": true,
+        "wall_time_s": 15.260089883580804,
+        "agent_iterations": 3,
+        "run_id": "heat_957b111b",
+        "config_produced": {
+          "dim": 2,
+          "nx": 32,
+          "ny": 32,
+          "k": 0.42,
+          "rho": 1180,
+          "cp": 1940,
+          "source": 0,
+          "t_end": 500,
+          "dt": 0.1,
+          "theta": 1,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 400,
+              "location": "left"
+            },
+            {
+              "type": "robin",
+              "alpha": 15,
+              "u_inf": 250,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 400,
+          "run_id": "heat_957b111b",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.875,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {
+          "agent": "simulation",
+          "task": "Model heat transfer through a Cryonite wall with convective cooling on the right face (h=15 W/m\u00b2K, T_amb=250 K). Left face at 400 K, top and bottom insulated. 32\u00d732 mesh, simulate for 500 seconds. Use the thermal properties of Cryonite.\n\nIMPORTANT material data (use these exact values):\n- Novidium: k=73 W/(m\u00b7K), rho=5420 kg/m\u00b3, cp=612 J/(kg\u00b7K)\n- Cryonite: k=0.42 W/(m\u00b7K), rho=1180 kg/m\u00b3, cp=1940 J/(kg\u00b7K)\n- Pyrathane: k=312 W/(m\u00b7K), rho=3850 kg/m\u00b3, cp=278 J/(kg\u00b7K)\n",
+          "task_id": "2a151077b9924279a1977023714cdd41",
+          "run_id": "heat_957b111b",
+          "answer": "The simulation with run_id `heat_957b111b` has successfully completed. Here are the key results:\n\n- **Wall Time**: 1.91 seconds\n- **Number of Degrees of Freedom (DOFs)**: 1089\n- **Maximum Temperature**: 409 K\n- **Minimum Temperature**: 357 K\n\nThe simulation results have been uploaded to the MinIO bucket `simulation-results` under the prefix `runs/heat_957b111b`.\n\nIf you need further analysis or additional simulations, feel free to request.",
+          "status": "done",
+          "iterations": 3,
+          "tool_calls_log": [
+            {
+              "iteration": 0,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 3713,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 1,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 3762,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 2,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 2585,
+              "has_tool_calls": false
+            }
+          ]
+        },
+        "property_fidelity": 1.0,
+        "t_max_actual": 408.9903280738399,
+        "t_min_actual": 356.67527639902755,
+        "t_mean_actual": 399.0365966193303,
+        "t_max_error": 3.990328073839919,
+        "t_min_error": null,
+        "physics_score": 0.800483596308004
+      },
+      {
+        "task_id": "P1",
+        "difficulty": "novel",
+        "mode": "prompt_inject",
+        "success": true,
+        "wall_time_s": 11.636892887763679,
+        "agent_iterations": 3,
+        "run_id": "heat_0bb18e2a",
+        "config_produced": {
+          "dim": 2,
+          "nx": 48,
+          "ny": 48,
+          "k": 312,
+          "rho": 3850,
+          "cp": 278,
+          "source": 0,
+          "t_end": 1e-06,
+          "dt": 1e-09,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 1500,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 400,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 950,
+          "run_id": "heat_0bb18e2a",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {
+          "agent": "simulation",
+          "task": "Simulate 2D steady-state heat conduction in a Pyrathane crucible wall. Left face at 1500 K, right face at 400 K, top and bottom insulated. Use a 48\u00d748 mesh. Look up the correct material properties for Pyrathane from the knowledge graph.\n\nIMPORTANT material data (use these exact values):\n- Novidium: k=73 W/(m\u00b7K), rho=5420 kg/m\u00b3, cp=612 J/(kg\u00b7K)\n- Cryonite: k=0.42 W/(m\u00b7K), rho=1180 kg/m\u00b3, cp=1940 J/(kg\u00b7K)\n- Pyrathane: k=312 W/(m\u00b7K), rho=3850 kg/m\u00b3, cp=278 J/(kg\u00b7K)\n",
+          "task_id": "0c52450eae054cb59c0d5b616a001b12",
+          "run_id": "heat_0bb18e2a",
+          "answer": "The simulation with run_id `heat_0bb18e2a` has successfully completed. Here are the key results:\n\n- **Wall Time**: 0.724 seconds\n- **Number of Degrees of Freedom (DOFs)**: 2401\n- **Maximum Temperature**: ~1500 K\n- **Minimum Temperature**: ~400 K\n\nThe simulation output files have been uploaded to the MinIO bucket `simulation-results` under the prefix `runs/heat_0bb18e2a`.\n\nIf you need further analysis or additional simulations, feel free to request.",
+          "status": "done",
+          "iterations": 3,
+          "tool_calls_log": [
+            {
+              "iteration": 0,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 3673,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 1,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 3707,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 2,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 2644,
+              "has_tool_calls": false
+            }
+          ]
+        },
+        "property_fidelity": 0.9994666666666666,
+        "t_max_actual": 1499.9999816949512,
+        "t_min_actual": 399.99999511865366,
+        "t_mean_actual": 949.9999742679091,
+        "t_max_error": 0.0,
+        "t_min_error": 0.0,
+        "physics_score": 0.9997333333333334
+      },
+      {
+        "task_id": "P2",
+        "difficulty": "novel",
+        "mode": "prompt_inject",
+        "success": true,
+        "wall_time_s": 10.538742257282138,
+        "agent_iterations": 3,
+        "run_id": "heat_47da90ec",
+        "config_produced": {
+          "dim": 2,
+          "nx": 32,
+          "ny": 32,
+          "k": 312,
+          "rho": 3850,
+          "cp": 278,
+          "source": 0,
+          "t_end": 15,
+          "dt": 0.1,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 400,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 400,
+              "location": "right"
+            },
+            {
+              "type": "dirichlet",
+              "value": 400,
+              "location": "top"
+            },
+            {
+              "type": "dirichlet",
+              "value": 400,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 2000,
+          "run_id": "heat_47da90ec",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.875,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {
+          "agent": "simulation",
+          "task": "Simulate transient heat diffusion in a Pyrathane component (2D). All boundaries at 400 K, initial temperature 2000 K. Use 32\u00d732 mesh, simulate for 15 seconds with dt=0.1. Use the thermal properties of Pyrathane.\n\nIMPORTANT material data (use these exact values):\n- Novidium: k=73 W/(m\u00b7K), rho=5420 kg/m\u00b3, cp=612 J/(kg\u00b7K)\n- Cryonite: k=0.42 W/(m\u00b7K), rho=1180 kg/m\u00b3, cp=1940 J/(kg\u00b7K)\n- Pyrathane: k=312 W/(m\u00b7K), rho=3850 kg/m\u00b3, cp=278 J/(kg\u00b7K)\n",
+          "task_id": "b9ad46aac4f0440d8cca4e69f4fc5db4",
+          "run_id": "heat_47da90ec",
+          "answer": "The simulation with run_id `heat_47da90ec` has successfully completed. Here are the key results:\n\n- **Wall Time:** 0.127 seconds\n- **Number of Degrees of Freedom (DOFs):** 1089\n- **Maximum Temperature:** 2000.002 K\n- **Minimum Temperature:** 400.000 K\n\nThe results have been uploaded to the MinIO bucket `simulation-results` under the prefix `runs/heat_47da90ec`.\n\nIf you need further analysis or additional simulations, feel free to request!",
+          "status": "done",
+          "iterations": 3,
+          "tool_calls_log": [
+            {
+              "iteration": 0,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 3709,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 1,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 3741,
+              "has_tool_calls": true
+            },
+            {
+              "iteration": 2,
+              "model": "qwen2.5-coder:32b",
+              "elapsed_ms": 2645,
+              "has_tool_calls": false
+            }
+          ]
+        },
+        "property_fidelity": 0.9994666666666666,
+        "t_max_actual": 2000.0016442182603,
+        "t_min_actual": 399.9999941546956,
+        "t_mean_actual": 1486.947388947279,
+        "t_max_error": 0.001644218260253183,
+        "t_min_error": 0.0,
+        "physics_score": 0.9997328195151269
+      }
+    ]
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "dim": 2,
+  "nx": 32,
+  "ny": 32,
+  "nz": 16,
+  "Lx": 1.0,
+  "Ly": 1.0,
+  "Lz": 1.0,
+  "rho": 5149.0,
+  "cp": 612.0,
+  "k": 73.0,
+  "source": 0,
+  "bcs": [
+    {
+      "type": "dirichlet",
+      "value": 293,
+      "location": "left"
+    },
+    {
+      "type": "dirichlet",
+      "value": 293,
+      "location": "right"
+    },
+    {
+      "type": "dirichlet",
+      "value": 293,
+      "location": "top"
+    },
+    {
+      "type": "dirichlet",
+      "value": 293,
+      "location": "bottom"
+    }
+  ],
+  "geometry": null,
+  "u_init": 600,
+  "t_start": 0.0,
+  "t_end": 200,
+  "dt": 1.0,
+  "theta": 1.0,
+  "element_degree": 1,
+  "output_dir": "/workspace/evaluation/results/error_propagation/errprop_G2_sens_rho_minus",
+  "run_id": "errprop_G2_sens_rho_minus",
+  "save_every": 10,
+  "save_format": "xdmf",
+  "petsc_solver": "cg",
+  "petsc_preconditioner": "hypre"
+}

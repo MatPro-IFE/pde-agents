@@ -1,0 +1,141 @@
+{
+  "accuracy": 1.0,
+  "tasks": [
+    {
+      "task_id": "E1",
+      "difficulty": "easy",
+      "material_novelty": "explicit_params",
+      "decided_mode": "kg_off",
+      "optimal_mode": "kg_off",
+      "match": true
+    },
+    {
+      "task_id": "E2",
+      "difficulty": "easy",
+      "material_novelty": "explicit_params",
+      "decided_mode": "kg_off",
+      "optimal_mode": "kg_off",
+      "match": true
+    },
+    {
+      "task_id": "E3",
+      "difficulty": "easy",
+      "material_novelty": "explicit_params",
+      "decided_mode": "kg_off",
+      "optimal_mode": "kg_off",
+      "match": true
+    },
+    {
+      "task_id": "M1",
+      "difficulty": "medium",
+      "material_novelty": "known",
+      "decided_mode": "kg_smart_lazy",
+      "optimal_mode": "kg_smart_lazy",
+      "match": true
+    },
+    {
+      "task_id": "M2",
+      "difficulty": "medium",
+      "material_novelty": "known",
+      "decided_mode": "kg_smart_lazy",
+      "optimal_mode": "kg_smart_lazy",
+      "match": true
+    },
+    {
+      "task_id": "M3",
+      "difficulty": "medium",
+      "material_novelty": "known",
+      "decided_mode": "kg_smart_lazy",
+      "optimal_mode": "kg_smart_lazy",
+      "match": true
+    },
+    {
+      "task_id": "H1",
+      "difficulty": "hard",
+      "material_novelty": "known",
+      "decided_mode": "kg_smart_lazy",
+      "optimal_mode": "kg_smart_lazy",
+      "match": true
+    },
+    {
+      "task_id": "H2",
+      "difficulty": "hard",
+      "material_novelty": "known",
+      "decided_mode": "kg_smart_lazy",
+      "optimal_mode": "kg_smart_lazy",
+      "match": true
+    },
+    {
+      "task_id": "H3",
+      "difficulty": "hard",
+      "material_novelty": "known",
+      "decided_mode": "kg_smart_lazy",
+      "optimal_mode": "kg_smart_lazy",
+      "match": true
+    },
+    {
+      "task_id": "H4",
+      "difficulty": "hard",
+      "material_novelty": "known",
+      "decided_mode": "kg_smart_lazy",
+      "optimal_mode": "kg_smart_lazy",
+      "match": true
+    },
+    {
+      "task_id": "G1",
+      "difficulty": "novel",
+      "material_novelty": "novel",
+      "decided_mode": "kg_smart_forced",
+      "optimal_mode": "kg_smart_forced",
+      "match": true
+    },
+    {
+      "task_id": "G2",
+      "difficulty": "novel",
+      "material_novelty": "novel",
+      "decided_mode": "kg_smart_forced",
+      "optimal_mode": "kg_smart_forced",
+      "match": true
+    },
+    {
+      "task_id": "G3",
+      "difficulty": "novel",
+      "material_novelty": "novel",
+      "decided_mode": "kg_smart_forced",
+      "optimal_mode": "kg_smart_forced",
+      "match": true
+    },
+    {
+      "task_id": "C1",
+      "difficulty": "novel",
+      "material_novelty": "novel",
+      "decided_mode": "kg_smart_forced",
+      "optimal_mode": "kg_smart_forced",
+      "match": true
+    },
+    {
+      "task_id": "C2",
+      "difficulty": "novel",
+      "material_novelty": "novel",
+      "decided_mode": "kg_smart_forced",
+      "optimal_mode": "kg_smart_forced",
+      "match": true
+    },
+    {
+      "task_id": "P1",
+      "difficulty": "novel",
+      "material_novelty": "novel",
+      "decided_mode": "kg_smart_forced",
+      "optimal_mode": "kg_smart_forced",
+      "match": true
+    },
+    {
+      "task_id": "P2",
+      "difficulty": "novel",
+      "material_novelty": "novel",
+      "decided_mode": "kg_smart_forced",
+      "optimal_mode": "kg_smart_forced",
+      "match": true
+    }
+  ]
+}
