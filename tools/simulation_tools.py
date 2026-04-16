@@ -18,6 +18,21 @@ import os
 import subprocess
 import tempfile
 import time
+
+
+def _safe_json_parse(value, fallback=None):
+    """Parse a JSON string robustly — handles str, dict, list, double-encoded inputs."""
+    if isinstance(value, (dict, list)):
+        return value
+    if not isinstance(value, str) or not value.strip():
+        return fallback if fallback is not None else {}
+    try:
+        parsed = json.loads(value)
+        if isinstance(parsed, str):
+            parsed = json.loads(parsed)
+        return parsed
+    except (json.JSONDecodeError, TypeError, ValueError):
+        return fallback
 import uuid
 from pathlib import Path
 from typing import Optional
@@ -169,10 +184,9 @@ def run_simulation(config_json: str) -> str:
     Returns:
         JSON string with run_id, status, and result summary.
     """
-    try:
-        config = json.loads(config_json)
-    except json.JSONDecodeError as e:
-        return json.dumps({"error": f"Invalid JSON: {e}"})
+    config = _safe_json_parse(config_json)
+    if config is None:
+        return json.dumps({"error": "Invalid config_json: could not parse"})
 
     # Assign run_id if not provided
     if "run_id" not in config:
@@ -247,10 +261,9 @@ def validate_config(config_json: str) -> str:
         JSON string with 'valid' (bool), 'errors' (list), 'warnings' (list),
         and 'estimates' (DOF count, memory, estimated wall time).
     """
-    try:
-        config = json.loads(config_json)
-    except json.JSONDecodeError as e:
-        return json.dumps({"valid": False, "errors": [f"JSON parse error: {e}"]})
+    config = _safe_json_parse(config_json)
+    if config is None:
+        return json.dumps({"valid": False, "errors": ["JSON parse error"]})
 
     errors, warnings = [], []
 
@@ -331,11 +344,10 @@ def modify_config(config_json: str, changes_json: str) -> str:
     Returns:
         Updated configuration as JSON string.
     """
-    try:
-        config  = json.loads(config_json)
-        changes = json.loads(changes_json)
-    except json.JSONDecodeError as e:
-        return json.dumps({"error": f"JSON parse error: {e}"})
+    config = _safe_json_parse(config_json)
+    changes = _safe_json_parse(changes_json)
+    if config is None or changes is None:
+        return json.dumps({"error": "JSON parse error in config or changes"})
 
     config.update(changes)
     if "run_id" not in changes:
@@ -552,11 +564,10 @@ def run_parametric_sweep(
     Returns:
         JSON summary with study_id and list of run_ids.
     """
-    try:
-        values      = json.loads(values_json)
-        base_config = json.loads(base_config_json)
-    except json.JSONDecodeError as e:
-        return json.dumps({"error": f"JSON parse error: {e}"})
+    values = _safe_json_parse(values_json, fallback=[])
+    base_config = _safe_json_parse(base_config_json)
+    if not values or base_config is None:
+        return json.dumps({"error": "JSON parse error in values or base_config"})
 
     study_id = _new_run_id("study")
     run_ids  = []

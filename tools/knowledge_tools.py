@@ -14,6 +14,21 @@ import logging
 
 from langchain_core.tools import tool
 
+
+def _safe_json_parse(value, fallback=None):
+    """Parse a JSON string robustly — handles str, dict, list, double-encoded inputs."""
+    if isinstance(value, (dict, list)):
+        return value
+    if not isinstance(value, str) or not value.strip():
+        return fallback if fallback is not None else {}
+    try:
+        parsed = json.loads(value)
+        if isinstance(parsed, str):
+            parsed = json.loads(parsed)
+        return parsed
+    except (json.JSONDecodeError, TypeError, ValueError):
+        return fallback
+
 log = logging.getLogger(__name__)
 
 
@@ -260,10 +275,9 @@ def check_config_warnings(config_json: str) -> str:
           - physics_references:         curated physics facts / warnings for this config
           - recommendation:             overall pass/warning/caution assessment
     """
-    try:
-        config = json.loads(config_json)
-    except json.JSONDecodeError as exc:
-        return json.dumps({"error": f"Invalid config JSON: {exc}"})
+    config = _safe_json_parse(config_json)
+    if config is None:
+        return json.dumps({"error": "Invalid config JSON"})
 
     kg = _kg()
 
@@ -373,10 +387,7 @@ def get_physics_references(config_json: str) -> str:
           - source:   citation
           - tags:     searchable keywords
     """
-    try:
-        config = json.loads(config_json) if config_json.strip() else {}
-    except json.JSONDecodeError as exc:
-        return json.dumps({"error": f"Invalid JSON: {exc}"})
+    config = _safe_json_parse(config_json, fallback={})
 
     kg = _kg()
     if not kg or not kg.available:

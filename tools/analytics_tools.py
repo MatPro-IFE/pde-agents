@@ -16,6 +16,21 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+
+
+def _safe_json_parse(value, fallback=None):
+    """Parse a JSON string robustly — handles str, dict, list, double-encoded inputs."""
+    if isinstance(value, (dict, list)):
+        return value
+    if not isinstance(value, str) or not value.strip():
+        return fallback if fallback is not None else {}
+    try:
+        parsed = json.loads(value)
+        if isinstance(parsed, str):
+            parsed = json.loads(parsed)
+        return parsed
+    except (json.JSONDecodeError, TypeError, ValueError):
+        return fallback
 from typing import Optional
 
 import numpy as np
@@ -157,10 +172,9 @@ def compare_runs(run_ids_json: str) -> str:
     Returns:
         JSON with comparison table and ranking.
     """
-    try:
-        run_ids = json.loads(run_ids_json)
-    except json.JSONDecodeError as e:
-        return json.dumps({"error": f"Invalid JSON: {e}"})
+    run_ids = _safe_json_parse(run_ids_json, fallback=[])
+    if not run_ids:
+        return json.dumps({"error": "Invalid or empty run_ids_json"})
 
     rows = []
     for rid in run_ids:
@@ -289,10 +303,9 @@ def suggest_next_run(analysis_json: str, strategy: str = "optimize_uniformity") 
     Returns:
         JSON with 'suggested_config' and 'rationale'.
     """
-    try:
-        analysis = json.loads(analysis_json)
-    except json.JSONDecodeError as e:
-        return json.dumps({"error": f"Invalid JSON: {e}"})
+    analysis = _safe_json_parse(analysis_json)
+    if analysis is None:
+        return json.dumps({"error": "Invalid analysis_json"})
 
     config = analysis.get("physical_params", {})
     suggested = {}
@@ -511,10 +524,9 @@ def export_summary_report(run_ids_json: str, output_path: str = "") -> str:
     Returns:
         JSON summary report as string.
     """
-    try:
-        run_ids = json.loads(run_ids_json)
-    except json.JSONDecodeError as e:
-        return json.dumps({"error": f"Invalid JSON: {e}"})
+    run_ids = _safe_json_parse(run_ids_json, fallback=[])
+    if not run_ids:
+        return json.dumps({"error": "Invalid or empty run_ids_json"})
 
     report = {"runs": {}}
     for rid in run_ids:

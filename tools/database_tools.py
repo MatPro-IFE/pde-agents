@@ -17,6 +17,21 @@ from __future__ import annotations
 import csv
 import json
 import os
+
+
+def _safe_json_parse(value, fallback=None):
+    """Parse a JSON string robustly — handles str, dict, list, double-encoded inputs."""
+    if isinstance(value, (dict, list)):
+        return value
+    if not isinstance(value, str) or not value.strip():
+        return fallback if fallback is not None else {}
+    try:
+        parsed = json.loads(value)
+        if isinstance(parsed, str):
+            parsed = json.loads(parsed)
+        return parsed
+    except (json.JSONDecodeError, TypeError, ValueError):
+        return fallback
 from io import StringIO
 from pathlib import Path
 from typing import Optional
@@ -79,10 +94,9 @@ def store_result(result_json: str) -> str:
     if not DB_AVAILABLE:
         return json.dumps({"error": "Database not available"})
 
-    try:
-        result = json.loads(result_json)
-    except json.JSONDecodeError as e:
-        return json.dumps({"error": f"JSON parse error: {e}"})
+    result = _safe_json_parse(result_json)
+    if result is None:
+        return json.dumps({"error": "JSON parse error in result_json"})
 
     run_id = result.get("run_id")
     if not run_id:
@@ -190,12 +204,11 @@ def catalog_study(
     if not DB_AVAILABLE:
         return json.dumps({"error": "Database not available"})
 
-    try:
-        values      = json.loads(values_json)
-        base_config = json.loads(base_config_json)
-        run_pairs   = json.loads(run_ids_json)  # [[run_id, val], ...]
-    except json.JSONDecodeError as e:
-        return json.dumps({"error": f"JSON parse error: {e}"})
+    values = _safe_json_parse(values_json, fallback=[])
+    base_config = _safe_json_parse(base_config_json)
+    run_pairs = _safe_json_parse(run_ids_json, fallback=[])
+    if not values or base_config is None:
+        return json.dumps({"error": "JSON parse error in values or base_config"})
 
     try:
         study = create_study(
