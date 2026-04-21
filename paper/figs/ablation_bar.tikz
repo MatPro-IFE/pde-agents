@@ -1,5 +1,5 @@
 % 3-way ablation bar chart — KG On vs KG Off vs KG Smart
-% 17 tasks: Easy/Medium/Hard (standard) + Novel (3 fictional materials)
+% 50 tasks: Easy(12) / Medium(15) / Hard(13) / Novel(10)
 \begin{tikzpicture}
 \begin{axis}[
   ybar,
@@ -29,10 +29,10 @@
 % KG On (mandatory) — blue
 \addplot[fill=nodeblue!55, draw=nodeblue!80] coordinates {
   (Easy,   100)
-  (Medium,  33)
-  (Hard,    50)
-  (Novel,   57)
-  (Overall, 59)
+  (Medium,  67)
+  (Hard,    85)
+  (Novel,   50)
+  (Overall, 76)
 };
 \addlegendentry{KG On}
 
@@ -48,10 +48,10 @@
 
 % KG Smart (warm-start + lazy) — orange
 \addplot[fill=nodeorange!55, draw=nodeorange!80] coordinates {
-  (Easy,   100)
+  (Easy,    92)
   (Medium, 100)
-  (Hard,    75)
-  (Novel,  100)
+  (Hard,    92)
+  (Novel,   90)
   (Overall, 94)
 };
 \addlegendentry{KG Smart}

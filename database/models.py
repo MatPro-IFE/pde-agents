@@ -104,6 +104,10 @@ class SimulationRun(Base):
     # Perf
     wall_time   = Column(Float, doc="seconds")
 
+    # Experiment tracking
+    experiment_phase = Column(String(64), nullable=True, index=True,
+                              doc="e.g. 'ablation_v2', 'kg_growth_clean', 'production'")
+
     # Storage
     output_dir  = Column(String(512))
     minio_prefix = Column(String(512))

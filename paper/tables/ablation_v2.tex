@@ -1,0 +1,21 @@
+\begin{table}[htbp]
+\centering
+\caption{Ablation study results (frozen KG, $n=50$ tasks per mode). ``Overall'' includes failed runs (phys${}=0.5$, MPF${}=0$); ``Success-only'' isolates output quality.}
+\label{tab:ablation-v2}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccc}
+\toprule
+Metric & \textbf{KG Off} & \textbf{KG On} & \textbf{KG Smart} \\
+\midrule
+Success rate & \textbf{100% [93%, 100%]} & 76% [63%, 86%] & 94% [84%, 98%] \\[2pt]
+\multicolumn{4}{l}{\textit{Overall (all tasks):}} \\
+~~Physics score & 0.853 $\pm$ 0.212 & 0.791 $\pm$ 0.251 & 0.882 $\pm$ 0.217 \\
+~~MPF & 0.796 $\pm$ 0.297 & 0.640 $\pm$ 0.450 & 0.844 $\pm$ 0.315 \\[2pt]
+\multicolumn{4}{l}{\textit{Success-only:}} \\
+~~Physics score & 0.853 $\pm$ 0.212 & 0.888 $\pm$ 0.185 & \textbf{0.918 $\pm$ 0.160} \\
+~~MPF & 0.796 $\pm$ 0.297 & 0.825 $\pm$ 0.333 & \textbf{0.898 $\pm$ 0.237} \\[2pt]
+Wall time (s) & \textbf{12.9 $\pm$ 4.9} & 47.8 $\pm$ 55.1 & 31.6 $\pm$ 54.2 \\
+\bottomrule
+\end{tabular}
+\end{table}

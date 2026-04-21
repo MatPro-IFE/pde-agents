@@ -90,18 +90,23 @@ Be concise, systematic, and always explain what you're doing.
 
 _KG_ON_SUFFIX = """
 ## Your capabilities (knowledge tools):
-- check_config_warnings: ALWAYS call this BEFORE running any simulation. Checks the config
-  against known failure patterns AND finds similar past runs with their outcomes.
 - query_knowledge_graph: Look up material properties by name (e.g. "steel", "copper"),
   find similar runs by k+dim, or get the lineage of a run.
+- check_config_warnings: Check a config against known failure patterns and similar past runs.
 
-## Workflow:
-1. Parse the user's task description into a simulation config
-2. Call check_config_warnings to validate against known issues and see past similar runs
-3. Validate the config (check for errors, estimate resources)
-4. Launch the simulation
-5. If failed: debug, apply fixes, and retry (up to 3 times)
-6. Report results to the user
+## MANDATORY Workflow — follow these steps IN ORDER:
+1. Parse the task. If a material is named, call query_knowledge_graph ONCE for its
+   properties (k, rho, cp). Use the returned values — do NOT substitute your own.
+   If the material is not found, use your best knowledge for its thermal properties.
+2. Build the config JSON from the task description + retrieved properties.
+3. Call check_config_warnings ONCE with the config JSON.
+4. Call run_simulation with the config JSON. YOU MUST ALWAYS CALL run_simulation.
+   Never just output a config — you must actually run the simulation.
+5. If simulation failed: call debug_simulation, fix, retry run_simulation.
+6. Report the final result including the run_id.
+
+CRITICAL: You MUST call run_simulation. A task is NOT complete until run_simulation
+has been called and returned a run_id. Never stop at just building a config.
 """
 
 _KG_OFF_SUFFIX = """
@@ -270,8 +275,72 @@ class SimulationAgent(BaseAgent):
             ollama_base_url=kwargs.get("ollama_base_url"),
         )
 
+    _nudge_count: int = 0
+    _MAX_NUDGES: int = 3
+
+    def _router(self, state) -> str:
+        """Override router: nudge the LLM up to 3 times if it hasn't
+        called run_simulation yet."""
+        from langchain_core.messages import AIMessage
+
+        last = state["messages"][-1]
+        iteration = state["iteration"]
+        max_iter = state["max_iterations"]
+
+        if iteration >= max_iter:
+            self._nudge_count = 0
+            return "finish"
+
+        if isinstance(last, AIMessage) and last.tool_calls:
+            return "act"
+
+        context = state.get("context", {})
+        if (not context.get("run_id")
+                and self._nudge_count < self._MAX_NUDGES
+                and iteration < max_iter - 2):
+            from langchain_core.messages import HumanMessage
+            self._nudge_count += 1
+            nudge = HumanMessage(
+                content="You have not called run_simulation yet. "
+                        "Please call run_simulation now with your config JSON. "
+                        "Do NOT output text — call the run_simulation tool."
+            )
+            state["messages"].append(nudge)
+            return "retry"
+
+        self._nudge_count = 0
+        return "finish"
+
+    def _build_graph(self):
+        """Override to add a retry self-loop back to reason."""
+        from langgraph.graph import StateGraph, END
+        from agents.base_agent import AgentState
+
+        g = StateGraph(AgentState)
+
+        g.add_node("reason", self._reason_node)
+        g.add_node("act",    self.tool_node)
+        g.add_node("finish", self._finish_node)
+
+        g.set_entry_point("reason")
+
+        g.add_conditional_edges(
+            "reason",
+            self._router,
+            {
+                "act":    "act",
+                "finish": "finish",
+                "retry":  "reason",
+            },
+        )
+        g.add_edge("act", "reason")
+        g.add_edge("finish", END)
+
+        return g.compile()
+
     def run(self, task: str, context: Optional[dict] = None) -> dict:
         """Override to inject KG warm-start context in smart_kg mode."""
+        self._nudge_count = 0
         if self._smart_kg:
             warm_ctx = _get_warm_start_context(task)
             if warm_ctx:

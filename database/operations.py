@@ -93,12 +93,21 @@ def create_run(
     config: dict,
     description: str = "",
     tags: list[str] | None = None,
+    experiment_phase: str | None = None,
 ) -> SimulationRun:
     """Register a new simulation run (status=PENDING).
 
     If a run with the same run_id already exists it is deleted first
     so that re-running with the same ID works correctly (overwrite semantics).
+
+    Args:
+        experiment_phase: Optional label for experiment tracking, e.g.
+            'ablation_v2', 'kg_growth_clean', 'production'.
+            Also read from EXPERIMENT_PHASE env var if not provided.
     """
+    if experiment_phase is None:
+        experiment_phase = os.getenv("EXPERIMENT_PHASE")
+
     with get_db() as db:
         # Remove any stale record so we can insert fresh
         existing = db.execute(
@@ -131,6 +140,7 @@ def create_run(
             source=config.get("source", 0.0),
             config_json=config,
             output_dir=config.get("output_dir"),
+            experiment_phase=experiment_phase,
         )
         db.add(run)
         db.flush()

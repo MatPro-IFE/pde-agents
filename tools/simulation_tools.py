@@ -71,6 +71,7 @@ MINIO_ENDPOINT     = os.getenv("MINIO_ENDPOINT",     "minio:9000")
 MINIO_ACCESS_KEY   = os.getenv("MINIO_ACCESS_KEY",   "minio_admin")
 MINIO_SECRET_KEY   = os.getenv("MINIO_SECRET_KEY",   "minio_secret123")
 MINIO_BUCKET       = os.getenv("MINIO_BUCKET_RESULTS", "simulation-results")
+KG_READ_ONLY       = os.getenv("KG_READ_ONLY", "").lower() in ("1", "true", "yes")
 
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -220,18 +221,20 @@ def run_simulation(config_json: str) -> str:
     minio_info = _upload_run_to_minio(run_id, result)
 
     # Auto-populate the knowledge graph after every successful run.
+    # When KG_READ_ONLY is set, skip writes to prevent cross-contamination
+    # during ablation studies.
     kg_info: dict = {"kg": "skipped"}
-    if KG_AVAILABLE:
+    if KG_AVAILABLE and not KG_READ_ONLY:
         try:
             kg = get_kg()
             if kg.available:
-                # Attach any pre-run rule warnings so the graph knows which
-                # issues were present in this configuration.
                 warnings = _check_config_rules(config)
                 added = kg.add_run(run_id, config, result, warnings=warnings)
                 kg_info = {"kg": "ok" if added else "error"}
         except Exception as exc:
             kg_info = {"kg": "error", "reason": str(exc)}
+    elif KG_READ_ONLY:
+        kg_info = {"kg": "read_only"}
 
     return json.dumps({
         "run_id": run_id,
