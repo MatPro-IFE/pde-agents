@@ -1,28 +1,31 @@
 \begin{table}[htbp]
 \centering\footnotesize
-\caption{Three-way KG ablation across 17 benchmark tasks.  KG Smart
-         recovers most KG Off performance on standard tasks while
-         achieving perfect property fidelity on novel materials.}
+\caption{Three-way KG ablation across 50 benchmark tasks with frozen
+         knowledge graph ($n{=}50$ per mode).  ``Success-only'' rows isolate
+         output quality by excluding failed runs (which receive
+         phys\,=\,0.5, MPF\,=\,0).  95\% Wilson CIs for success rate.}
 \label{tab:ablation}
-\setlength{\tabcolsep}{5pt}
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lccc}
 \toprule
-Metric & KG On & KG Off & KG Smart \\
+Metric & KG Off & KG On & KG Smart \\
 \midrule
-  Success rate          & 59\%  & 100\%  & \textbf{94\%}  \\
-  Config quality        & 0.45  & 0.69   & \textbf{0.82}  \\
+  Success rate          & \textbf{100\%} [93,100] & 76\% [63,86] & 94\% [84,98]  \\[2pt]
+\multicolumn{4}{l}{\textit{Success-only quality:}} \\
+  \quad Physics score   & 0.853 $\pm$ 0.21 & 0.888 $\pm$ 0.19 & \textbf{0.918 $\pm$ 0.16} \\
+  \quad MPF             & 0.796 $\pm$ 0.30 & 0.825 $\pm$ 0.33 & \textbf{0.898 $\pm$ 0.24} \\[2pt]
+  Wall time (s)         & \textbf{12.9 $\pm$ 4.9} & 47.8 $\pm$ 55.1 & 31.6 $\pm$ 54.2 \\
 \midrule
-\multicolumn{4}{l}{\textit{Novel material tasks only (7 tasks)}} \\
-  \quad Property fidelity (MPF) & 0.57  & 0.34   & \textbf{1.00}  \\
-  \quad Physics score           & 0.71  & 0.63   & \textbf{1.00}  \\
+\multicolumn{4}{l}{\textit{By difficulty (success rate):}} \\
+  \quad Easy (12)       & 100\%  & \textbf{100\%}  & 92\%  \\
+  \quad Medium (15)     & 100\%  &  67\%  & \textbf{100\%} \\
+  \quad Hard (13)       & 100\%  &  85\%  & 92\%  \\
+  \quad Novel (10)      & 100\%* &  50\%  & \textbf{90\%}  \\
 \midrule
-\multicolumn{4}{l}{\textit{By difficulty (success rate)}} \\
-  \quad Easy (E1--E3)       & 100\%  & 100\%   & 100\% \\
-  \quad Medium (M1--M3)     &  33\%  & 100\%   & \textbf{100\%} \\
-  \quad Hard (H1--H4)       &  50\%  & 100\%   & 75\%  \\
-  \quad Novel (G/C/P, 7)    &  57\%  & 100\%*  & \textbf{100\%} \\
+\multicolumn{4}{l}{\textit{Novel tasks, success-only quality:}} \\
+  \quad Physics score   & 0.590  & \textbf{0.998} & \textbf{0.999} \\
+  \quad MPF             & 0.340  & \textbf{1.000} & \textbf{1.000} \\
 \bottomrule
-\multicolumn{4}{l}{\scriptsize *KG Off succeeds but uses fabricated properties}\\
-\multicolumn{4}{l}{\scriptsize \phantom{*}(MPF\,=\,0.34 vs.\ KG Smart 1.00); see \cref{tab:novidium}.}\\
+\multicolumn{4}{l}{\scriptsize *KG Off ``succeeds'' but fabricates properties (MPF\,=\,0.34).}\\
 \end{tabular}
 \end{table}
