@@ -28,8 +28,8 @@
 
 % KG Off — wrong properties
 \addplot[fill=nodegreen!55, draw=nodegreen!80] coordinates {
-  (Novidium,  0.45)
-  (Cryonite,  0.39)
+  (Novidium,  0.52)
+  (Cryonite,  0.29)
   (Pyrathane, 0.15)
   (Average,   0.34)
 };

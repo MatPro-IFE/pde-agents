@@ -3,72 +3,72 @@
     "version": "v2",
     "n_tasks": 50,
     "modes": [
-      "kg_on",
       "kg_off",
-      "kg_smart"
+      "kg_smart",
+      "kg_on"
     ],
     "seed": 42,
     "kg_read_only": true,
     "experiment_phase": "ablation_v2",
     "timestamp": "2026-04-20T13:40:01.460486",
-    "last_updated": "2026-04-20T15:32:11.426395"
+    "last_updated": "2026-04-28T11:10:41.058680"
   },
   "kg_on": {
     "aggregate": {
       "n": 50,
-      "success_rate": 0.76,
-      "first_try_rate": 0.7,
-      "avg_quality": 0.6316666666666667,
-      "avg_property_fidelity": 0.6403282131673322,
-      "avg_physics_score": 0.7914488264367556,
-      "avg_iterations": 7.54,
-      "avg_wall_time": 47.82579248188063,
-      "success_ci_95": 0.11838140394504536
+      "success_rate": 0.94,
+      "first_try_rate": 0.9,
+      "avg_quality": 0.7290000000000001,
+      "avg_property_fidelity": 0.7524820940077297,
+      "avg_physics_score": 0.8460034399045607,
+      "avg_iterations": 7.5,
+      "avg_wall_time": 60.79492166018113,
+      "success_ci_95": 0.06582799404508695
     },
     "by_difficulty": {
       "easy": {
         "n": 12,
-        "success_rate": 1.0,
-        "first_try_rate": 1.0,
-        "avg_quality": 0.8861111111111111,
-        "avg_property_fidelity": 0.9166666666666666,
-        "avg_physics_score": 0.9230096528167892,
+        "success_rate": 0.9166666666666666,
+        "first_try_rate": 0.9166666666666666,
+        "avg_quality": 0.6666666666666666,
+        "avg_property_fidelity": 0.6666666666666666,
+        "avg_physics_score": 0.8333333333333334,
         "avg_iterations": 6.333333333333333,
-        "avg_wall_time": 25.429627585457638,
-        "success_ci_95": 0.0
+        "avg_wall_time": 26.46685819335592,
+        "success_ci_95": 0.15637976093353526
       },
       "hard": {
         "n": 13,
-        "success_rate": 0.8461538461538461,
-        "first_try_rate": 0.8461538461538461,
-        "avg_quality": 0.6423076923076922,
-        "avg_property_fidelity": 0.6324835340391398,
-        "avg_physics_score": 0.777780225875919,
-        "avg_iterations": 7.461538461538462,
-        "avg_wall_time": 43.950189005726806,
-        "success_ci_95": 0.1961337731926865
+        "success_rate": 1.0,
+        "first_try_rate": 1.0,
+        "avg_quality": 0.7397435897435898,
+        "avg_property_fidelity": 0.7730872813734586,
+        "avg_physics_score": 0.8480820995430786,
+        "avg_iterations": 7.384615384615385,
+        "avg_wall_time": 60.24498512123067,
+        "success_ci_95": 0.0
       },
       "medium": {
         "n": 15,
-        "success_rate": 0.6666666666666666,
-        "first_try_rate": 0.5333333333333333,
-        "avg_quality": 0.52,
-        "avg_property_fidelity": 0.5196445955696581,
-        "avg_physics_score": 0.759822297784829,
-        "avg_iterations": 8.866666666666667,
-        "avg_wall_time": 46.03618191679319,
-        "success_ci_95": 0.23856360282447234
+        "success_rate": 0.9333333333333333,
+        "first_try_rate": 0.8666666666666667,
+        "avg_quality": 0.76,
+        "avg_property_fidelity": 0.7717235357152535,
+        "avg_physics_score": 0.8858617678576267,
+        "avg_iterations": 8.6,
+        "avg_wall_time": 55.027113620129725,
+        "success_ci_95": 0.12623599298902796
       },
       "novel": {
         "n": 10,
-        "success_rate": 0.5,
-        "first_try_rate": 0.4,
-        "avg_quality": 0.48,
-        "avg_property_fidelity": 0.4999455782312925,
-        "avg_physics_score": 0.6987848084876924,
-        "avg_iterations": 7.1,
-        "avg_wall_time": 82.42389072421938,
-        "success_ci_95": 0.3099032106965012
+        "success_rate": 0.9,
+        "first_try_rate": 0.8,
+        "avg_quality": 0.7433333333333334,
+        "avg_property_fidelity": 0.7998117006802721,
+        "avg_physics_score": 0.7987178183303617,
+        "avg_iterations": 7.4,
+        "avg_wall_time": 111.35522738108412,
+        "success_ci_95": 0.1859419264179007
       }
     },
     "tasks": [
@@ -77,9 +77,9 @@
         "difficulty": "medium",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 82.57554732542485,
-        "agent_iterations": 13,
-        "run_id": "modified_74350e58",
+        "wall_time_s": 238.26874970365316,
+        "agent_iterations": 19,
+        "run_id": "modified_2f29f68e",
         "config_produced": {},
         "config_quality_score": 0.0,
         "first_try_success": false,
@@ -96,9 +96,9 @@
         "difficulty": "medium",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 31.328948169015348,
+        "wall_time_s": 50.64907524269074,
         "agent_iterations": 10,
-        "run_id": "heat_95759ffe",
+        "run_id": "heat_8a026401",
         "config_produced": {
           "dim": 2,
           "nx": 48,
@@ -133,7 +133,7 @@
             }
           ],
           "u_init": 371.5,
-          "run_id": "heat_95759ffe",
+          "run_id": "heat_8a026401",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -150,64 +150,90 @@
         "task_id": "M08",
         "difficulty": "medium",
         "mode": "kg_on",
-        "success": false,
-        "wall_time_s": 41.51759942062199,
-        "agent_iterations": 8,
-        "run_id": null,
-        "config_produced": {},
-        "config_quality_score": 0.0,
-        "first_try_success": false,
+        "success": true,
+        "wall_time_s": 57.38586303126067,
+        "agent_iterations": 7,
+        "run_id": "heat_b69a7be0",
+        "config_produced": {
+          "dim": 2,
+          "nx": 48,
+          "ny": 48,
+          "k": 71.59,
+          "rho": 21460,
+          "cp": 133,
+          "source": 0,
+          "t_end": 20,
+          "dt": 0.1,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 600,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 400,
+              "location": "right"
+            }
+          ],
+          "u_init": 500,
+          "run_id": "heat_b69a7be0",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
         "error_message": "",
         "raw_response": {},
-        "property_fidelity": 0.0,
-        "t_max_actual": null,
-        "t_min_actual": null,
-        "t_mean_actual": null,
-        "physics_score": 0.5
+        "property_fidelity": 0.992138235612414,
+        "t_max_actual": 599.9999967982512,
+        "t_min_actual": 399.99999786550075,
+        "t_mean_actual": 499.9999966588752,
+        "physics_score": 0.996069117806207
       },
       {
         "task_id": "E12",
         "difficulty": "easy",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 20.54838745482266,
+        "wall_time_s": 21.790169706568122,
         "agent_iterations": 6,
-        "run_id": "heat_92bd43f7",
+        "run_id": "heat_85978757",
         "config_produced": {
           "dim": 2,
           "nx": 32,
           "ny": 32,
-          "k": 400,
-          "rho": 8900,
-          "cp": 385,
-          "source": 0,
+          "k": 400.0,
+          "rho": 8900.0,
+          "cp": 385.0,
+          "source": 0.0,
           "t_end": 0.01,
           "dt": 0.0005,
           "theta": 1.0,
           "bcs": [
             {
               "type": "dirichlet",
-              "value": 350,
+              "value": 350.0,
               "location": "left"
             },
             {
               "type": "dirichlet",
-              "value": 300,
+              "value": 300.0,
               "location": "right"
             },
             {
               "type": "neumann",
-              "value": 0,
+              "value": 0.0,
               "location": "top"
             },
             {
               "type": "neumann",
-              "value": 0,
+              "value": 0.0,
               "location": "bottom"
             }
           ],
           "u_init": 325.0,
-          "run_id": "heat_92bd43f7",
+          "run_id": "heat_85978757",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -225,9 +251,9 @@
         "difficulty": "easy",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 23.826967483386397,
+        "wall_time_s": 23.600785452872515,
         "agent_iterations": 6,
-        "run_id": "heat_da92f8e3",
+        "run_id": "heat_57ee9cdd",
         "config_produced": {
           "dim": 2,
           "nx": 40,
@@ -262,7 +288,7 @@
             }
           ],
           "u_init": 450,
-          "run_id": "heat_da92f8e3",
+          "run_id": "heat_57ee9cdd",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -280,9 +306,9 @@
         "difficulty": "novel",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 49.726018401794136,
+        "wall_time_s": 77.85623325686902,
         "agent_iterations": 8,
-        "run_id": "heat_c288408d",
+        "run_id": "heat_958b6dc2",
         "config_produced": {
           "dim": 2,
           "nx": 32,
@@ -318,7 +344,7 @@
             }
           ],
           "u_init": 325.0,
-          "run_id": "heat_c288408d",
+          "run_id": "heat_958b6dc2",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -336,9 +362,9 @@
         "difficulty": "medium",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 27.34557364974171,
+        "wall_time_s": 26.4376336960122,
         "agent_iterations": 8,
-        "run_id": "heat_53d1e05b",
+        "run_id": "heat_b725d8f4",
         "config_produced": {
           "dim": 2,
           "nx": 48,
@@ -374,7 +400,7 @@
               "location": "bottom"
             }
           ],
-          "run_id": "heat_53d1e05b",
+          "run_id": "heat_b725d8f4",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -392,9 +418,9 @@
         "difficulty": "easy",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 22.918869801796973,
+        "wall_time_s": 22.45874062832445,
         "agent_iterations": 5,
-        "run_id": "heat_a5de493a",
+        "run_id": "heat_3de83286",
         "config_produced": {
           "dim": 2,
           "nx": 48,
@@ -429,7 +455,7 @@
               "location": "bottom"
             }
           ],
-          "run_id": "heat_a5de493a",
+          "run_id": "heat_3de83286",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -447,9 +473,9 @@
         "difficulty": "hard",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 20.491747168824077,
+        "wall_time_s": 20.067487857304513,
         "agent_iterations": 6,
-        "run_id": "heat_85c5a6c7",
+        "run_id": "heat_41e4410b",
         "config_produced": {
           "dim": 2,
           "nx": 128,
@@ -474,7 +500,7 @@
             }
           ],
           "u_init": 400.0,
-          "run_id": "heat_85c5a6c7",
+          "run_id": "heat_41e4410b",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 0.5,
@@ -492,9 +518,9 @@
         "difficulty": "medium",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 32.586943534202874,
-        "agent_iterations": 8,
-        "run_id": "heat_23b76874",
+        "wall_time_s": 17.921012689359486,
+        "agent_iterations": 6,
+        "run_id": "heat_4c27edef",
         "config_produced": {
           "dim": 2,
           "nx": 32,
@@ -519,7 +545,7 @@
             }
           ],
           "u_init": 278.0,
-          "run_id": "heat_23b76874",
+          "run_id": "heat_4c27edef",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 0.8,
@@ -537,9 +563,9 @@
         "difficulty": "hard",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 43.523228734731674,
-        "agent_iterations": 8,
-        "run_id": "heat_5896f908",
+        "wall_time_s": 29.39660904649645,
+        "agent_iterations": 5,
+        "run_id": "heat_8b05c129",
         "config_produced": {
           "dim": 2,
           "nx": 128,
@@ -574,7 +600,7 @@
               "location": "bottom"
             }
           ],
-          "run_id": "heat_5896f908",
+          "run_id": "heat_8b05c129",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 0.75,
@@ -591,13 +617,13 @@
         "task_id": "M10",
         "difficulty": "medium",
         "mode": "kg_on",
-        "success": false,
-        "wall_time_s": 49.62079799361527,
-        "agent_iterations": 9,
-        "run_id": null,
+        "success": true,
+        "wall_time_s": 92.41927851643413,
+        "agent_iterations": 11,
+        "run_id": "modified_4d15a9ae",
         "config_produced": {},
         "config_quality_score": 0.0,
-        "first_try_success": false,
+        "first_try_success": true,
         "error_message": "",
         "raw_response": {},
         "property_fidelity": 0.0,
@@ -611,9 +637,9 @@
         "difficulty": "medium",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 28.67519733402878,
-        "agent_iterations": 8,
-        "run_id": "heat_9201aa24",
+        "wall_time_s": 27.697046064771712,
+        "agent_iterations": 7,
+        "run_id": "heat_99a94c11",
         "config_produced": {
           "dim": 2,
           "nx": 64,
@@ -628,12 +654,12 @@
           "bcs": [
             {
               "type": "dirichlet",
-              "value": 300,
+              "value": 300.0,
               "location": "left"
             },
             {
               "type": "dirichlet",
-              "value": 500,
+              "value": 500.0,
               "location": "right"
             },
             {
@@ -648,7 +674,7 @@
             }
           ],
           "u_init": 400.0,
-          "run_id": "heat_9201aa24",
+          "run_id": "heat_99a94c11",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -666,44 +692,34 @@
         "difficulty": "easy",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 39.94100064318627,
-        "agent_iterations": 8,
-        "run_id": "heat_f98fdb81",
+        "wall_time_s": 21.592355809174478,
+        "agent_iterations": 7,
+        "run_id": "heat_de9f6feb",
         "config_produced": {
           "dim": 2,
           "nx": 48,
           "ny": 48,
-          "k": 25.0,
-          "rho": 2000.0,
-          "cp": 800.0,
-          "source": 0.0,
+          "k": 25,
+          "rho": 2000,
+          "cp": 800,
+          "source": 0,
           "t_end": 50.0,
           "dt": 0.5,
           "theta": 1.0,
           "bcs": [
             {
               "type": "dirichlet",
-              "value": 400.0,
+              "value": 400,
               "location": "left"
             },
             {
               "type": "dirichlet",
-              "value": 200.0,
+              "value": 200,
               "location": "right"
-            },
-            {
-              "type": "neumann",
-              "value": 0.0,
-              "location": "top"
-            },
-            {
-              "type": "neumann",
-              "value": 0.0,
-              "location": "bottom"
             }
           ],
-          "u_init": 300.0,
-          "run_id": "heat_f98fdb81",
+          "u_init": 300,
+          "run_id": "heat_de9f6feb",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -721,20 +737,20 @@
         "difficulty": "hard",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 38.18934210669249,
-        "agent_iterations": 6,
-        "run_id": "heat_f4fbe9f5",
+        "wall_time_s": 54.12638506107032,
+        "agent_iterations": 7,
+        "run_id": "heat_90debd61",
         "config_produced": {
           "dim": 2,
           "nx": 64,
           "ny": 64,
-          "k": 0.5,
-          "rho": 1600,
-          "cp": 890,
+          "k": 1.5,
+          "rho": 2500,
+          "cp": 800,
           "source": 0,
           "t_end": 20,
           "dt": 0.01,
-          "theta": 1,
+          "theta": 1.0,
           "bcs": [
             {
               "type": "dirichlet",
@@ -758,30 +774,85 @@
             }
           ],
           "u_init": 396.5,
-          "run_id": "heat_f4fbe9f5",
+          "run_id": "heat_90debd61",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.6,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.5086749851455734,
+        "t_max_actual": 499.9999937186704,
+        "t_min_actual": 292.99999631914085,
+        "t_mean_actual": 396.49997854516755,
+        "physics_score": 0.7543374925727867
+      },
+      {
+        "task_id": "H12",
+        "difficulty": "hard",
+        "mode": "kg_on",
+        "success": true,
+        "wall_time_s": 43.47614644281566,
+        "agent_iterations": 8,
+        "run_id": "heat_0dce82bf",
+        "config_produced": {
+          "dim": 2,
+          "nx": 48,
+          "ny": 48,
+          "k": 408,
+          "rho": 10500,
+          "cp": 235,
+          "source": 0,
+          "t_end": 2,
+          "dt": 0.01,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 500,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 300,
+              "location": "right"
+            },
+            {
+              "type": "dirichlet",
+              "value": 400,
+              "location": "top"
+            },
+            {
+              "type": "dirichlet",
+              "value": 350,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 425,
+          "run_id": "heat_0dce82bf",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 0.8,
         "first_try_success": true,
         "error_message": "",
         "raw_response": {},
-        "property_fidelity": 0.6519904931669638,
-        "t_max_actual": 499.9999937352747,
-        "t_min_actual": 292.99999632887096,
-        "t_mean_actual": 396.49998258522396,
-        "physics_score": 0.8259952465834819
+        "property_fidelity": 0.9852542372881355,
+        "t_max_actual": 500.0000043272305,
+        "t_min_actual": 300.0000025963383,
+        "t_mean_actual": 420.48854223123993,
+        "physics_score": 0.9926271186440678
       },
       {
-        "task_id": "H12",
-        "difficulty": "hard",
+        "task_id": "E11",
+        "difficulty": "easy",
         "mode": "kg_on",
-        "success": false,
-        "wall_time_s": 44.41825580317527,
+        "success": true,
+        "wall_time_s": 44.00839729141444,
         "agent_iterations": 8,
-        "run_id": null,
+        "run_id": "modified_36bfeab8",
         "config_produced": {},
         "config_quality_score": 0.0,
-        "first_try_success": false,
+        "first_try_success": true,
         "error_message": "",
         "raw_response": {},
         "property_fidelity": 0.0,
@@ -791,79 +862,13 @@
         "physics_score": 0.5
       },
       {
-        "task_id": "E11",
-        "difficulty": "easy",
-        "mode": "kg_on",
-        "success": true,
-        "wall_time_s": 31.315657418221235,
-        "agent_iterations": 7,
-        "run_id": "heat_c88e826c",
-        "config_produced": {
-          "dim": 3,
-          "nx": 12,
-          "ny": 12,
-          "nz": 12,
-          "k": 10.0,
-          "rho": 2700.0,
-          "cp": 900.0,
-          "source": 0.0,
-          "t_end": 2.0,
-          "dt": 0.1,
-          "theta": 1.0,
-          "u_init": 500.0,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 293.0,
-              "location": "left"
-            },
-            {
-              "type": "dirichlet",
-              "value": 293.0,
-              "location": "right"
-            },
-            {
-              "type": "dirichlet",
-              "value": 293.0,
-              "location": "top"
-            },
-            {
-              "type": "dirichlet",
-              "value": 293.0,
-              "location": "bottom"
-            },
-            {
-              "type": "dirichlet",
-              "value": 293.0,
-              "location": "front"
-            },
-            {
-              "type": "dirichlet",
-              "value": 293.0,
-              "location": "back"
-            }
-          ],
-          "run_id": "heat_c88e826c",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 0.8333333333333334,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 1.0,
-        "t_max_actual": 672.2052460800945,
-        "t_min_actual": 293.0000001159327,
-        "t_mean_actual": 432.8311581402498,
-        "physics_score": 0.5840452993234432
-      },
-      {
         "task_id": "M13",
         "difficulty": "medium",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 42.107888982631266,
-        "agent_iterations": 8,
-        "run_id": "heat_36de24bc",
+        "wall_time_s": 21.8686292078346,
+        "agent_iterations": 6,
+        "run_id": "heat_b2069069",
         "config_produced": {
           "dim": 2,
           "nx": 64,
@@ -898,7 +903,7 @@
             }
           ],
           "u_init": 350.0,
-          "run_id": "heat_36de24bc",
+          "run_id": "heat_b2069069",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -915,10 +920,10 @@
         "task_id": "H09",
         "difficulty": "hard",
         "mode": "kg_on",
-        "success": false,
-        "wall_time_s": 60.66255821567029,
-        "agent_iterations": 8,
-        "run_id": "heat_00698fb4",
+        "success": true,
+        "wall_time_s": 59.87318078055978,
+        "agent_iterations": 7,
+        "run_id": "heat_0ffd668c",
         "config_produced": {
           "dim": 3,
           "nx": 16,
@@ -931,104 +936,27 @@
           "t_end": 30.0,
           "dt": 0.01,
           "theta": 1.0,
-          "u_init": 400.0,
           "bcs": [
             {
               "type": "dirichlet",
               "value": 500.0,
-              "description": "Fixed temperature boundary"
+              "location": "front"
             },
             {
-              "type": "neumann",
-              "value": 0.0,
-              "description": "No heat flux"
+              "type": "dirichlet",
+              "value": 300.0,
+              "location": "back"
             },
             {
               "type": "robin",
-              "h": 73.0,
-              "T_inf": 298.15,
-              "description": "Convective boundary with h=73 W/(m^2*K) and ambient temperature of 298.15 K"
-            }
-          ],
-          "run_id": "heat_00698fb4",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 0.6666666666666666,
-        "first_try_success": false,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.6624720670391061,
-        "t_max_actual": null,
-        "t_min_actual": null,
-        "t_mean_actual": null,
-        "physics_score": 0.831236033519553
-      },
-      {
-        "task_id": "E01",
-        "difficulty": "easy",
-        "mode": "kg_on",
-        "success": true,
-        "wall_time_s": 17.720995970070362,
-        "agent_iterations": 5,
-        "run_id": "modified_d1b48aa2",
-        "config_produced": {},
-        "config_quality_score": 0.0,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.0,
-        "t_max_actual": null,
-        "t_min_actual": null,
-        "t_mean_actual": null,
-        "physics_score": 0.5
-      },
-      {
-        "task_id": "N04",
-        "difficulty": "novel",
-        "mode": "kg_on",
-        "success": false,
-        "wall_time_s": 79.95576302614063,
-        "agent_iterations": 11,
-        "run_id": "modified_451cf288",
-        "config_produced": {},
-        "config_quality_score": 0.0,
-        "first_try_success": false,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.0,
-        "t_max_actual": null,
-        "t_min_actual": null,
-        "t_mean_actual": null,
-        "physics_score": 0.5
-      },
-      {
-        "task_id": "M07",
-        "difficulty": "medium",
-        "mode": "kg_on",
-        "success": true,
-        "wall_time_s": 39.53896939847618,
-        "agent_iterations": 7,
-        "run_id": "heat_820e0618",
-        "config_produced": {
-          "dim": 2,
-          "nx": 32,
-          "ny": 32,
-          "k": 1.7,
-          "rho": 2300.0,
-          "cp": 880.0,
-          "source": 0.0,
-          "t_end": 600.0,
-          "dt": 1.0,
-          "theta": 1.0,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 350.0,
+              "alpha": 75.0,
+              "u_inf": 293.0,
               "location": "left"
             },
             {
-              "type": "dirichlet",
-              "value": 293.0,
+              "type": "robin",
+              "alpha": 75.0,
+              "u_inf": 293.0,
               "location": "right"
             },
             {
@@ -1042,8 +970,184 @@
               "location": "bottom"
             }
           ],
+          "u_init": 400.0,
+          "run_id": "heat_0ffd668c",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.6666666666666666,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.6624720670391061,
+        "t_max_actual": 500.00000106962375,
+        "t_min_actual": 300.0000006417742,
+        "t_mean_actual": 399.54786992164145,
+        "physics_score": 0.831236033519553
+      },
+      {
+        "task_id": "E01",
+        "difficulty": "easy",
+        "mode": "kg_on",
+        "success": true,
+        "wall_time_s": 19.313934663310647,
+        "agent_iterations": 6,
+        "run_id": "heat_449f7ff9",
+        "config_produced": {
+          "dim": 2,
+          "nx": 32,
+          "ny": 32,
+          "k": 1,
+          "rho": 1,
+          "cp": 1,
+          "source": 0,
+          "t_end": 0.5,
+          "dt": 0.01,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 0,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 1,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 0.5,
+          "run_id": "heat_449f7ff9",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 1.0,
+        "t_max_actual": 0.9999999991440819,
+        "t_min_actual": 0.0,
+        "t_mean_actual": 0.5000000053377357,
+        "physics_score": 1.0
+      },
+      {
+        "task_id": "N04",
+        "difficulty": "novel",
+        "mode": "kg_on",
+        "success": true,
+        "wall_time_s": 113.8952381676063,
+        "agent_iterations": 13,
+        "run_id": "modified_d20c7303",
+        "config_produced": {
+          "dim": 3,
+          "nx": 16,
+          "ny": 16,
+          "nz": 16,
+          "k": 73.0,
+          "rho": 5420.0,
+          "cp": 612.0,
+          "source": 0.0,
+          "t_end": 50.0,
+          "dt": 0.1,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 500.0,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 293.0,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "front"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "back"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 293.0,
+          "run_id": "modified_d20c7303",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.8333333333333334,
+        "first_try_success": false,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.9997278911564625,
+        "t_max_actual": 500.0000003968958,
+        "t_min_actual": 274.32646929415506,
+        "t_mean_actual": 306.9419998471475,
+        "physics_score": 0.4998639455782313
+      },
+      {
+        "task_id": "M07",
+        "difficulty": "medium",
+        "mode": "kg_on",
+        "success": true,
+        "wall_time_s": 26.815505760721862,
+        "agent_iterations": 7,
+        "run_id": "heat_2afa980b",
+        "config_produced": {
+          "dim": 2,
+          "nx": 32,
+          "ny": 32,
+          "k": 1.7,
+          "rho": 2300.0,
+          "cp": 880.0,
+          "source": 0.0,
+          "t_end": 600,
+          "dt": 1.0,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 350,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 293,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "bottom"
+            }
+          ],
           "u_init": 321.5,
-          "run_id": "heat_820e0618",
+          "run_id": "heat_2afa980b",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -1061,158 +1165,195 @@
         "difficulty": "hard",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 80.82446395326406,
-        "agent_iterations": 12,
-        "run_id": "modified_72d8d604",
-        "config_produced": {},
-        "config_quality_score": 0.0,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.0,
-        "t_max_actual": null,
-        "t_min_actual": null,
-        "t_mean_actual": null,
-        "physics_score": 0.5
-      },
-      {
-        "task_id": "N09",
-        "difficulty": "novel",
-        "mode": "kg_on",
-        "success": false,
-        "wall_time_s": 27.784828485921025,
-        "agent_iterations": 7,
-        "run_id": null,
-        "config_produced": {},
-        "config_quality_score": 0.0,
-        "first_try_success": false,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.0,
-        "t_max_actual": null,
-        "t_min_actual": null,
-        "t_mean_actual": null,
-        "physics_score": 0.5
-      },
-      {
-        "task_id": "N02",
-        "difficulty": "novel",
-        "mode": "kg_on",
-        "success": true,
-        "wall_time_s": 86.98273892048746,
-        "agent_iterations": 13,
-        "run_id": "modified_c9dc05a8",
+        "wall_time_s": 41.42119027953595,
+        "agent_iterations": 8,
+        "run_id": "heat_49c7fea7",
         "config_produced": {
           "dim": 2,
-          "nx": 32,
-          "ny": 32,
-          "k": 73.0,
-          "rho": 5420.0,
-          "cp": 612.0,
+          "nx": 64,
+          "ny": 64,
+          "k": 50.0,
+          "rho": 7800.0,
+          "cp": 500.0,
           "source": 0.0,
           "t_end": 200.0,
-          "dt": 1.0,
+          "dt": 0.1,
           "theta": 1.0,
-          "u_init": 293.0,
+          "u_init": 446.5,
           "bcs": [
             {
               "type": "dirichlet",
-              "value": 293.0,
+              "value": 600,
               "location": "left"
             },
             {
               "type": "dirichlet",
-              "value": 293.0,
+              "value": 293,
               "location": "right"
             },
             {
-              "type": "dirichlet",
-              "value": 293.0,
-              "location": "top"
-            },
-            {
-              "type": "dirichlet",
-              "value": 293.0,
-              "location": "bottom"
-            }
-          ],
-          "run_id": "modified_c9dc05a8",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 1.0,
-        "first_try_success": false,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.9997278911564625,
-        "t_max_actual": 293.00004463654415,
-        "t_min_actual": 292.9999762855899,
-        "t_mean_actual": 292.99999993397057,
-        "physics_score": 0.9998639455782312
-      },
-      {
-        "task_id": "H04",
-        "difficulty": "hard",
-        "mode": "kg_on",
-        "success": true,
-        "wall_time_s": 60.14395893085748,
-        "agent_iterations": 6,
-        "run_id": "heat_916b250a",
-        "config_produced": {
-          "dim": 2,
-          "nx": 128,
-          "ny": 128,
-          "k": 16.5,
-          "rho": 7900,
-          "cp": 500,
-          "source": 0,
-          "t_end": 60,
-          "dt": 0.01,
-          "theta": 1.0,
-          "u_init": 600.0,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 800,
-              "location": "left"
-            },
-            {
               "type": "robin",
-              "alpha": 100,
-              "u_inf": 300,
+              "alpha": 10,
+              "u_inf": 293,
               "location": "top"
             },
             {
               "type": "neumann",
               "value": 0,
               "location": "bottom"
+            }
+          ],
+          "run_id": "heat_49c7fea7",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.6666666666666666,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.9357531760435571,
+        "t_max_actual": 599.9999961755117,
+        "t_min_actual": 292.9999981323749,
+        "t_mean_actual": 446.417678407199,
+        "physics_score": 0.9678765880217786
+      },
+      {
+        "task_id": "N09",
+        "difficulty": "novel",
+        "mode": "kg_on",
+        "success": true,
+        "wall_time_s": 36.567599112167954,
+        "agent_iterations": 7,
+        "run_id": "heat_c6d91bb2",
+        "config_produced": {
+          "dim": 2,
+          "nx": 32,
+          "ny": 32,
+          "k": 312.0,
+          "rho": 3850.0,
+          "cp": 278.0,
+          "source": 0.0,
+          "t_end": 15.0,
+          "dt": 0.1,
+          "theta": 1.0,
+          "u_init": 2000.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 400,
+              "location": "left"
             },
             {
               "type": "dirichlet",
               "value": 400,
               "location": "right"
+            },
+            {
+              "type": "dirichlet",
+              "value": 400,
+              "location": "top"
+            },
+            {
+              "type": "dirichlet",
+              "value": 400,
+              "location": "bottom"
             }
           ],
-          "run_id": "heat_916b250a",
+          "run_id": "heat_c6d91bb2",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.8,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.9994666666666666,
+        "t_max_actual": 2000.0016442182603,
+        "t_min_actual": 399.9999941546956,
+        "t_mean_actual": 1486.947388947279,
+        "physics_score": 0.9997328195151269
+      },
+      {
+        "task_id": "N02",
+        "difficulty": "novel",
+        "mode": "kg_on",
+        "success": true,
+        "wall_time_s": 84.34202630724758,
+        "agent_iterations": 11,
+        "run_id": "modified_b56d4f7c",
+        "config_produced": {},
+        "config_quality_score": 0.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.0,
+        "t_max_actual": null,
+        "t_min_actual": null,
+        "t_mean_actual": null,
+        "physics_score": 0.5
+      },
+      {
+        "task_id": "H04",
+        "difficulty": "hard",
+        "mode": "kg_on",
+        "success": true,
+        "wall_time_s": 232.30685578938574,
+        "agent_iterations": 11,
+        "run_id": "heat_7dc839dd",
+        "config_produced": {
+          "dim": 2,
+          "nx": 128,
+          "ny": 128,
+          "k": 16.0,
+          "rho": 8000.0,
+          "cp": 500.0,
+          "source": 0.0,
+          "t_end": 60.0,
+          "dt": 0.01,
+          "theta": 1.0,
+          "u_init": 400.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 800.0,
+              "location": "left"
+            },
+            {
+              "type": "robin",
+              "alpha": 100.0,
+              "u_inf": 300.0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "bottom"
+            },
+            {
+              "type": "dirichlet",
+              "value": 400.0,
+              "location": "right"
+            }
+          ],
+          "run_id": "heat_7dc839dd",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
         "first_try_success": true,
         "error_message": "",
         "raw_response": {},
-        "property_fidelity": 0.961491935483871,
-        "t_max_actual": 799.9999898026707,
-        "t_min_actual": 399.99999490133536,
-        "t_mean_actual": 599.4789957840367,
-        "physics_score": 0.9807459677419355
+        "property_fidelity": 0.9838709677419355,
+        "t_max_actual": 799.9999859274902,
+        "t_min_actual": 389.9653745659582,
+        "t_mean_actual": 408.3483576081677,
+        "physics_score": 0.9919354838709677
       },
       {
         "task_id": "H02",
         "difficulty": "hard",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 22.566558144055307,
+        "wall_time_s": 45.94992564804852,
         "agent_iterations": 6,
-        "run_id": "heat_97642bfa",
+        "run_id": "heat_e7bc1d27",
         "config_produced": {
           "dim": 3,
           "nx": 24,
@@ -1223,7 +1364,7 @@
           "cp": 840.0,
           "source": 0.0,
           "t_end": 20.0,
-          "dt": 0.1,
+          "dt": 0.01,
           "theta": 1.0,
           "bcs": [
             {
@@ -1238,7 +1379,7 @@
             }
           ],
           "u_init": 650.0,
-          "run_id": "heat_97642bfa",
+          "run_id": "heat_e7bc1d27",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -1246,9 +1387,9 @@
         "error_message": "",
         "raw_response": {},
         "property_fidelity": 0.33333333333333337,
-        "t_max_actual": 1000.0000022628926,
-        "t_min_actual": 300.0000006788678,
-        "t_mean_actual": 650.0000087004171,
+        "t_max_actual": 1000.0000023203063,
+        "t_min_actual": 300.0000006960919,
+        "t_mean_actual": 650.0000873903269,
         "physics_score": 0.6666666666666667
       },
       {
@@ -1256,47 +1397,119 @@
         "difficulty": "medium",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 121.04719972144812,
-        "agent_iterations": 16,
-        "run_id": "modified_d090ee74",
-        "config_produced": {},
-        "config_quality_score": 0.0,
-        "first_try_success": false,
+        "wall_time_s": 26.01308244932443,
+        "agent_iterations": 7,
+        "run_id": "heat_7cfa0ae9",
+        "config_produced": {
+          "dim": 2,
+          "nx": 64,
+          "ny": 64,
+          "k": 50.2,
+          "rho": 7210,
+          "cp": 469,
+          "source": 0,
+          "t_end": 100,
+          "dt": 0.1,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 700,
+              "location": "bottom"
+            },
+            {
+              "type": "dirichlet",
+              "value": 300,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "left"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "right"
+            }
+          ],
+          "u_init": 500,
+          "run_id": "heat_7cfa0ae9",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
         "error_message": "",
         "raw_response": {},
-        "property_fidelity": 0.0,
-        "t_max_actual": null,
-        "t_min_actual": null,
-        "t_mean_actual": null,
-        "physics_score": 0.5
+        "property_fidelity": 0.9761609195402299,
+        "t_max_actual": 700.0000002364814,
+        "t_min_actual": 300.0000001013492,
+        "t_mean_actual": 500.000031463064,
+        "physics_score": 0.9880804597701149
       },
       {
         "task_id": "M11",
         "difficulty": "medium",
         "mode": "kg_on",
-        "success": false,
-        "wall_time_s": 35.71017620153725,
+        "success": true,
+        "wall_time_s": 30.047612868249416,
         "agent_iterations": 8,
-        "run_id": null,
-        "config_produced": {},
-        "config_quality_score": 0.0,
-        "first_try_success": false,
+        "run_id": "heat_290ec5f5",
+        "config_produced": {
+          "dim": 2,
+          "nx": 32,
+          "ny": 32,
+          "k": 0.23,
+          "rho": 1200,
+          "cp": 1000,
+          "source": 0,
+          "t_end": 200,
+          "dt": 0.5,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 380,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 293,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 336.5,
+          "run_id": "heat_290ec5f5",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.6,
+        "first_try_success": true,
         "error_message": "",
         "raw_response": {},
-        "property_fidelity": 0.0,
-        "t_max_actual": null,
-        "t_min_actual": null,
-        "t_mean_actual": null,
-        "physics_score": 0.5
+        "property_fidelity": 0.9037940379403794,
+        "t_max_actual": 379.9999954739222,
+        "t_min_actual": 292.9999965101558,
+        "t_mean_actual": 336.4999927487775,
+        "physics_score": 0.9518970189701896
       },
       {
         "task_id": "N03",
         "difficulty": "novel",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 42.35668215714395,
-        "agent_iterations": 7,
-        "run_id": "heat_b93766c5",
+        "wall_time_s": 42.4464312242344,
+        "agent_iterations": 8,
+        "run_id": "heat_fb5e8d51",
         "config_produced": {
           "dim": 2,
           "nx": 64,
@@ -1331,8 +1544,8 @@
               "location": "bottom"
             }
           ],
-          "u_init": 546.5,
-          "run_id": "heat_b93766c5",
+          "u_init": 496.5,
+          "run_id": "heat_fb5e8d51",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -1340,9 +1553,9 @@
         "error_message": "",
         "raw_response": {},
         "property_fidelity": 0.9997278911564625,
-        "t_max_actual": 699.9999901569796,
-        "t_min_actual": 535.5745390471113,
-        "t_mean_actual": 556.8619758958873,
+        "t_max_actual": 699.9999894908899,
+        "t_min_actual": 487.7288100243497,
+        "t_mean_actual": 510.56754476640725,
         "physics_score": 0.9998639455782312
       },
       {
@@ -1350,9 +1563,9 @@
         "difficulty": "novel",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 41.515837849117815,
+        "wall_time_s": 41.2808728562668,
         "agent_iterations": 8,
-        "run_id": "heat_c5f71fd9",
+        "run_id": "heat_d98ebd2f",
         "config_produced": {
           "dim": 2,
           "nx": 48,
@@ -1387,7 +1600,7 @@
               "location": "bottom"
             }
           ],
-          "run_id": "heat_c5f71fd9",
+          "run_id": "heat_d98ebd2f",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 0.8,
@@ -1405,9 +1618,9 @@
         "difficulty": "hard",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 42.80931840557605,
+        "wall_time_s": 41.45470699202269,
         "agent_iterations": 8,
-        "run_id": "heat_9c8a9221",
+        "run_id": "heat_5f21cf31",
         "config_produced": {
           "dim": 2,
           "nx": 96,
@@ -1443,7 +1656,7 @@
             }
           ],
           "u_init": 850.0,
-          "run_id": "heat_9c8a9221",
+          "run_id": "heat_5f21cf31",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 0.3333333333333333,
@@ -1461,9 +1674,9 @@
         "difficulty": "hard",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 51.277319990098476,
+        "wall_time_s": 78.75769173540175,
         "agent_iterations": 8,
-        "run_id": "heat_d6104bf0",
+        "run_id": "heat_b1f956c1",
         "config_produced": {
           "dim": 3,
           "nx": 20,
@@ -1510,7 +1723,7 @@
             }
           ],
           "u_init": 373.0,
-          "run_id": "heat_d6104bf0",
+          "run_id": "heat_b1f956c1",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -1528,9 +1741,9 @@
         "difficulty": "novel",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 26.40893806144595,
-        "agent_iterations": 5,
-        "run_id": "heat_5407460f",
+        "wall_time_s": 43.73016669135541,
+        "agent_iterations": 9,
+        "run_id": "heat_493b2619",
         "config_produced": {
           "dim": 2,
           "nx": 48,
@@ -1540,7 +1753,7 @@
           "cp": 1940.0,
           "source": 0.0,
           "t_end": 100.0,
-          "dt": 0.1,
+          "dt": 1.0,
           "theta": 1.0,
           "bcs": [
             {
@@ -1565,7 +1778,7 @@
             }
           ],
           "u_init": 315.0,
-          "run_id": "heat_5407460f",
+          "run_id": "heat_493b2619",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -1573,9 +1786,9 @@
         "error_message": "",
         "raw_response": {},
         "property_fidelity": 1.0,
-        "t_max_actual": 349.99999564447734,
-        "t_min_actual": 279.99999651558187,
-        "t_mean_actual": 314.9999892569707,
+        "t_max_actual": 349.9999959718353,
+        "t_min_actual": 279.99999677746825,
+        "t_mean_actual": 314.99999893870654,
         "physics_score": 1.0
       },
       {
@@ -1583,9 +1796,9 @@
         "difficulty": "medium",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 24.944565765559673,
+        "wall_time_s": 23.88721213582903,
         "agent_iterations": 6,
-        "run_id": "heat_de191b4f",
+        "run_id": "heat_906cb015",
         "config_produced": {
           "dim": 2,
           "nx": 48,
@@ -1621,7 +1834,7 @@
             }
           ],
           "u_init": 400.0,
-          "run_id": "heat_de191b4f",
+          "run_id": "heat_906cb015",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -1638,14 +1851,70 @@
         "task_id": "N10",
         "difficulty": "novel",
         "mode": "kg_on",
+        "success": true,
+        "wall_time_s": 219.09056283999234,
+        "agent_iterations": 5,
+        "run_id": "heat_b9a76b43",
+        "config_produced": {
+          "dim": 2,
+          "nx": 64,
+          "ny": 64,
+          "k": 312.0,
+          "rho": 3850.0,
+          "cp": 278.0,
+          "source": 0.0,
+          "t_end": 10.0,
+          "dt": 0.0001,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 1000.0,
+              "location": "left"
+            },
+            {
+              "type": "robin",
+              "alpha": 200.0,
+              "u_inf": 400.0,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 700.0,
+          "run_id": "heat_b9a76b43",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.9994666666666666,
+        "t_max_actual": 1000.0000028881345,
+        "t_min_actual": 688.5763964661245,
+        "t_mean_actual": 719.7116040885336,
+        "physics_score": 0.9997333333333334
+      },
+      {
+        "task_id": "N08",
+        "difficulty": "novel",
+        "mode": "kg_on",
         "success": false,
-        "wall_time_s": 402.5371283441782,
+        "wall_time_s": 430.0035252356902,
         "agent_iterations": 0,
         "run_id": null,
         "config_produced": {},
         "config_quality_score": 0.0,
         "first_try_success": false,
-        "error_message": "Timeout after 300s",
+        "error_message": "Timeout after 420s",
         "raw_response": {},
         "property_fidelity": 0.0,
         "t_max_actual": null,
@@ -1654,13 +1923,13 @@
         "physics_score": 0.0
       },
       {
-        "task_id": "N08",
-        "difficulty": "novel",
+        "task_id": "E03",
+        "difficulty": "easy",
         "mode": "kg_on",
         "success": false,
-        "wall_time_s": 35.99211202468723,
-        "agent_iterations": 6,
-        "run_id": null,
+        "wall_time_s": 41.045791258104146,
+        "agent_iterations": 5,
+        "run_id": "modified_d68859d4",
         "config_produced": {},
         "config_quality_score": 0.0,
         "first_try_success": false,
@@ -1673,68 +1942,13 @@
         "physics_score": 0.5
       },
       {
-        "task_id": "E03",
-        "difficulty": "easy",
-        "mode": "kg_on",
-        "success": true,
-        "wall_time_s": 28.880119467154145,
-        "agent_iterations": 6,
-        "run_id": "heat_8bc86754",
-        "config_produced": {
-          "dim": 2,
-          "nx": 32,
-          "ny": 32,
-          "k": 50,
-          "rho": 7800,
-          "cp": 500,
-          "source": 0,
-          "t_end": 10.0,
-          "dt": 0.5,
-          "theta": 1.0,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 500,
-              "location": "left"
-            },
-            {
-              "type": "dirichlet",
-              "value": 500,
-              "location": "right"
-            },
-            {
-              "type": "dirichlet",
-              "value": 500,
-              "location": "top"
-            },
-            {
-              "type": "dirichlet",
-              "value": 500,
-              "location": "bottom"
-            }
-          ],
-          "u_init": 300,
-          "run_id": "heat_8bc86754",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 0.8,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 1.0,
-        "t_max_actual": 500.00000270531535,
-        "t_min_actual": 286.669624480771,
-        "t_mean_actual": 323.09382350148337,
-        "physics_score": 0.9920705344780262
-      },
-      {
         "task_id": "H01",
         "difficulty": "hard",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 29.048948846757412,
+        "wall_time_s": 28.0233550760895,
         "agent_iterations": 5,
-        "run_id": "heat_bce13a4a",
+        "run_id": "heat_922fe600",
         "config_produced": {
           "dim": 2,
           "nx": 96,
@@ -1773,7 +1987,7 @@
               "location": "bottom"
             }
           ],
-          "run_id": "heat_bce13a4a",
+          "run_id": "heat_922fe600",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 0.5,
@@ -1791,14 +2005,14 @@
         "difficulty": "hard",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 36.84736184217036,
-        "agent_iterations": 8,
-        "run_id": "heat_be7ab388",
+        "wall_time_s": 37.85510825552046,
+        "agent_iterations": 9,
+        "run_id": "heat_61158a9a",
         "config_produced": {
           "dim": 2,
           "nx": 48,
           "ny": 48,
-          "k": 2.5,
+          "k": 2.75,
           "rho": 2700,
           "cp": 840,
           "source": 0,
@@ -1828,53 +2042,53 @@
               "location": "bottom"
             }
           ],
-          "run_id": "heat_be7ab388",
+          "run_id": "heat_61158a9a",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 0.8,
         "first_try_success": true,
         "error_message": "",
         "raw_response": {},
-        "property_fidelity": 0.9258094572559982,
-        "t_max_actual": 800.0000119528257,
-        "t_min_actual": 292.99940681346123,
-        "t_mean_actual": 333.5444774782902,
-        "physics_score": 0.962904728627999
+        "property_fidelity": 0.953587235033776,
+        "t_max_actual": 800.0000082092696,
+        "t_min_actual": 292.99955251487813,
+        "t_mean_actual": 335.26321462517905,
+        "physics_score": 0.976793617516888
       },
       {
         "task_id": "E06",
         "difficulty": "easy",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 22.589472429826856,
+        "wall_time_s": 17.988456109538674,
         "agent_iterations": 6,
-        "run_id": "heat_09e1bf6a",
+        "run_id": "heat_c1967378",
         "config_produced": {
           "dim": 3,
           "nx": 16,
           "ny": 16,
           "nz": 16,
-          "k": 5,
-          "rho": 3000,
-          "cp": 1000,
-          "source": 0,
+          "k": 5.0,
+          "rho": 3000.0,
+          "cp": 1000.0,
+          "source": 0.0,
           "t_end": 1.0,
           "dt": 0.05,
           "theta": 1.0,
           "bcs": [
             {
               "type": "dirichlet",
-              "value": 350,
+              "value": 350.0,
               "location": "left"
             },
             {
               "type": "dirichlet",
-              "value": 250,
+              "value": 250.0,
               "location": "right"
             }
           ],
-          "u_init": 300,
-          "run_id": "heat_09e1bf6a",
+          "u_init": 300.0,
+          "run_id": "heat_c1967378",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -1892,9 +2106,9 @@
         "difficulty": "hard",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 40.549394932575524,
+        "wall_time_s": 70.47616361174732,
         "agent_iterations": 8,
-        "run_id": "heat_eecdad36",
+        "run_id": "heat_a84a3f04",
         "config_produced": {
           "dim": 2,
           "nx": 128,
@@ -1909,12 +2123,12 @@
           "bcs": [
             {
               "type": "dirichlet",
-              "value": 1100.0,
+              "value": 1100,
               "location": "left"
             },
             {
               "type": "dirichlet",
-              "value": 293.0,
+              "value": 293,
               "location": "right"
             },
             {
@@ -1929,7 +2143,7 @@
             }
           ],
           "u_init": 746.5,
-          "run_id": "heat_eecdad36",
+          "run_id": "heat_a84a3f04",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -1947,121 +2161,12 @@
         "difficulty": "easy",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 25.07240355666727,
-        "agent_iterations": 7,
-        "run_id": "heat_fa4ea8b2",
-        "config_produced": {
-          "dim": 2,
-          "nx": 32,
-          "ny": 32,
-          "k": 2,
-          "rho": 1500,
-          "cp": 1200,
-          "source": 500,
-          "t_end": 10.0,
-          "dt": 0.5,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 293,
-              "location": "left"
-            },
-            {
-              "type": "dirichlet",
-              "value": 293,
-              "location": "right"
-            },
-            {
-              "type": "dirichlet",
-              "value": 293,
-              "location": "top"
-            },
-            {
-              "type": "dirichlet",
-              "value": 293,
-              "location": "bottom"
-            }
-          ],
-          "u_init": 293.0,
-          "run_id": "heat_fa4ea8b2",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 1.0,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 1.0,
-        "t_max_actual": 293.00433711577193,
-        "t_min_actual": 292.9999998763568,
-        "t_mean_actual": 293.0025148675732,
-        "physics_score": 1.0
-      },
-      {
-        "task_id": "E09",
-        "difficulty": "easy",
-        "mode": "kg_on",
-        "success": true,
-        "wall_time_s": 22.61514996457845,
-        "agent_iterations": 7,
-        "run_id": "heat_736d1c53",
-        "config_produced": {
-          "dim": 2,
-          "nx": 64,
-          "ny": 64,
-          "k": 15.0,
-          "rho": 4000.0,
-          "cp": 600.0,
-          "source": 0.0,
-          "t_end": 20.0,
-          "dt": 0.2,
-          "theta": 0.5,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 800.0,
-              "location": "left"
-            },
-            {
-              "type": "dirichlet",
-              "value": 200.0,
-              "location": "right"
-            },
-            {
-              "type": "neumann",
-              "value": 0.0,
-              "location": "top"
-            },
-            {
-              "type": "neumann",
-              "value": 0.0,
-              "location": "bottom"
-            }
-          ],
-          "u_init": 500.0,
-          "run_id": "heat_736d1c53",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 1.0,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 1.0,
-        "t_max_actual": 799.9999923204409,
-        "t_min_actual": 199.99999808011023,
-        "t_mean_actual": 499.99999795664235,
-        "physics_score": 1.0
-      },
-      {
-        "task_id": "M03",
-        "difficulty": "medium",
-        "mode": "kg_on",
-        "success": false,
-        "wall_time_s": 31.944663962349296,
-        "agent_iterations": 7,
-        "run_id": null,
+        "wall_time_s": 19.208813571371138,
+        "agent_iterations": 5,
+        "run_id": "modified_99524921",
         "config_produced": {},
         "config_quality_score": 0.0,
-        "first_try_success": false,
+        "first_try_success": true,
         "error_message": "",
         "raw_response": {},
         "property_fidelity": 0.0,
@@ -2071,13 +2176,87 @@
         "physics_score": 0.5
       },
       {
+        "task_id": "E09",
+        "difficulty": "easy",
+        "mode": "kg_on",
+        "success": true,
+        "wall_time_s": 43.344378462061286,
+        "agent_iterations": 9,
+        "run_id": "modified_4e00d54e",
+        "config_produced": {},
+        "config_quality_score": 0.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.0,
+        "t_max_actual": null,
+        "t_min_actual": null,
+        "t_mean_actual": null,
+        "physics_score": 0.5
+      },
+      {
+        "task_id": "M03",
+        "difficulty": "medium",
+        "mode": "kg_on",
+        "success": true,
+        "wall_time_s": 40.512386937625706,
+        "agent_iterations": 8,
+        "run_id": "heat_65677361",
+        "config_produced": {
+          "dim": 2,
+          "nx": 32,
+          "ny": 32,
+          "k": 200.0,
+          "rho": 2700.0,
+          "cp": 900.0,
+          "source": 1000.0,
+          "t_end": 2.0,
+          "dt": 0.01,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 293.0,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 293.0,
+              "location": "right"
+            },
+            {
+              "type": "dirichlet",
+              "value": 293.0,
+              "location": "top"
+            },
+            {
+              "type": "dirichlet",
+              "value": 293.0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 293.0,
+          "run_id": "heat_65677361",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.9090909090909091,
+        "t_max_actual": 293.0009490436269,
+        "t_min_actual": 292.9999998825519,
+        "t_mean_actual": 293.00073361327316,
+        "physics_score": 0.9545454545454546
+      },
+      {
         "task_id": "M04",
         "difficulty": "medium",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 58.420331618748605,
-        "agent_iterations": 9,
-        "run_id": "heat_d67ae9ab",
+        "wall_time_s": 63.08304253127426,
+        "agent_iterations": 11,
+        "run_id": "heat_ed1d59c9",
         "config_produced": {
           "dim": 2,
           "nx": 48,
@@ -2112,7 +2291,7 @@
             }
           ],
           "u_init": 400.0,
-          "run_id": "heat_d67ae9ab",
+          "run_id": "heat_ed1d59c9",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -2130,7 +2309,7 @@
         "difficulty": "medium",
         "mode": "kg_on",
         "success": false,
-        "wall_time_s": 43.17832567449659,
+        "wall_time_s": 82.40057346690446,
         "agent_iterations": 8,
         "run_id": null,
         "config_produced": {},
@@ -2149,9 +2328,9 @@
         "difficulty": "easy",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 23.798933865502477,
+        "wall_time_s": 19.891063903458416,
         "agent_iterations": 6,
-        "run_id": "heat_3403f76b",
+        "run_id": "heat_9e9c7409",
         "config_produced": {
           "dim": 2,
           "nx": 64,
@@ -2186,7 +2365,7 @@
             }
           ],
           "u_init": 323.0,
-          "run_id": "heat_3403f76b",
+          "run_id": "heat_9e9c7409",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -2204,9 +2383,9 @@
         "difficulty": "easy",
         "mode": "kg_on",
         "success": true,
-        "wall_time_s": 25.92757297027856,
+        "wall_time_s": 23.359411464072764,
         "agent_iterations": 7,
-        "run_id": "heat_8a3d5e5f",
+        "run_id": "heat_f1e6cbb2",
         "config_produced": {
           "dim": 2,
           "nx": 24,
@@ -2228,20 +2407,10 @@
               "type": "dirichlet",
               "value": 300,
               "location": "right"
-            },
-            {
-              "type": "neumann",
-              "value": 0,
-              "location": "top"
-            },
-            {
-              "type": "neumann",
-              "value": 0,
-              "location": "bottom"
             }
           ],
-          "u_init": 400.0,
-          "run_id": "heat_8a3d5e5f",
+          "u_init": 400,
+          "run_id": "heat_f1e6cbb2",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -2258,20 +2427,56 @@
         "task_id": "N01",
         "difficulty": "novel",
         "mode": "kg_on",
-        "success": false,
-        "wall_time_s": 30.978859971277416,
-        "agent_iterations": 6,
-        "run_id": null,
-        "config_produced": {},
-        "config_quality_score": 0.0,
-        "first_try_success": false,
+        "success": true,
+        "wall_time_s": 24.33961811941117,
+        "agent_iterations": 5,
+        "run_id": "heat_4bc340c4",
+        "config_produced": {
+          "dim": 2,
+          "nx": 48,
+          "ny": 48,
+          "k": 73.0,
+          "rho": 5420.0,
+          "cp": 612.0,
+          "source": 0.0,
+          "t_end": 1.0,
+          "dt": 0.01,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 400.0,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 300.0,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 350.0,
+          "run_id": "heat_4bc340c4",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
         "error_message": "",
         "raw_response": {},
-        "property_fidelity": 0.0,
-        "t_max_actual": null,
-        "t_min_actual": null,
-        "t_mean_actual": null,
-        "physics_score": 0.5
+        "property_fidelity": 0.9997278911564625,
+        "t_max_actual": 399.9999953788642,
+        "t_min_actual": 299.99999653414807,
+        "t_mean_actual": 349.99999872716023,
+        "physics_score": 0.9998639455782312
       }
     ]
   },
@@ -4988,85 +5193,141 @@
   "kg_smart": {
     "aggregate": {
       "n": 50,
-      "success_rate": 0.94,
-      "first_try_rate": 0.94,
-      "avg_quality": 0.8123333333333332,
-      "avg_property_fidelity": 0.8439156462928004,
-      "avg_physics_score": 0.8824665149419851,
-      "avg_iterations": 4.16,
-      "avg_wall_time": 31.581666351053865,
-      "success_ci_95": 0.06582799404508695
+      "success_rate": 1.0,
+      "first_try_rate": 1.0,
+      "avg_quality": 0.8896666666666668,
+      "avg_property_fidelity": 0.9255176822600164,
+      "avg_physics_score": 0.9332675336801394,
+      "avg_iterations": 4.2,
+      "avg_wall_time": 28.69530008783564,
+      "success_ci_95": 0.0
     },
     "by_difficulty": {
       "easy": {
         "n": 12,
-        "success_rate": 0.9166666666666666,
-        "first_try_rate": 0.9166666666666666,
-        "avg_quality": 0.8694444444444445,
-        "avg_property_fidelity": 0.9166666666666666,
-        "avg_physics_score": 0.9197803646855395,
-        "avg_iterations": 4.083333333333333,
-        "avg_wall_time": 16.898130141974736,
-        "success_ci_95": 0.15637976093353526
+        "success_rate": 1.0,
+        "first_try_rate": 1.0,
+        "avg_quality": 0.938888888888889,
+        "avg_property_fidelity": 1.0,
+        "avg_physics_score": 0.9197803646855394,
+        "avg_iterations": 3.75,
+        "avg_wall_time": 22.488300137609865,
+        "success_ci_95": 0.0
       },
       "hard": {
         "n": 13,
-        "success_rate": 0.9230769230769231,
-        "first_try_rate": 0.9230769230769231,
-        "avg_quality": 0.6243589743589744,
-        "avg_property_fidelity": 0.5964671315385701,
-        "avg_physics_score": 0.7597720252245151,
-        "avg_iterations": 4.461538461538462,
-        "avg_wall_time": 33.26326706855056,
-        "success_ci_95": 0.14485439144214032
+        "success_rate": 1.0,
+        "first_try_rate": 1.0,
+        "avg_quality": 0.7397435897435897,
+        "avg_property_fidelity": 0.7773080279377503,
+        "avg_physics_score": 0.8501924734241053,
+        "avg_iterations": 4.3076923076923075,
+        "avg_wall_time": 28.560697528103795,
+        "success_ci_95": 0.0
       },
       "medium": {
         "n": 15,
         "success_rate": 1.0,
         "first_try_rate": 1.0,
-        "avg_quality": 0.9111111111111112,
-        "avg_property_fidelity": 0.9629243137786283,
-        "avg_physics_score": 0.9481288210408263,
-        "avg_iterations": 4.066666666666666,
-        "avg_wall_time": 16.168122778895,
+        "avg_quality": 0.9466666666666667,
+        "avg_property_fidelity": 0.9449045456789474,
+        "avg_physics_score": 0.972452272839474,
+        "avg_iterations": 4.0,
+        "avg_wall_time": 14.230195272341371,
         "success_ci_95": 0.0
       },
       "novel": {
         "n": 10,
-        "success_rate": 0.9,
-        "first_try_rate": 0.9,
-        "avg_quality": 0.8399999999999999,
-        "avg_property_fidelity": 0.8997844897959183,
-        "avg_physics_score": 0.8986992727341694,
-        "avg_iterations": 4.0,
-        "avg_wall_time": 70.1361442274414,
-        "success_ci_95": 0.1859419264179007
+        "success_rate": 1.0,
+        "first_try_rate": 1.0,
+        "avg_quality": 0.9399999999999998,
+        "avg_property_fidelity": 0.999731156462585,
+        "avg_physics_score": 0.9986726060675025,
+        "avg_iterations": 4.9,
+        "avg_wall_time": 58.01634057899937,
+        "success_ci_95": 0.0
       }
     },
     "tasks": [
       {
-        "task_id": "M11",
-        "difficulty": "medium",
+        "task_id": "N03",
+        "difficulty": "novel",
         "mode": "kg_smart",
         "success": true,
-        "wall_time_s": 17.351451816037297,
-        "agent_iterations": 4,
-        "run_id": "heat_1ad7faed",
+        "wall_time_s": 46.13129155058414,
+        "agent_iterations": 5,
+        "run_id": "heat_94482ee1",
         "config_produced": {
           "dim": 2,
-          "nx": 32,
-          "ny": 32,
-          "k": 0.215,
-          "rho": 1200,
-          "cp": 1000,
-          "source": 0,
-          "t_end": 200,
-          "dt": 0.1,
+          "nx": 64,
+          "ny": 64,
+          "k": 73.0,
+          "rho": 5420.0,
+          "cp": 612.0,
+          "source": 0.0,
+          "t_end": 150.0,
+          "dt": 0.01,
           "theta": 1.0,
           "bcs": [
             {
               "type": "dirichlet",
-              "value": 380,
+              "value": 700.0,
+              "location": "left"
+            },
+            {
+              "type": "robin",
+              "alpha": 50.0,
+              "u_inf": 293.0,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 700.0,
+          "run_id": "heat_94482ee1",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.9997278911564625,
+        "t_max_actual": 700.0005102859583,
+        "t_min_actual": 682.4638449786304,
+        "t_mean_actual": 698.9859688275437,
+        "physics_score": 0.9998639455782312
+      },
+      {
+        "task_id": "N02",
+        "difficulty": "novel",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 14.090602986514568,
+        "agent_iterations": 5,
+        "run_id": "heat_0194ef56",
+        "config_produced": {
+          "dim": 2,
+          "nx": 32,
+          "ny": 32,
+          "k": 73.0,
+          "rho": 5420.0,
+          "cp": 612.0,
+          "source": 0,
+          "t_end": 200,
+          "dt": 1.0,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 293,
               "location": "left"
             },
             {
@@ -5075,58 +5336,59 @@
               "location": "right"
             },
             {
-              "type": "neumann",
-              "value": 0,
+              "type": "dirichlet",
+              "value": 293,
               "location": "top"
             },
             {
-              "type": "neumann",
-              "value": 0,
+              "type": "dirichlet",
+              "value": 293,
               "location": "bottom"
             }
           ],
-          "u_init": 336.5,
-          "run_id": "heat_1ad7faed",
+          "u_init": 600,
+          "run_id": "heat_0194ef56",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 0.8,
         "first_try_success": true,
         "error_message": "",
         "raw_response": {},
-        "property_fidelity": 0.9281842818428184,
-        "t_max_actual": 379.9999953876705,
-        "t_min_actual": 292.99999644365124,
-        "t_mean_actual": 336.49996388435596,
-        "physics_score": 0.9640921409214092
+        "property_fidelity": 0.9997278911564625,
+        "t_max_actual": 600.0005562942381,
+        "t_min_actual": 293.0000001566205,
+        "t_mean_actual": 501.3000001517305,
+        "physics_score": 0.9998630395615569
       },
       {
-        "task_id": "M07",
+        "task_id": "M02",
         "difficulty": "medium",
         "mode": "kg_smart",
         "success": true,
-        "wall_time_s": 31.632894874550402,
-        "agent_iterations": 6,
-        "run_id": "heat_56a702db",
+        "wall_time_s": 13.553617385216057,
+        "agent_iterations": 4,
+        "run_id": "heat_d2f33303",
         "config_produced": {
           "dim": 2,
-          "nx": 32,
-          "ny": 32,
-          "k": 1.75,
-          "rho": 2400.0,
-          "cp": 880.0,
+          "nx": 48,
+          "ny": 48,
+          "k": 401,
+          "rho": 8960,
+          "cp": 385,
           "source": 0.0,
-          "t_end": 600.0,
-          "dt": 1.0,
+          "t_end": 5.0,
+          "dt": 0.01,
           "theta": 1.0,
           "bcs": [
             {
               "type": "dirichlet",
-              "value": 350.0,
+              "value": 400,
               "location": "left"
             },
             {
-              "type": "dirichlet",
-              "value": 293.0,
+              "type": "robin",
+              "alpha": 25,
+              "u_inf": 293,
               "location": "right"
             },
             {
@@ -5140,27 +5402,469 @@
               "location": "bottom"
             }
           ],
-          "run_id": "heat_56a702db",
+          "u_init": 400,
+          "run_id": "heat_d2f33303",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.9856438067800306,
+        "t_max_actual": 400.00050451604955,
+        "t_min_actual": 399.8151719593989,
+        "t_mean_actual": 399.9943872110487,
+        "physics_score": 0.9928219033900153
+      },
+      {
+        "task_id": "E10",
+        "difficulty": "easy",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 13.501285951584578,
+        "agent_iterations": 4,
+        "run_id": "heat_8258dbf4",
+        "config_produced": {
+          "dim": 2,
+          "nx": 48,
+          "ny": 48,
+          "k": 30,
+          "rho": 5000,
+          "cp": 400,
+          "source": 0,
+          "t_end": 5.0,
+          "dt": 0.1,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 273,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 273,
+              "location": "right"
+            },
+            {
+              "type": "dirichlet",
+              "value": 273,
+              "location": "top"
+            },
+            {
+              "type": "dirichlet",
+              "value": 273,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 1000,
+          "run_id": "heat_8258dbf4",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 0.8,
         "first_try_success": true,
         "error_message": "",
         "raw_response": {},
-        "property_fidelity": 0.8933582518688902,
-        "t_max_actual": 349.9999975879229,
-        "t_min_actual": -7.213318348280801,
-        "t_mean_actual": 26.083579218170293,
-        "physics_score": 0.4466791259344451
+        "property_fidelity": 1.0,
+        "t_max_actual": 1056.3446193140453,
+        "t_min_actual": 273.00000206121035,
+        "t_mean_actual": 940.0723644078126,
+        "physics_score": 0.9612485424250032
+      },
+      {
+        "task_id": "M08",
+        "difficulty": "medium",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 15.213620879687369,
+        "agent_iterations": 4,
+        "run_id": "heat_bce546bd",
+        "config_produced": {
+          "dim": 2,
+          "nx": 48,
+          "ny": 48,
+          "k": 73.5,
+          "rho": 21460,
+          "cp": 131,
+          "source": 0,
+          "t_end": 20,
+          "dt": 0.01,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 600,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 400,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 500,
+          "run_id": "heat_bce546bd",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.9782955351030469,
+        "t_max_actual": 599.9999925992137,
+        "t_min_actual": 399.99999506614245,
+        "t_mean_actual": 499.99992224098537,
+        "physics_score": 0.9891477675515234
+      },
+      {
+        "task_id": "H03",
+        "difficulty": "hard",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 15.007475804537535,
+        "agent_iterations": 5,
+        "run_id": "heat_c3897168",
+        "config_produced": {
+          "dim": 2,
+          "nx": 128,
+          "ny": 128,
+          "k": 6.7,
+          "rho": 4430.0,
+          "cp": 526.0,
+          "source": 0.0,
+          "t_end": 0.5,
+          "dt": 0.001,
+          "theta": 0.5,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 500.0,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 300.0,
+              "location": "right"
+            }
+          ],
+          "u_init": 400.0,
+          "run_id": "heat_c3897168",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.5,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.33499999999999996,
+        "t_max_actual": 499.9999935687351,
+        "t_min_actual": 299.99999614124107,
+        "t_mean_actual": 399.9999979782556,
+        "physics_score": 0.6675
+      },
+      {
+        "task_id": "E02",
+        "difficulty": "easy",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 12.613206138834357,
+        "agent_iterations": 4,
+        "run_id": "heat_29d3e1d4",
+        "config_produced": {
+          "dim": 2,
+          "nx": 64,
+          "ny": 64,
+          "k": 10,
+          "rho": 1000,
+          "cp": 500,
+          "source": 0,
+          "t_end": 2,
+          "dt": 0.05,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 273,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 373,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 323.0,
+          "run_id": "heat_29d3e1d4",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 1.0,
+        "t_max_actual": 372.9999975071248,
+        "t_min_actual": 272.999998175456,
+        "t_mean_actual": 322.999999690256,
+        "physics_score": 1.0
+      },
+      {
+        "task_id": "E01",
+        "difficulty": "easy",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 11.882427361793816,
+        "agent_iterations": 4,
+        "run_id": "heat_2740ba7a",
+        "config_produced": {
+          "dim": 2,
+          "nx": 32,
+          "ny": 32,
+          "k": 1,
+          "rho": 1,
+          "cp": 1,
+          "source": 0,
+          "t_end": 0.5,
+          "dt": 0.01,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 0,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 1,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 0.5,
+          "run_id": "heat_2740ba7a",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 1.0,
+        "t_max_actual": 0.9999999991440819,
+        "t_min_actual": 0.0,
+        "t_mean_actual": 0.5000000053377357,
+        "physics_score": 1.0
+      },
+      {
+        "task_id": "M04",
+        "difficulty": "medium",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 13.958170523867011,
+        "agent_iterations": 4,
+        "run_id": "heat_e607e2f7",
+        "config_produced": {
+          "dim": 2,
+          "nx": 48,
+          "ny": 48,
+          "k": 109,
+          "rho": 8530,
+          "cp": 373,
+          "source": 0,
+          "t_end": 10,
+          "dt": 0.01,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 500,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 300,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 400,
+          "run_id": "heat_e607e2f7",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.971439358167047,
+        "t_max_actual": 499.9999939765099,
+        "t_min_actual": 299.999996385906,
+        "t_mean_actual": 399.99997174451687,
+        "physics_score": 0.9857196790835234
+      },
+      {
+        "task_id": "E04",
+        "difficulty": "easy",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 13.30532329250127,
+        "agent_iterations": 4,
+        "run_id": "heat_af2642a1",
+        "config_produced": {
+          "dim": 2,
+          "nx": 48,
+          "ny": 48,
+          "k": 25,
+          "rho": 2000,
+          "cp": 800,
+          "source": 0,
+          "t_end": 50.0,
+          "dt": 0.5,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 400,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 200,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 300.0,
+          "run_id": "heat_af2642a1",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 1.0,
+        "t_max_actual": 399.999999719269,
+        "t_min_actual": 199.9999998596345,
+        "t_mean_actual": 299.9999998851332,
+        "physics_score": 1.0
+      },
+      {
+        "task_id": "H02",
+        "difficulty": "hard",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 37.72065411414951,
+        "agent_iterations": 3,
+        "run_id": "heat_12ebabb3",
+        "config_produced": {
+          "dim": 3,
+          "nx": 24,
+          "ny": 24,
+          "nz": 24,
+          "k": 1.0,
+          "rho": 2500.0,
+          "cp": 800.0,
+          "source": 0.0,
+          "t_end": 20.0,
+          "dt": 0.01,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 1000.0,
+              "location": "front"
+            },
+            {
+              "type": "dirichlet",
+              "value": 300.0,
+              "location": "back"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "left"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 650.0,
+          "run_id": "heat_12ebabb3",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.33333333333333337,
+        "t_max_actual": 1000.0000023176266,
+        "t_min_actual": 300.00000069528795,
+        "t_mean_actual": 650.0000873195424,
+        "physics_score": 0.6666666666666667
       },
       {
         "task_id": "E11",
         "difficulty": "easy",
         "mode": "kg_smart",
         "success": true,
-        "wall_time_s": 14.794618328101933,
-        "agent_iterations": 4,
-        "run_id": "heat_3f4106fc",
+        "wall_time_s": 13.684008845128119,
+        "agent_iterations": 3,
+        "run_id": "heat_49642e6d",
         "config_produced": {
           "dim": 3,
           "nx": 12,
@@ -5206,7 +5910,7 @@
             }
           ],
           "u_init": 500,
-          "run_id": "heat_3f4106fc",
+          "run_id": "heat_49642e6d",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 0.8333333333333334,
@@ -5220,82 +5924,28 @@
         "physics_score": 0.5840452993234432
       },
       {
-        "task_id": "M03",
-        "difficulty": "medium",
+        "task_id": "H12",
+        "difficulty": "hard",
         "mode": "kg_smart",
         "success": true,
-        "wall_time_s": 13.88964467216283,
+        "wall_time_s": 12.99505356978625,
         "agent_iterations": 4,
-        "run_id": "heat_dd735cf9",
+        "run_id": "heat_986ad7e1",
         "config_produced": {
           "dim": 2,
-          "nx": 32,
-          "ny": 32,
-          "k": 200.0,
-          "rho": 2700.0,
-          "cp": 900.0,
-          "source": 1000.0,
-          "t_end": 2.0,
+          "nx": 48,
+          "ny": 48,
+          "k": 429,
+          "rho": 10500,
+          "cp": 236,
+          "source": 0,
+          "t_end": 2,
           "dt": 0.01,
           "theta": 1.0,
           "bcs": [
             {
               "type": "dirichlet",
-              "value": 293.0,
-              "location": "left"
-            },
-            {
-              "type": "dirichlet",
-              "value": 293.0,
-              "location": "right"
-            },
-            {
-              "type": "dirichlet",
-              "value": 293.0,
-              "location": "top"
-            },
-            {
-              "type": "dirichlet",
-              "value": 293.0,
-              "location": "bottom"
-            }
-          ],
-          "run_id": "heat_dd735cf9",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 0.6666666666666666,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.9090909090909091,
-        "t_max_actual": 292.9999997736361,
-        "t_min_actual": -23.13095959702673,
-        "t_mean_actual": 35.369671341902055,
-        "physics_score": 0.9545454168181364
-      },
-      {
-        "task_id": "M06",
-        "difficulty": "medium",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 14.094882486388087,
-        "agent_iterations": 4,
-        "run_id": "heat_98910781",
-        "config_produced": {
-          "dim": 2,
-          "nx": 64,
-          "ny": 64,
-          "k": 90.9,
-          "rho": 8900,
-          "cp": 445,
-          "source": 0,
-          "t_end": 30,
-          "dt": 0.1,
-          "theta": 1.0,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 800,
+              "value": 500,
               "location": "left"
             },
             {
@@ -5304,6 +5954,61 @@
               "location": "right"
             },
             {
+              "type": "dirichlet",
+              "value": 400,
+              "location": "top"
+            },
+            {
+              "type": "dirichlet",
+              "value": 350,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 425.0,
+          "run_id": "heat_986ad7e1",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.9968627450980392,
+        "t_max_actual": 500.00000424845734,
+        "t_min_actual": 300.00000254907434,
+        "t_mean_actual": 420.4246884884744,
+        "physics_score": 0.9984313725490196
+      },
+      {
+        "task_id": "M11",
+        "difficulty": "medium",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 15.31169159989804,
+        "agent_iterations": 4,
+        "run_id": "heat_233db529",
+        "config_produced": {
+          "dim": 2,
+          "nx": 32,
+          "ny": 32,
+          "k": 0.215,
+          "rho": 1200,
+          "cp": 1000,
+          "source": 0,
+          "t_end": 200,
+          "dt": 0.1,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 380,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 293,
+              "location": "right"
+            },
+            {
               "type": "neumann",
               "value": 0,
               "location": "top"
@@ -5314,8 +6019,219 @@
               "location": "bottom"
             }
           ],
+          "u_init": 336.5,
+          "run_id": "heat_233db529",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.8,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.9281842818428184,
+        "t_max_actual": 379.9999953876705,
+        "t_min_actual": 292.99999644365124,
+        "t_mean_actual": 336.49996388435596,
+        "physics_score": 0.9640921409214092
+      },
+      {
+        "task_id": "M05",
+        "difficulty": "medium",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 12.933040050789714,
+        "agent_iterations": 4,
+        "run_id": "heat_ebf32dc2",
+        "config_produced": {
+          "dim": 2,
+          "nx": 32,
+          "ny": 32,
+          "k": 1.0,
+          "rho": 2230.0,
+          "cp": 830.0,
+          "source": 0.0,
+          "t_end": 300.0,
+          "dt": 1.0,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 293.0,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 263.0,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 278.0,
+          "run_id": "heat_ebf32dc2",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.8,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.9515,
+        "t_max_actual": 292.9999966960229,
+        "t_min_actual": 262.9999970343141,
+        "t_mean_actual": 277.9999936993021,
+        "physics_score": 0.97575
+      },
+      {
+        "task_id": "N06",
+        "difficulty": "novel",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 18.40250752866268,
+        "agent_iterations": 5,
+        "run_id": "heat_44ead4c9",
+        "config_produced": {
+          "dim": 2,
+          "nx": 32,
+          "ny": 32,
+          "k": 0.42,
+          "rho": 1180.0,
+          "cp": 1940.0,
+          "source": 0.0,
+          "t_end": 500.0,
+          "dt": 0.1,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 400.0,
+              "location": "left"
+            },
+            {
+              "type": "robin",
+              "alpha": 15.0,
+              "u_inf": 250.0,
+              "location": "right"
+            }
+          ],
+          "u_init": 325.0,
+          "run_id": "heat_44ead4c9",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 1.0,
+        "t_max_actual": 400.00000076784215,
+        "t_min_actual": 303.33784167499874,
+        "t_mean_actual": 326.63630939431306,
+        "physics_score": 1.0
+      },
+      {
+        "task_id": "N09",
+        "difficulty": "novel",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 15.359587186016142,
+        "agent_iterations": 5,
+        "run_id": "heat_8e8e4d15",
+        "config_produced": {
+          "dim": 2,
+          "nx": 32,
+          "ny": 32,
+          "k": 312.0,
+          "rho": 3850.0,
+          "cp": 278.0,
+          "source": 0.0,
+          "t_end": 15.0,
+          "dt": 0.1,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 400.0,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 400.0,
+              "location": "right"
+            },
+            {
+              "type": "dirichlet",
+              "value": 400.0,
+              "location": "top"
+            },
+            {
+              "type": "dirichlet",
+              "value": 400.0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 2000.0,
+          "run_id": "heat_8e8e4d15",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.8,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.9994666666666666,
+        "t_max_actual": 2000.0016442182603,
+        "t_min_actual": 399.9999941546956,
+        "t_mean_actual": 1486.947388947279,
+        "physics_score": 0.9997328195151269
+      },
+      {
+        "task_id": "M06",
+        "difficulty": "medium",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 13.925372365862131,
+        "agent_iterations": 4,
+        "run_id": "heat_f8dfad80",
+        "config_produced": {
+          "dim": 2,
+          "nx": 64,
+          "ny": 64,
+          "k": 90.9,
+          "rho": 8900.0,
+          "cp": 445.0,
+          "source": 0.0,
+          "t_end": 30.0,
+          "dt": 0.1,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 800.0,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 300.0,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "bottom"
+            }
+          ],
           "u_init": 550.0,
-          "run_id": "heat_98910781",
+          "run_id": "heat_f8dfad80",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -5329,121 +6245,28 @@
         "physics_score": 0.9955709023941068
       },
       {
-        "task_id": "M08",
+        "task_id": "M14",
         "difficulty": "medium",
         "mode": "kg_smart",
         "success": true,
-        "wall_time_s": 17.764869223348796,
+        "wall_time_s": 14.89251924213022,
         "agent_iterations": 4,
-        "run_id": "heat_3db5c7ce",
+        "run_id": "heat_23b23d04",
         "config_produced": {
           "dim": 2,
-          "nx": 48,
-          "ny": 48,
-          "k": 71.5,
-          "rho": 21460,
-          "cp": 130,
-          "source": 0,
-          "t_end": 20,
-          "dt": 0.01,
-          "theta": 1.0,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 600,
-              "location": "left"
-            },
-            {
-              "type": "dirichlet",
-              "value": 400,
-              "location": "right"
-            },
-            {
-              "type": "neumann",
-              "value": 0,
-              "location": "top"
-            },
-            {
-              "type": "neumann",
-              "value": 0,
-              "location": "bottom"
-            }
-          ],
-          "u_init": 500,
-          "run_id": "heat_3db5c7ce",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 1.0,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.985150408624587,
-        "t_max_actual": 599.9999925879,
-        "t_min_actual": 399.99999505860006,
-        "t_mean_actual": 499.9999223894272,
-        "physics_score": 0.9925752043122935
-      },
-      {
-        "task_id": "E07",
-        "difficulty": "easy",
-        "mode": "kg_smart",
-        "success": false,
-        "wall_time_s": 51.84805231075734,
-        "agent_iterations": 5,
-        "run_id": null,
-        "config_produced": {},
-        "config_quality_score": 0.0,
-        "first_try_success": false,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.0,
-        "t_max_actual": null,
-        "t_min_actual": null,
-        "t_mean_actual": null,
-        "physics_score": 0.5
-      },
-      {
-        "task_id": "H04",
-        "difficulty": "hard",
-        "mode": "kg_smart",
-        "success": false,
-        "wall_time_s": 19.06968933250755,
-        "agent_iterations": 3,
-        "run_id": null,
-        "config_produced": {},
-        "config_quality_score": 0.0,
-        "first_try_success": false,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.0,
-        "t_max_actual": null,
-        "t_min_actual": null,
-        "t_mean_actual": null,
-        "physics_score": 0.5
-      },
-      {
-        "task_id": "M12",
-        "difficulty": "medium",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 16.960938808508217,
-        "agent_iterations": 4,
-        "run_id": "heat_5ca7afe0",
-        "config_produced": {
-          "dim": 2,
-          "nx": 48,
-          "ny": 48,
-          "k": 35.0,
-          "rho": 11340.0,
-          "cp": 129.0,
+          "nx": 32,
+          "ny": 32,
+          "k": 400.0,
+          "rho": 7140.0,
+          "cp": 385.0,
           "source": 0.0,
-          "t_end": 15.0,
+          "t_end": 10.0,
           "dt": 0.01,
           "theta": 1.0,
           "bcs": [
             {
               "type": "dirichlet",
-              "value": 450.0,
+              "value": 500.0,
               "location": "left"
             },
             {
@@ -5462,144 +6285,144 @@
               "location": "bottom"
             }
           ],
-          "u_init": 371.5,
-          "run_id": "heat_5ca7afe0",
+          "u_init": 396.5,
+          "run_id": "heat_23b23d04",
           "output_dir": "/workspace/results"
         },
-        "config_quality_score": 1.0,
+        "config_quality_score": 0.8,
         "first_try_success": true,
         "error_message": "",
         "raw_response": {},
-        "property_fidelity": 0.9984193129567579,
-        "t_max_actual": 449.9999944315389,
-        "t_min_actual": 292.9999963743131,
-        "t_mean_actual": 371.49995915491013,
-        "physics_score": 0.999209656478379
+        "property_fidelity": 0.6598310394488738,
+        "t_max_actual": 499.9999944575671,
+        "t_min_actual": 292.99999675213434,
+        "t_mean_actual": 396.4999572841504,
+        "physics_score": 0.8299155197244369
       },
       {
-        "task_id": "E01",
-        "difficulty": "easy",
+        "task_id": "H11",
+        "difficulty": "hard",
         "mode": "kg_smart",
         "success": true,
-        "wall_time_s": 12.32975406292826,
-        "agent_iterations": 4,
-        "run_id": "heat_61a65944",
-        "config_produced": {
-          "dim": 2,
-          "nx": 32,
-          "ny": 32,
-          "k": 1,
-          "rho": 1,
-          "cp": 1,
-          "source": 0,
-          "t_end": 0.5,
-          "dt": 0.01,
-          "theta": 1.0,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 0,
-              "location": "left"
-            },
-            {
-              "type": "dirichlet",
-              "value": 1,
-              "location": "right"
-            },
-            {
-              "type": "neumann",
-              "value": 0,
-              "location": "top"
-            },
-            {
-              "type": "neumann",
-              "value": 0,
-              "location": "bottom"
-            }
-          ],
-          "u_init": 0.5,
-          "run_id": "heat_61a65944",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 1.0,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 1.0,
-        "t_max_actual": 0.9999999991440819,
-        "t_min_actual": 0.0,
-        "t_mean_actual": 0.5000000053377357,
-        "physics_score": 1.0
-      },
-      {
-        "task_id": "M15",
-        "difficulty": "medium",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 15.624402477405965,
-        "agent_iterations": 4,
-        "run_id": "heat_8eb2b071",
+        "wall_time_s": 83.08116615004838,
+        "agent_iterations": 3,
+        "run_id": "heat_e3b458f5",
         "config_produced": {
           "dim": 2,
           "nx": 48,
           "ny": 48,
-          "k": 15.9,
-          "rho": 7930,
-          "cp": 500,
-          "source": 0,
-          "t_end": 60,
+          "k": 2.2,
+          "rho": 2700,
+          "cp": 835,
+          "source": 0.0,
+          "t_end": 3600,
+          "dt": 10,
+          "theta": 1.0,
+          "u_init": 293.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 800.0,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 293.0,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "bottom"
+            }
+          ],
+          "run_id": "heat_e3b458f5",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.6,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.8945337370913891,
+        "t_max_actual": 799.9999996888018,
+        "t_min_actual": 292.99990472006834,
+        "t_mean_actual": 331.4635029896322,
+        "physics_score": 0.9472668685456945
+      },
+      {
+        "task_id": "H04",
+        "difficulty": "hard",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 30.77763854712248,
+        "agent_iterations": 7,
+        "run_id": "heat_28faefab",
+        "config_produced": {
+          "dim": 2,
+          "nx": 128,
+          "ny": 128,
+          "k": 15.0,
+          "rho": 8000.0,
+          "cp": 500.0,
+          "source": 0.0,
+          "t_end": 60.0,
           "dt": 0.1,
           "theta": 1.0,
           "bcs": [
             {
               "type": "dirichlet",
-              "value": 500,
+              "value": 800.0,
               "location": "left"
             },
             {
               "type": "robin",
-              "alpha": 50,
-              "u_inf": 293,
-              "location": "right"
-            },
-            {
-              "type": "neumann",
-              "value": 0,
+              "alpha": 100.0,
+              "u_inf": 300.0,
               "location": "top"
             },
             {
               "type": "neumann",
-              "value": 0,
+              "value": 0.0,
               "location": "bottom"
+            },
+            {
+              "type": "dirichlet",
+              "value": 400.0,
+              "location": "right"
             }
           ],
-          "u_init": 500,
-          "run_id": "heat_8eb2b071",
+          "u_init": 600.0,
+          "run_id": "heat_28faefab",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
         "first_try_success": true,
         "error_message": "",
         "raw_response": {},
-        "property_fidelity": 0.988481182795699,
-        "t_max_actual": 500.21421020467517,
-        "t_min_actual": 488.76794038934446,
-        "t_mean_actual": 499.7440158424506,
-        "physics_score": 0.9942405913978495
+        "property_fidelity": 0.9838709677419355,
+        "t_max_actual": 799.9999957848231,
+        "t_min_actual": 399.99999789241156,
+        "t_mean_actual": 599.4804974631554,
+        "physics_score": 0.9919354838709677
       },
       {
         "task_id": "M10",
         "difficulty": "medium",
         "mode": "kg_smart",
         "success": true,
-        "wall_time_s": 14.473706994205713,
+        "wall_time_s": 14.447844407521188,
         "agent_iterations": 4,
-        "run_id": "heat_51521071",
+        "run_id": "heat_11947699",
         "config_produced": {
           "dim": 2,
           "nx": 32,
           "ny": 32,
-          "k": 140,
+          "k": 174,
           "rho": 19250,
           "cp": 138,
           "source": 0.0,
@@ -5629,192 +6452,27 @@
             }
           ],
           "u_init": 1000,
-          "run_id": "heat_51521071",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 0.8,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.9329055053224513,
-        "t_max_actual": 1499.9999814841851,
-        "t_min_actual": 499.99999382806175,
-        "t_mean_actual": 999.9999559999235,
-        "physics_score": 0.9664527526612257
-      },
-      {
-        "task_id": "H11",
-        "difficulty": "hard",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 12.69889011979103,
-        "agent_iterations": 3,
-        "run_id": "heat_d59ecdfe",
-        "config_produced": {
-          "dim": 2,
-          "nx": 48,
-          "ny": 48,
-          "k": 2.2,
-          "rho": 2700,
-          "cp": 835,
-          "source": 0.0,
-          "t_end": 3600,
-          "dt": 10.0,
-          "theta": 1.0,
-          "u_init": 293.0,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 800.0,
-              "location": "left"
-            },
-            {
-              "type": "dirichlet",
-              "value": 293.0,
-              "location": "right"
-            },
-            {
-              "type": "neumann",
-              "value": 0.0,
-              "location": "top"
-            },
-            {
-              "type": "neumann",
-              "value": 0.0,
-              "location": "bottom"
-            }
-          ],
-          "run_id": "heat_d59ecdfe",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 0.6,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.8945337370913891,
-        "t_max_actual": 799.9999996888018,
-        "t_min_actual": 292.99990472006834,
-        "t_mean_actual": 331.4635029896322,
-        "physics_score": 0.9472668685456945
-      },
-      {
-        "task_id": "N01",
-        "difficulty": "novel",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 16.293144307099283,
-        "agent_iterations": 4,
-        "run_id": "heat_5a68001e",
-        "config_produced": {
-          "dim": 2,
-          "nx": 48,
-          "ny": 48,
-          "k": 73.0,
-          "rho": 5420.0,
-          "cp": 612.0,
-          "source": 0.0,
-          "t_end": 10000.0,
-          "dt": 9.2545,
-          "theta": 1.0,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 400.0,
-              "location": "left"
-            },
-            {
-              "type": "dirichlet",
-              "value": 300.0,
-              "location": "right"
-            },
-            {
-              "type": "neumann",
-              "value": 0.0,
-              "location": "top"
-            },
-            {
-              "type": "neumann",
-              "value": 0.0,
-              "location": "bottom"
-            }
-          ],
-          "u_init": 350.0,
-          "run_id": "heat_5a68001e",
+          "run_id": "heat_11947699",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
         "first_try_success": true,
         "error_message": "",
         "raw_response": {},
-        "property_fidelity": 0.9997278911564625,
-        "t_max_actual": 399.9999990244863,
-        "t_min_actual": 299.9999992683647,
-        "t_mean_actual": 349.9998514734095,
-        "physics_score": 0.9998639455782312
-      },
-      {
-        "task_id": "H13",
-        "difficulty": "hard",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 19.489581592381,
-        "agent_iterations": 4,
-        "run_id": "heat_7d950798",
-        "config_produced": {
-          "dim": 2,
-          "nx": 64,
-          "ny": 64,
-          "k": 1.5,
-          "rho": 1800.0,
-          "cp": 1300.0,
-          "source": 0.0,
-          "t_end": 20.0,
-          "dt": 0.01,
-          "theta": 1.0,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 500.0,
-              "location": "left"
-            },
-            {
-              "type": "dirichlet",
-              "value": 293.0,
-              "location": "right"
-            },
-            {
-              "type": "neumann",
-              "value": 0.0,
-              "location": "top"
-            },
-            {
-              "type": "neumann",
-              "value": 0.0,
-              "location": "bottom"
-            }
-          ],
-          "u_init": 396.5,
-          "run_id": "heat_7d950798",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 0.6,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.4932263814616755,
-        "t_max_actual": 499.9999937235142,
-        "t_min_actual": 292.9999963219793,
-        "t_mean_actual": 396.49997956524976,
-        "physics_score": 0.7466131907308378
+        "property_fidelity": 0.9838858974793141,
+        "t_max_actual": 1499.9999813370637,
+        "t_min_actual": 499.9999937790212,
+        "t_mean_actual": 999.9999534948669,
+        "physics_score": 0.991942948739657
       },
       {
         "task_id": "H06",
         "difficulty": "hard",
         "mode": "kg_smart",
         "success": true,
-        "wall_time_s": 19.520084919407964,
+        "wall_time_s": 18.444038818590343,
         "agent_iterations": 4,
-        "run_id": "heat_64c5e43f",
+        "run_id": "heat_3b91e95d",
         "config_produced": {
           "dim": 3,
           "nx": 20,
@@ -5861,7 +6519,7 @@
             }
           ],
           "u_init": 373,
-          "run_id": "heat_64c5e43f",
+          "run_id": "heat_3b91e95d",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -5875,33 +6533,148 @@
         "physics_score": 0.9795707070707071
       },
       {
-        "task_id": "M01",
-        "difficulty": "medium",
+        "task_id": "H05",
+        "difficulty": "hard",
         "mode": "kg_smart",
         "success": true,
-        "wall_time_s": 14.708662079647183,
+        "wall_time_s": 12.646418685093522,
         "agent_iterations": 4,
-        "run_id": "heat_d49771bc",
+        "run_id": "heat_eb1e95d2",
         "config_produced": {
           "dim": 2,
-          "nx": 64,
-          "ny": 64,
-          "k": 50.0,
-          "rho": 7800.0,
-          "cp": 500.0,
-          "source": 0.0,
-          "t_end": 50.0,
-          "dt": 0.1,
+          "nx": 128,
+          "ny": 128,
+          "k": 397,
+          "rho": 8960,
+          "cp": 385,
+          "source": 0,
+          "t_end": 0.1,
+          "dt": 0.001,
           "theta": 1.0,
           "bcs": [
             {
               "type": "dirichlet",
-              "value": 300.0,
+              "value": 1200,
               "location": "left"
             },
             {
               "type": "dirichlet",
-              "value": 500.0,
+              "value": 293,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 293,
+          "run_id": "heat_eb1e95d2",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.75,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.9899976055047581,
+        "t_max_actual": 1199.9999858017977,
+        "t_min_actual": 233.39393145800233,
+        "t_mean_actual": 300.36891323693015,
+        "physics_score": 0.49499880275237906
+      },
+      {
+        "task_id": "H01",
+        "difficulty": "hard",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 16.571416209451854,
+        "agent_iterations": 4,
+        "run_id": "heat_57843847",
+        "config_produced": {
+          "dim": 2,
+          "nx": 96,
+          "ny": 96,
+          "k": 54,
+          "rho": 7850,
+          "cp": 473,
+          "source": 0,
+          "t_end": 60,
+          "dt": 0.1,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "robin",
+              "alpha": 500,
+              "u_inf": 293,
+              "location": "left"
+            },
+            {
+              "type": "robin",
+              "alpha": 500,
+              "u_inf": 293,
+              "location": "right"
+            },
+            {
+              "type": "robin",
+              "alpha": 500,
+              "u_inf": 293,
+              "location": "top"
+            },
+            {
+              "type": "robin",
+              "alpha": 500,
+              "u_inf": 293,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 1200,
+          "run_id": "heat_57843847",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.5,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.92,
+        "t_max_actual": 1200.00004912676,
+        "t_min_actual": 804.2345138291276,
+        "t_mean_actual": 1171.6177245941913,
+        "physics_score": 0.9599999729179934
+      },
+      {
+        "task_id": "N10",
+        "difficulty": "novel",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 219.471653226763,
+        "agent_iterations": 5,
+        "run_id": "heat_60b1b90a",
+        "config_produced": {
+          "dim": 2,
+          "nx": 64,
+          "ny": 64,
+          "k": 312.0,
+          "rho": 3850.0,
+          "cp": 278.0,
+          "source": 0.0,
+          "t_end": 10.0,
+          "dt": 0.0001,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 1000.0,
+              "location": "left"
+            },
+            {
+              "type": "robin",
+              "alpha": 200.0,
+              "u_inf": 400.0,
               "location": "right"
             },
             {
@@ -5915,28 +6688,417 @@
               "location": "bottom"
             }
           ],
-          "u_init": 400.0,
-          "run_id": "heat_d49771bc",
+          "u_init": 700.0,
+          "run_id": "heat_60b1b90a",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
         "first_try_success": true,
         "error_message": "",
         "raw_response": {},
-        "property_fidelity": 0.9978768577494692,
-        "t_max_actual": 499.99999725677105,
-        "t_min_actual": 299.99999835406254,
-        "t_mean_actual": 399.99999340181046,
-        "physics_score": 0.9989384288747346
+        "property_fidelity": 0.9994666666666666,
+        "t_max_actual": 1000.0000028881345,
+        "t_min_actual": 688.5763964661245,
+        "t_mean_actual": 719.7116040885336,
+        "physics_score": 0.9997333333333334
+      },
+      {
+        "task_id": "E12",
+        "difficulty": "easy",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 12.968394252471626,
+        "agent_iterations": 4,
+        "run_id": "heat_f7df5a6e",
+        "config_produced": {
+          "dim": 2,
+          "nx": 32,
+          "ny": 32,
+          "k": 400,
+          "rho": 8900,
+          "cp": 385,
+          "source": 0,
+          "t_end": 0.01,
+          "dt": 0.0005,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 350,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 300,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 325,
+          "run_id": "heat_f7df5a6e",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 1.0,
+        "t_max_actual": 349.9999957628043,
+        "t_min_actual": 299.99999636811793,
+        "t_mean_actual": 324.9999995359484,
+        "physics_score": 1.0
+      },
+      {
+        "task_id": "M15",
+        "difficulty": "medium",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 14.1356399692595,
+        "agent_iterations": 4,
+        "run_id": "heat_ecdf4da9",
+        "config_produced": {
+          "dim": 2,
+          "nx": 48,
+          "ny": 48,
+          "k": 15.9,
+          "rho": 7930.0,
+          "cp": 500.0,
+          "source": 0.0,
+          "t_end": 60.0,
+          "dt": 0.1,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 500.0,
+              "location": "left"
+            },
+            {
+              "type": "robin",
+              "alpha": 50.0,
+              "u_inf": 293.0,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 500.0,
+          "run_id": "heat_ecdf4da9",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.988481182795699,
+        "t_max_actual": 500.21421020467517,
+        "t_min_actual": 488.76794038934446,
+        "t_mean_actual": 499.7440158424506,
+        "physics_score": 0.9942405913978495
+      },
+      {
+        "task_id": "M09",
+        "difficulty": "medium",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 15.573747251182795,
+        "agent_iterations": 4,
+        "run_id": "heat_f801f3cf",
+        "config_produced": {
+          "dim": 2,
+          "nx": 64,
+          "ny": 64,
+          "k": 58.0,
+          "rho": 7200.0,
+          "cp": 470.0,
+          "source": 0.0,
+          "t_end": 100.0,
+          "dt": 0.1,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 700.0,
+              "location": "bottom"
+            },
+            {
+              "type": "dirichlet",
+              "value": 300.0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "left"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "right"
+            }
+          ],
+          "u_init": 500.0,
+          "run_id": "heat_f801f3cf",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.8,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.9243678160919541,
+        "t_max_actual": 700.0000002213662,
+        "t_min_actual": 300.00000009487127,
+        "t_mean_actual": 500.0000282979843,
+        "physics_score": 0.9621839080459771
+      },
+      {
+        "task_id": "H07",
+        "difficulty": "hard",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 36.1622487641871,
+        "agent_iterations": 6,
+        "run_id": "modified_10b7bac4",
+        "config_produced": {
+          "dim": 2,
+          "nx": 64,
+          "ny": 64,
+          "k": 50.0,
+          "rho": 7850.0,
+          "cp": 449.0,
+          "source": 0.0,
+          "t_end": 200.0,
+          "dt": 1.0,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 600.0,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 293.0,
+              "location": "right"
+            },
+            {
+              "type": "robin",
+              "alpha": 10.0,
+              "u_inf": 5.0,
+              "T_inf": 293.0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "bottom"
+            }
+          ],
+          "u_inf": null,
+          "T_inf": null,
+          "run_id": "modified_10b7bac4",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.6666666666666666,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.9323049001814883,
+        "t_max_actual": 599.9999977379238,
+        "t_min_actual": -2.0989366832231263e-07,
+        "t_mean_actual": 59.76847909161898,
+        "physics_score": 0.9661524500907441
+      },
+      {
+        "task_id": "E09",
+        "difficulty": "easy",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 12.756186053156853,
+        "agent_iterations": 4,
+        "run_id": "heat_acda3b89",
+        "config_produced": {
+          "dim": 2,
+          "nx": 64,
+          "ny": 64,
+          "k": 15,
+          "rho": 4000,
+          "cp": 600,
+          "source": 0,
+          "t_end": 20.0,
+          "dt": 0.2,
+          "theta": 0.5,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 800,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 200,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 500,
+          "run_id": "heat_acda3b89",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 1.0,
+        "t_max_actual": 799.9999923204409,
+        "t_min_actual": 199.99999808011023,
+        "t_mean_actual": 499.99999795664235,
+        "physics_score": 1.0
+      },
+      {
+        "task_id": "N08",
+        "difficulty": "novel",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 169.7132018925622,
+        "agent_iterations": 5,
+        "run_id": "heat_853fd281",
+        "config_produced": {
+          "dim": 2,
+          "nx": 48,
+          "ny": 48,
+          "k": 312.0,
+          "rho": 3850.0,
+          "cp": 278.0,
+          "source": 0.0,
+          "t_end": 10.0,
+          "dt": 0.0001,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 1500.0,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 400.0,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 950.0,
+          "run_id": "heat_853fd281",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.9994666666666666,
+        "t_max_actual": 1499.9999742726216,
+        "t_min_actual": 399.9999931393657,
+        "t_mean_actual": 949.9836258948383,
+        "physics_score": 0.9997333333333334
+      },
+      {
+        "task_id": "E07",
+        "difficulty": "easy",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 117.50374227855355,
+        "agent_iterations": 3,
+        "run_id": "heat_e5310fa2",
+        "config_produced": {
+          "dim": 2,
+          "nx": 32,
+          "ny": 32,
+          "k": 2,
+          "rho": 1500,
+          "cp": 1200,
+          "source": 500,
+          "t_end": 10.0,
+          "dt": 0.5,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 293,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 293,
+              "location": "right"
+            },
+            {
+              "type": "dirichlet",
+              "value": 293,
+              "location": "top"
+            },
+            {
+              "type": "dirichlet",
+              "value": 293,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 293.0,
+          "run_id": "heat_e5310fa2",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 1.0,
+        "t_max_actual": 293.00433711577193,
+        "t_min_actual": 292.9999998763568,
+        "t_mean_actual": 293.0025148675732,
+        "physics_score": 1.0
       },
       {
         "task_id": "N04",
         "difficulty": "novel",
         "mode": "kg_smart",
         "success": true,
-        "wall_time_s": 17.665749117732048,
+        "wall_time_s": 16.717276536859572,
         "agent_iterations": 4,
-        "run_id": "heat_1385900d",
+        "run_id": "heat_9da3200f",
         "config_produced": {
           "dim": 3,
           "nx": 16,
@@ -5982,7 +7144,7 @@
             }
           ],
           "u_init": 396.5,
-          "run_id": "heat_1385900d",
+          "run_id": "heat_9da3200f",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -5996,78 +7158,13 @@
         "physics_score": 0.9998639455782312
       },
       {
-        "task_id": "N08",
-        "difficulty": "novel",
-        "mode": "kg_smart",
-        "success": false,
-        "wall_time_s": 315.20186694990844,
-        "agent_iterations": 0,
-        "run_id": null,
-        "config_produced": {},
-        "config_quality_score": 0.0,
-        "first_try_success": false,
-        "error_message": "Timeout after 300s",
-        "raw_response": {},
-        "property_fidelity": 0.0,
-        "t_max_actual": null,
-        "t_min_actual": null,
-        "t_mean_actual": null,
-        "physics_score": 0.0
-      },
-      {
-        "task_id": "E06",
-        "difficulty": "easy",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 17.16286780219525,
-        "agent_iterations": 4,
-        "run_id": "heat_774d9b3c",
-        "config_produced": {
-          "dim": 3,
-          "nx": 16,
-          "ny": 16,
-          "nz": 16,
-          "k": 5,
-          "rho": 3000,
-          "cp": 1000,
-          "source": 0,
-          "t_end": 1.0,
-          "dt": 0.05,
-          "theta": 1.0,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 350,
-              "location": "left"
-            },
-            {
-              "type": "dirichlet",
-              "value": 250,
-              "location": "right"
-            }
-          ],
-          "u_init": 300,
-          "run_id": "heat_774d9b3c",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 1.0,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 1.0,
-        "t_max_actual": 350.0000002726094,
-        "t_min_actual": 250.00000019472103,
-        "t_mean_actual": 300.00000011826336,
-        "physics_score": 1.0
-      },
-      {
         "task_id": "N07",
         "difficulty": "novel",
         "mode": "kg_smart",
         "success": true,
-        "wall_time_s": 38.485856424085796,
+        "wall_time_s": 25.680992174893618,
         "agent_iterations": 4,
-        "run_id": "heat_ffbbb87c",
+        "run_id": "heat_683bcb00",
         "config_produced": {
           "dim": 2,
           "nx": 48,
@@ -6102,7 +7199,7 @@
               "location": "bottom"
             }
           ],
-          "run_id": "heat_ffbbb87c",
+          "run_id": "heat_683bcb00",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 0.8,
@@ -6116,114 +7213,38 @@
         "physics_score": 0.9880716981969817
       },
       {
-        "task_id": "H02",
-        "difficulty": "hard",
+        "task_id": "N05",
+        "difficulty": "novel",
         "mode": "kg_smart",
         "success": true,
-        "wall_time_s": 39.32144811656326,
-        "agent_iterations": 3,
-        "run_id": "heat_a458ab23",
-        "config_produced": {
-          "dim": 3,
-          "nx": 24,
-          "ny": 24,
-          "nz": 24,
-          "k": 1.0,
-          "rho": 2500.0,
-          "cp": 800.0,
-          "source": 0.0,
-          "t_end": 20.0,
-          "dt": 0.01,
-          "theta": 1.0,
-          "u_init": 650.0,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 1000.0,
-              "location": "front"
-            },
-            {
-              "type": "dirichlet",
-              "value": 300.0,
-              "location": "back"
-            },
-            {
-              "type": "neumann",
-              "value": 0.0,
-              "location": "left"
-            },
-            {
-              "type": "neumann",
-              "value": 0.0,
-              "location": "right"
-            },
-            {
-              "type": "neumann",
-              "value": 0.0,
-              "location": "top"
-            },
-            {
-              "type": "neumann",
-              "value": 0.0,
-              "location": "bottom"
-            }
-          ],
-          "run_id": "heat_a458ab23",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 1.0,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.33333333333333337,
-        "t_max_actual": 1000.0000023176266,
-        "t_min_actual": 300.00000069528795,
-        "t_mean_actual": 650.0000873195424,
-        "physics_score": 0.6666666666666667
-      },
-      {
-        "task_id": "E04",
-        "difficulty": "easy",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 13.076855623163283,
-        "agent_iterations": 4,
-        "run_id": "heat_7a9349d9",
+        "wall_time_s": 28.215768560767174,
+        "agent_iterations": 7,
+        "run_id": "heat_b65868ce",
         "config_produced": {
           "dim": 2,
           "nx": 48,
           "ny": 48,
-          "k": 25,
-          "rho": 2000,
-          "cp": 800,
-          "source": 0,
-          "t_end": 50.0,
-          "dt": 0.5,
+          "k": 0.42,
+          "rho": 1180.0,
+          "cp": 1940.0,
+          "source": 0.0,
+          "t_end": 10000.0,
+          "dt": 37.018,
           "theta": 1.0,
           "bcs": [
             {
               "type": "dirichlet",
-              "value": 400,
+              "value": 350.0,
               "location": "left"
             },
             {
               "type": "dirichlet",
-              "value": 200,
+              "value": 280.0,
               "location": "right"
-            },
-            {
-              "type": "neumann",
-              "value": 0,
-              "location": "top"
-            },
-            {
-              "type": "neumann",
-              "value": 0,
-              "location": "bottom"
             }
           ],
-          "u_init": 300.0,
-          "run_id": "heat_7a9349d9",
+          "u_init": 315.0,
+          "run_id": "heat_b65868ce",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -6231,129 +7252,74 @@
         "error_message": "",
         "raw_response": {},
         "property_fidelity": 1.0,
-        "t_max_actual": 399.999999719269,
-        "t_min_actual": 199.9999998596345,
-        "t_mean_actual": 299.9999998851332,
+        "t_max_actual": 349.9999997572875,
+        "t_min_actual": 279.99999980583,
+        "t_mean_actual": 314.99999934520105,
         "physics_score": 1.0
       },
       {
-        "task_id": "E02",
-        "difficulty": "easy",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 12.989030455239117,
-        "agent_iterations": 4,
-        "run_id": "heat_af8054b1",
-        "config_produced": {
-          "dim": 2,
-          "nx": 64,
-          "ny": 64,
-          "k": 10,
-          "rho": 1000,
-          "cp": 500,
-          "source": 0,
-          "t_end": 2,
-          "dt": 0.05,
-          "theta": 1.0,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 273,
-              "location": "left"
-            },
-            {
-              "type": "dirichlet",
-              "value": 373,
-              "location": "right"
-            },
-            {
-              "type": "neumann",
-              "value": 0,
-              "location": "top"
-            },
-            {
-              "type": "neumann",
-              "value": 0,
-              "location": "bottom"
-            }
-          ],
-          "u_init": 323.0,
-          "run_id": "heat_af8054b1",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 1.0,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 1.0,
-        "t_max_actual": 372.9999975071248,
-        "t_min_actual": 272.999998175456,
-        "t_mean_actual": 322.999999690256,
-        "physics_score": 1.0
-      },
-      {
-        "task_id": "M13",
+        "task_id": "M03",
         "difficulty": "medium",
         "mode": "kg_smart",
         "success": true,
-        "wall_time_s": 14.73424274660647,
+        "wall_time_s": 12.884241198189557,
         "agent_iterations": 4,
-        "run_id": "heat_cfaaad54",
+        "run_id": "heat_f4d4850d",
         "config_produced": {
           "dim": 2,
-          "nx": 64,
-          "ny": 64,
-          "k": 148,
-          "rho": 2330,
-          "cp": 705,
-          "source": 0.0,
-          "t_end": 0.5,
-          "dt": 0.001,
+          "nx": 32,
+          "ny": 32,
+          "k": 205,
+          "rho": 2710,
+          "cp": 896,
+          "source": 1000,
+          "t_end": 2,
+          "dt": 0.01,
           "theta": 1.0,
           "bcs": [
             {
               "type": "dirichlet",
-              "value": 400,
+              "value": 293,
               "location": "left"
             },
             {
               "type": "dirichlet",
-              "value": 300,
+              "value": 293,
               "location": "right"
             },
             {
-              "type": "neumann",
-              "value": 0.0,
+              "type": "dirichlet",
+              "value": 293,
               "location": "top"
             },
             {
-              "type": "neumann",
-              "value": 0.0,
+              "type": "dirichlet",
+              "value": 293,
               "location": "bottom"
             }
           ],
-          "u_init": 350.0,
-          "run_id": "heat_cfaaad54",
+          "u_init": 293.0,
+          "run_id": "heat_f4d4850d",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
         "first_try_success": true,
         "error_message": "",
         "raw_response": {},
-        "property_fidelity": 0.9917713561059845,
-        "t_max_actual": 399.99999514226477,
-        "t_min_actual": 299.99999635669866,
-        "t_mean_actual": 349.9999932855866,
-        "physics_score": 0.9958856780529923
+        "property_fidelity": 0.9318181818181819,
+        "t_max_actual": 293.0009432753372,
+        "t_min_actual": 292.99999988305535,
+        "t_mean_actual": 293.00073390184707,
+        "physics_score": 0.9659090909090909
       },
       {
         "task_id": "E03",
         "difficulty": "easy",
         "mode": "kg_smart",
         "success": true,
-        "wall_time_s": 13.559796839952469,
+        "wall_time_s": 13.024247244000435,
         "agent_iterations": 4,
-        "run_id": "heat_1440f69c",
+        "run_id": "heat_9e9af541",
         "config_produced": {
           "dim": 2,
           "nx": 32,
@@ -6388,7 +7354,7 @@
             }
           ],
           "u_init": 300,
-          "run_id": "heat_1440f69c",
+          "run_id": "heat_9e9af541",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 0.8,
@@ -6402,87 +7368,13 @@
         "physics_score": 0.9920705344780262
       },
       {
-        "task_id": "N09",
-        "difficulty": "novel",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 13.541945492848754,
-        "agent_iterations": 4,
-        "run_id": "heat_3749711f",
-        "config_produced": {
-          "dim": 2,
-          "nx": 32,
-          "ny": 32,
-          "k": 312.0,
-          "rho": 3850.0,
-          "cp": 278.0,
-          "source": 0.0,
-          "t_end": 15.0,
-          "dt": 0.1,
-          "theta": 1.0,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 400.0,
-              "location": "left"
-            },
-            {
-              "type": "dirichlet",
-              "value": 400.0,
-              "location": "right"
-            },
-            {
-              "type": "dirichlet",
-              "value": 400.0,
-              "location": "top"
-            },
-            {
-              "type": "dirichlet",
-              "value": 400.0,
-              "location": "bottom"
-            }
-          ],
-          "u_init": 2000.0,
-          "run_id": "heat_3749711f",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 0.8,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.9994666666666666,
-        "t_max_actual": 2000.0016442182603,
-        "t_min_actual": 399.9999941546956,
-        "t_mean_actual": 1486.947388947279,
-        "physics_score": 0.9997328195151269
-      },
-      {
-        "task_id": "H07",
-        "difficulty": "hard",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 172.90813856944442,
-        "agent_iterations": 10,
-        "run_id": "modified_6d85ca5d",
-        "config_produced": {},
-        "config_quality_score": 0.0,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.0,
-        "t_max_actual": null,
-        "t_min_actual": null,
-        "t_mean_actual": null,
-        "physics_score": 0.5
-      },
-      {
         "task_id": "E05",
         "difficulty": "easy",
         "mode": "kg_smart",
         "success": true,
-        "wall_time_s": 12.69155041873455,
+        "wall_time_s": 13.29136929102242,
         "agent_iterations": 4,
-        "run_id": "heat_374f42f2",
+        "run_id": "heat_ec0ec0b4",
         "config_produced": {
           "dim": 2,
           "nx": 40,
@@ -6490,7 +7382,7 @@
           "k": 100,
           "rho": 8000,
           "cp": 450,
-          "source": 0,
+          "source": 0.0,
           "t_end": 5.0,
           "dt": 0.1,
           "theta": 1.0,
@@ -6507,17 +7399,17 @@
             },
             {
               "type": "neumann",
-              "value": 0,
+              "value": 0.0,
               "location": "left"
             },
             {
               "type": "neumann",
-              "value": 0,
+              "value": 0.0,
               "location": "right"
             }
           ],
           "u_init": 450,
-          "run_id": "heat_374f42f2",
+          "run_id": "heat_ec0ec0b4",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -6531,144 +7423,33 @@
         "physics_score": 1.0
       },
       {
-        "task_id": "E08",
-        "difficulty": "easy",
+        "task_id": "M01",
+        "difficulty": "medium",
         "mode": "kg_smart",
         "success": true,
-        "wall_time_s": 13.691535491496325,
+        "wall_time_s": 14.147603658027947,
         "agent_iterations": 4,
-        "run_id": "heat_fcb37b42",
-        "config_produced": {
-          "dim": 2,
-          "nx": 24,
-          "ny": 24,
-          "k": 0.5,
-          "rho": 500,
-          "cp": 2000,
-          "source": 0,
-          "t_end": 100.0,
-          "dt": 1.0,
-          "theta": 1.0,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 500,
-              "location": "left"
-            },
-            {
-              "type": "dirichlet",
-              "value": 300,
-              "location": "right"
-            },
-            {
-              "type": "neumann",
-              "value": 0,
-              "location": "top"
-            },
-            {
-              "type": "neumann",
-              "value": 0,
-              "location": "bottom"
-            }
-          ],
-          "u_init": 400.0,
-          "run_id": "heat_fcb37b42",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 1.0,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 1.0,
-        "t_max_actual": 499.99999456359353,
-        "t_min_actual": 299.99999673815614,
-        "t_mean_actual": 399.99999714203244,
-        "physics_score": 1.0
-      },
-      {
-        "task_id": "E12",
-        "difficulty": "easy",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 13.240790335461497,
-        "agent_iterations": 4,
-        "run_id": "heat_456a39c5",
-        "config_produced": {
-          "dim": 2,
-          "nx": 32,
-          "ny": 32,
-          "k": 400,
-          "rho": 8900,
-          "cp": 385,
-          "source": 0,
-          "t_end": 0.01,
-          "dt": 0.0005,
-          "theta": 1.0,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 350,
-              "location": "left"
-            },
-            {
-              "type": "dirichlet",
-              "value": 300,
-              "location": "right"
-            },
-            {
-              "type": "neumann",
-              "value": 0,
-              "location": "top"
-            },
-            {
-              "type": "neumann",
-              "value": 0,
-              "location": "bottom"
-            }
-          ],
-          "u_init": 325.0,
-          "run_id": "heat_456a39c5",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 1.0,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 1.0,
-        "t_max_actual": 349.9999957628043,
-        "t_min_actual": 299.99999636811793,
-        "t_mean_actual": 324.9999995359484,
-        "physics_score": 1.0
-      },
-      {
-        "task_id": "N03",
-        "difficulty": "novel",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 20.008902044035494,
-        "agent_iterations": 5,
-        "run_id": "heat_7461b580",
+        "run_id": "heat_3716b954",
         "config_produced": {
           "dim": 2,
           "nx": 64,
           "ny": 64,
-          "k": 73.0,
-          "rho": 5420.0,
-          "cp": 612.0,
+          "k": 50.0,
+          "rho": 7850.0,
+          "cp": 490.0,
           "source": 0.0,
-          "t_end": 150.0,
+          "t_end": 50.0,
           "dt": 0.1,
           "theta": 1.0,
           "bcs": [
             {
               "type": "dirichlet",
-              "value": 700.0,
+              "value": 300.0,
               "location": "left"
             },
             {
-              "type": "robin",
-              "alpha": 50.0,
-              "u_inf": 293.0,
+              "type": "dirichlet",
+              "value": 500.0,
               "location": "right"
             },
             {
@@ -6682,8 +7463,244 @@
               "location": "bottom"
             }
           ],
-          "u_init": 496.5,
-          "run_id": "heat_7461b580",
+          "u_init": 400.0,
+          "run_id": "heat_3716b954",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.9933333333333333,
+        "t_max_actual": 499.99999728799156,
+        "t_min_actual": 299.999998372795,
+        "t_mean_actual": 399.99999344456165,
+        "physics_score": 0.9966666666666666
+      },
+      {
+        "task_id": "H10",
+        "difficulty": "hard",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 51.127840218134224,
+        "agent_iterations": 5,
+        "run_id": "modified_3bcd9780",
+        "config_produced": {
+          "dim": 2,
+          "nx": 96,
+          "ny": 96,
+          "k": 14.5,
+          "rho": 8370.0,
+          "cp": 440.0,
+          "source": 0.0,
+          "t_end": 120.0,
+          "dt": 0.1,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 900.0,
+              "location": "left"
+            },
+            {
+              "type": "robin",
+              "alpha": 150.0,
+              "u_inf": 293.0,
+              "location": "right"
+            },
+            {
+              "type": "dirichlet",
+              "value": 700.0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "bottom"
+            }
+          ],
+          "u_left": 900.0,
+          "u_top": 700.0,
+          "u_right_alpha": 150.0,
+          "u_right_u_inf": 293.0,
+          "u_bottom_value": 0.0,
+          "u_left_type": "dirichlet",
+          "u_top_type": "dirichlet",
+          "u_right_type": "robin",
+          "u_bottom_type": "neumann",
+          "u_left_location": "left",
+          "u_top_location": "top",
+          "u_right_location": "right",
+          "u_bottom_location": "bottom",
+          "u_inf_value": 293.0,
+          "u_inf_location": "right",
+          "u_inf_type": "robin",
+          "run_id": "modified_3bcd9780",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.3333333333333333,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.9096341463414634,
+        "t_max_actual": 900.0000009775239,
+        "t_min_actual": -0.003869968522468518,
+        "t_mean_actual": 48.03603424698846,
+        "physics_score": 0.9548170731707317
+      },
+      {
+        "task_id": "M12",
+        "difficulty": "medium",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 14.4003650797531,
+        "agent_iterations": 4,
+        "run_id": "heat_7d17ace9",
+        "config_produced": {
+          "dim": 2,
+          "nx": 48,
+          "ny": 48,
+          "k": 35.0,
+          "rho": 11340.0,
+          "cp": 129.0,
+          "source": 0.0,
+          "t_end": 15.0,
+          "dt": 0.01,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 450.0,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 293.0,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 371.5,
+          "run_id": "heat_7d17ace9",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.9984193129567579,
+        "t_max_actual": 449.9999944315389,
+        "t_min_actual": 292.9999963743131,
+        "t_mean_actual": 371.49995915491013,
+        "physics_score": 0.999209656478379
+      },
+      {
+        "task_id": "H13",
+        "difficulty": "hard",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 16.66164245735854,
+        "agent_iterations": 4,
+        "run_id": "heat_571eafff",
+        "config_produced": {
+          "dim": 2,
+          "nx": 64,
+          "ny": 64,
+          "k": 1.5,
+          "rho": 1800.0,
+          "cp": 1300.0,
+          "source": 0.0,
+          "t_end": 20.0,
+          "dt": 0.01,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 500.0,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 293.0,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 396.5,
+          "run_id": "heat_571eafff",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 0.6,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.4932263814616755,
+        "t_max_actual": 499.9999937235142,
+        "t_min_actual": 292.9999963219793,
+        "t_mean_actual": 396.49997956524976,
+        "physics_score": 0.7466131907308378
+      },
+      {
+        "task_id": "N01",
+        "difficulty": "novel",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 26.38052414637059,
+        "agent_iterations": 4,
+        "run_id": "heat_40c12654",
+        "config_produced": {
+          "dim": 2,
+          "nx": 48,
+          "ny": 48,
+          "k": 73.0,
+          "rho": 5420.0,
+          "cp": 612.0,
+          "source": 0.0,
+          "t_end": 10000.0,
+          "dt": 1.0,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 400.0,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 300.0,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0.0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 350.0,
+          "run_id": "heat_40c12654",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
@@ -6691,148 +7708,34 @@
         "error_message": "",
         "raw_response": {},
         "property_fidelity": 0.9997278911564625,
-        "t_max_actual": 699.9999894908899,
-        "t_min_actual": 487.7288100243497,
-        "t_mean_actual": 510.56754476640725,
+        "t_max_actual": 400.0000001003836,
+        "t_min_actual": 300.00000007528774,
+        "t_mean_actual": 349.9999953890969,
         "physics_score": 0.9998639455782312
       },
       {
-        "task_id": "H01",
-        "difficulty": "hard",
+        "task_id": "M07",
+        "difficulty": "medium",
         "mode": "kg_smart",
         "success": true,
-        "wall_time_s": 17.351621902547777,
+        "wall_time_s": 14.10617699753493,
         "agent_iterations": 4,
-        "run_id": "heat_bfcffee9",
+        "run_id": "heat_989ec7a4",
         "config_produced": {
           "dim": 2,
-          "nx": 96,
-          "ny": 96,
-          "k": 54,
-          "rho": 7850,
-          "cp": 473,
-          "source": 0,
-          "t_end": 60,
-          "dt": 0.1,
-          "theta": 1.0,
-          "bcs": [
-            {
-              "type": "robin",
-              "alpha": 500,
-              "u_inf": 293,
-              "location": "left"
-            },
-            {
-              "type": "robin",
-              "alpha": 500,
-              "u_inf": 293,
-              "location": "right"
-            },
-            {
-              "type": "robin",
-              "alpha": 500,
-              "u_inf": 293,
-              "location": "top"
-            },
-            {
-              "type": "robin",
-              "alpha": 500,
-              "u_inf": 293,
-              "location": "bottom"
-            }
-          ],
-          "u_init": 1200,
-          "run_id": "heat_bfcffee9",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 0.5,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.92,
-        "t_max_actual": 1200.00004912676,
-        "t_min_actual": 804.2345138291276,
-        "t_mean_actual": 1171.6177245941913,
-        "physics_score": 0.9599999729179934
-      },
-      {
-        "task_id": "H12",
-        "difficulty": "hard",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 12.01850622612983,
-        "agent_iterations": 3,
-        "run_id": "heat_d6978635",
-        "config_produced": {
-          "dim": 2,
-          "nx": 48,
-          "ny": 48,
-          "k": 429,
-          "rho": 10500,
-          "cp": 236,
-          "source": 0,
-          "t_end": 2,
-          "dt": 0.01,
-          "theta": 1.0,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 500,
-              "location": "left"
-            },
-            {
-              "type": "dirichlet",
-              "value": 300,
-              "location": "right"
-            },
-            {
-              "type": "dirichlet",
-              "value": 400,
-              "location": "top"
-            },
-            {
-              "type": "dirichlet",
-              "value": 350,
-              "location": "bottom"
-            }
-          ],
-          "u_init": 425,
-          "run_id": "heat_d6978635",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 1.0,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.9968627450980392,
-        "t_max_actual": 500.00000424845734,
-        "t_min_actual": 300.00000254907434,
-        "t_mean_actual": 420.4246884884744,
-        "physics_score": 0.9984313725490196
-      },
-      {
-        "task_id": "H08",
-        "difficulty": "hard",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 21.55418043024838,
-        "agent_iterations": 4,
-        "run_id": "heat_771dc4a6",
-        "config_produced": {
-          "dim": 2,
-          "nx": 128,
-          "ny": 64,
+          "nx": 32,
+          "ny": 32,
           "k": 1.75,
           "rho": 2400,
           "cp": 880,
           "source": 0.0,
-          "t_end": 1800,
+          "t_end": 600,
           "dt": 1.0,
           "theta": 1.0,
           "bcs": [
             {
               "type": "dirichlet",
-              "value": 1100,
+              "value": 350,
               "location": "left"
             },
             {
@@ -6851,28 +7754,28 @@
               "location": "bottom"
             }
           ],
-          "u_init": 701.5,
-          "run_id": "heat_771dc4a6",
+          "u_init": 321.5,
+          "run_id": "heat_989ec7a4",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
         "first_try_success": true,
         "error_message": "",
         "raw_response": {},
-        "property_fidelity": 0.8643617021276595,
-        "t_max_actual": 1099.999995237965,
-        "t_min_actual": 292.9999987315671,
-        "t_mean_actual": 701.0284439818474,
-        "physics_score": 0.9321808510638298
+        "property_fidelity": 0.8933582518688902,
+        "t_max_actual": 349.999996149696,
+        "t_min_actual": 292.9999967767455,
+        "t_mean_actual": 321.4999819664149,
+        "physics_score": 0.9466791259344451
       },
       {
         "task_id": "H09",
         "difficulty": "hard",
         "mode": "kg_smart",
         "success": true,
-        "wall_time_s": 29.177241331897676,
+        "wall_time_s": 26.556715803220868,
         "agent_iterations": 3,
-        "run_id": "heat_39ce9fa6",
+        "run_id": "heat_f85967fb",
         "config_produced": {
           "dim": 3,
           "nx": 16,
@@ -6919,7 +7822,8 @@
               "location": "bottom"
             }
           ],
-          "run_id": "heat_39ce9fa6",
+          "u_init": 400,
+          "run_id": "heat_f85967fb",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 0.6666666666666666,
@@ -6927,39 +7831,40 @@
         "error_message": "",
         "raw_response": {},
         "property_fidelity": 0.49273743016759775,
-        "t_max_actual": 500.0000003305271,
-        "t_min_actual": -3.928960783637971,
-        "t_mean_actual": 79.65129039504203,
+        "t_max_actual": 500.00000081742877,
+        "t_min_actual": 300.00000049045724,
+        "t_mean_actual": 399.6668116581185,
         "physics_score": 0.7463687150837989
       },
       {
-        "task_id": "M04",
-        "difficulty": "medium",
+        "task_id": "E06",
+        "difficulty": "easy",
         "mode": "kg_smart",
         "success": true,
-        "wall_time_s": 15.008608028292656,
-        "agent_iterations": 4,
-        "run_id": "heat_4f0ffa3b",
+        "wall_time_s": 22.32831024006009,
+        "agent_iterations": 3,
+        "run_id": "heat_06c271c9",
         "config_produced": {
-          "dim": 2,
-          "nx": 48,
-          "ny": 48,
-          "k": 109,
-          "rho": 8530,
-          "cp": 373,
+          "dim": 3,
+          "nx": 16,
+          "ny": 16,
+          "nz": 16,
+          "k": 5,
+          "rho": 3000,
+          "cp": 1000,
           "source": 0,
-          "t_end": 10,
-          "dt": 0.01,
+          "t_end": 1.0,
+          "dt": 0.05,
           "theta": 1.0,
           "bcs": [
             {
               "type": "dirichlet",
-              "value": 500,
+              "value": 350,
               "location": "left"
             },
             {
               "type": "dirichlet",
-              "value": 300,
+              "value": 250,
               "location": "right"
             },
             {
@@ -6971,570 +7876,49 @@
               "type": "neumann",
               "value": 0,
               "location": "bottom"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "front"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "back"
             }
           ],
-          "u_init": 400,
-          "run_id": "heat_4f0ffa3b",
+          "run_id": "heat_06c271c9",
           "output_dir": "/workspace/results"
         },
-        "config_quality_score": 1.0,
+        "config_quality_score": 0.8333333333333334,
         "first_try_success": true,
         "error_message": "",
         "raw_response": {},
-        "property_fidelity": 0.971439358167047,
-        "t_max_actual": 499.9999939765099,
-        "t_min_actual": 299.999996385906,
-        "t_mean_actual": 399.99997174451687,
-        "physics_score": 0.9857196790835234
+        "property_fidelity": 1.0,
+        "t_max_actual": 350.00000015081343,
+        "t_min_actual": -193.50684832400177,
+        "t_mean_actual": 27.815618747549124,
+        "physics_score": 0.5
       },
       {
-        "task_id": "E09",
-        "difficulty": "easy",
+        "task_id": "M13",
+        "difficulty": "medium",
         "mode": "kg_smart",
         "success": true,
-        "wall_time_s": 12.940634423866868,
+        "wall_time_s": 13.969278476200998,
         "agent_iterations": 4,
-        "run_id": "heat_cdf22a68",
+        "run_id": "heat_525f3a2a",
         "config_produced": {
           "dim": 2,
           "nx": 64,
           "ny": 64,
-          "k": 15,
-          "rho": 4000,
-          "cp": 600,
-          "source": 0,
-          "t_end": 20.0,
-          "dt": 0.2,
-          "theta": 0.5,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 800,
-              "location": "left"
-            },
-            {
-              "type": "dirichlet",
-              "value": 200,
-              "location": "right"
-            },
-            {
-              "type": "neumann",
-              "value": 0,
-              "location": "top"
-            },
-            {
-              "type": "neumann",
-              "value": 0,
-              "location": "bottom"
-            }
-          ],
-          "u_init": 500,
-          "run_id": "heat_cdf22a68",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 1.0,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 1.0,
-        "t_max_actual": 799.9999923204409,
-        "t_min_actual": 199.99999808011023,
-        "t_mean_actual": 499.99999795664235,
-        "physics_score": 1.0
-      },
-      {
-        "task_id": "M05",
-        "difficulty": "medium",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 15.04428992420435,
-        "agent_iterations": 4,
-        "run_id": "heat_e2d2b544",
-        "config_produced": {
-          "dim": 2,
-          "nx": 32,
-          "ny": 32,
-          "k": 1.0,
-          "rho": 2230.0,
-          "cp": 830.0,
-          "source": 0.0,
-          "t_end": 300.0,
-          "dt": 1.0,
-          "theta": 1.0,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 293.0,
-              "location": "left"
-            },
-            {
-              "type": "dirichlet",
-              "value": 263.0,
-              "location": "right"
-            },
-            {
-              "type": "neumann",
-              "value": 0.0,
-              "location": "top"
-            },
-            {
-              "type": "neumann",
-              "value": 0.0,
-              "location": "bottom"
-            }
-          ],
-          "u_init": 278.0,
-          "run_id": "heat_e2d2b544",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 0.8,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.9515,
-        "t_max_actual": 292.9999966960229,
-        "t_min_actual": 262.9999970343141,
-        "t_mean_actual": 277.9999936993021,
-        "physics_score": 0.97575
-      },
-      {
-        "task_id": "E10",
-        "difficulty": "easy",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 14.452075611799955,
-        "agent_iterations": 4,
-        "run_id": "heat_73350829",
-        "config_produced": {
-          "dim": 2,
-          "nx": 48,
-          "ny": 48,
-          "k": 30,
-          "rho": 5000,
-          "cp": 400,
-          "source": 0,
-          "t_end": 5.0,
-          "dt": 0.1,
-          "theta": 1.0,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 273,
-              "location": "left"
-            },
-            {
-              "type": "dirichlet",
-              "value": 273,
-              "location": "right"
-            },
-            {
-              "type": "dirichlet",
-              "value": 273,
-              "location": "top"
-            },
-            {
-              "type": "dirichlet",
-              "value": 273,
-              "location": "bottom"
-            }
-          ],
-          "u_init": 1000,
-          "run_id": "heat_73350829",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 0.8,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 1.0,
-        "t_max_actual": 1056.3446193140453,
-        "t_min_actual": 273.00000206121035,
-        "t_mean_actual": 940.0723644078126,
-        "physics_score": 0.9612485424250032
-      },
-      {
-        "task_id": "H03",
-        "difficulty": "hard",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 33.14628007635474,
-        "agent_iterations": 7,
-        "run_id": "heat_f7be1fb1",
-        "config_produced": {
-          "dim": 2,
-          "nx": 128,
-          "ny": 128,
-          "k": 23.7,
-          "rho": 4506.0,
-          "cp": 385.0,
+          "k": 150.0,
+          "rho": 2330.0,
+          "cp": 700.0,
           "source": 0.0,
           "t_end": 0.5,
           "dt": 0.001,
-          "theta": 0.5,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 500,
-              "location": "left"
-            },
-            {
-              "type": "dirichlet",
-              "value": 300,
-              "location": "right"
-            }
-          ],
-          "run_id": "heat_f7be1fb1",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 1.0,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.8150000000000001,
-        "t_max_actual": 500.00000039740434,
-        "t_min_actual": -46.92496215993237,
-        "t_mean_actual": 5.927371212914049,
-        "physics_score": 0.9075
-      },
-      {
-        "task_id": "N05",
-        "difficulty": "novel",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 35.399785593152046,
-        "agent_iterations": 4,
-        "run_id": "heat_c0ef1857",
-        "config_produced": {
-          "dim": 2,
-          "nx": 48,
-          "ny": 48,
-          "k": 0.42,
-          "rho": 1180.0,
-          "cp": 1940.0,
-          "source": 0.0,
-          "t_end": 10000.0,
-          "dt": 1.0,
-          "theta": 1.0,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 350.0,
-              "location": "left"
-            },
-            {
-              "type": "dirichlet",
-              "value": 280.0,
-              "location": "right"
-            }
-          ],
-          "u_init": 315.0,
-          "run_id": "heat_c0ef1857",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 1.0,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 1.0,
-        "t_max_actual": 349.9999957420079,
-        "t_min_actual": 279.99999659360634,
-        "t_mean_actual": 314.99965870552734,
-        "physics_score": 1.0
-      },
-      {
-        "task_id": "M14",
-        "difficulty": "medium",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 15.450263289734721,
-        "agent_iterations": 4,
-        "run_id": "heat_2e36fa22",
-        "config_produced": {
-          "dim": 2,
-          "nx": 32,
-          "ny": 32,
-          "k": 116,
-          "rho": 7140,
-          "cp": 385,
-          "source": 0.0,
-          "t_end": 10.0,
-          "dt": 0.01,
-          "theta": 1.0,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 500,
-              "location": "left"
-            },
-            {
-              "type": "dirichlet",
-              "value": 293,
-              "location": "right"
-            },
-            {
-              "type": "neumann",
-              "value": 0.0,
-              "location": "top"
-            },
-            {
-              "type": "neumann",
-              "value": 0.0,
-              "location": "bottom"
-            }
-          ],
-          "u_init": 396.5,
-          "run_id": "heat_2e36fa22",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 1.0,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.9902658220575695,
-        "t_max_actual": 499.9999937769338,
-        "t_min_actual": 292.9999963532832,
-        "t_mean_actual": 396.4999602371959,
-        "physics_score": 0.9951329110287848
-      },
-      {
-        "task_id": "H05",
-        "difficulty": "hard",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 14.074032321572304,
-        "agent_iterations": 4,
-        "run_id": "heat_30eca9c3",
-        "config_produced": {
-          "dim": 2,
-          "nx": 128,
-          "ny": 128,
-          "k": 401,
-          "rho": 8960,
-          "cp": 385,
-          "source": 0.0,
-          "t_end": 0.1,
-          "dt": 0.001,
-          "theta": 1.0,
-          "u_init": 293.0,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 1200.0,
-              "location": "left"
-            },
-            {
-              "type": "dirichlet",
-              "value": 293.0,
-              "location": "right"
-            },
-            {
-              "type": "neumann",
-              "value": 0.0,
-              "location": "top"
-            },
-            {
-              "type": "neumann",
-              "value": 0.0,
-              "location": "bottom"
-            }
-          ],
-          "run_id": "heat_30eca9c3",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 0.75,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.9848759665803023,
-        "t_max_actual": 1199.9999857999258,
-        "t_min_actual": 233.21976809343352,
-        "t_mean_actual": 300.38384560270885,
-        "physics_score": 0.49243798329015115
-      },
-      {
-        "task_id": "N02",
-        "difficulty": "novel",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 15.77385790552944,
-        "agent_iterations": 5,
-        "run_id": "heat_31ccac53",
-        "config_produced": {
-          "dim": 2,
-          "nx": 32,
-          "ny": 32,
-          "k": 73.0,
-          "rho": 5420.0,
-          "cp": 612.0,
-          "source": 0,
-          "t_end": 200,
-          "dt": 1.0,
-          "theta": 1.0,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 293,
-              "location": "left"
-            },
-            {
-              "type": "dirichlet",
-              "value": 293,
-              "location": "right"
-            },
-            {
-              "type": "dirichlet",
-              "value": 293,
-              "location": "top"
-            },
-            {
-              "type": "dirichlet",
-              "value": 293,
-              "location": "bottom"
-            }
-          ],
-          "u_init": 600.0,
-          "run_id": "heat_31ccac53",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 0.8,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.9997278911564625,
-        "t_max_actual": 600.0005562942381,
-        "t_min_actual": 293.0000001566205,
-        "t_mean_actual": 501.3000001517305,
-        "physics_score": 0.9998630395615569
-      },
-      {
-        "task_id": "N10",
-        "difficulty": "novel",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 211.00863332208246,
-        "agent_iterations": 5,
-        "run_id": "heat_85939791",
-        "config_produced": {
-          "dim": 2,
-          "nx": 64,
-          "ny": 64,
-          "k": 312.0,
-          "rho": 3850.0,
-          "cp": 278.0,
-          "source": 0.0,
-          "t_end": 10.0,
-          "dt": 0.0001,
-          "theta": 1.0,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 1000.0,
-              "location": "left"
-            },
-            {
-              "type": "robin",
-              "alpha": 200.0,
-              "u_inf": 400.0,
-              "location": "right"
-            },
-            {
-              "type": "neumann",
-              "value": 0.0,
-              "location": "top"
-            },
-            {
-              "type": "neumann",
-              "value": 0.0,
-              "location": "bottom"
-            }
-          ],
-          "u_init": 700.0,
-          "run_id": "heat_85939791",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 1.0,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.9994666666666666,
-        "t_max_actual": 1000.0000028881345,
-        "t_min_actual": 688.5763964661245,
-        "t_mean_actual": 719.7116040885336,
-        "physics_score": 0.9997333333333334
-      },
-      {
-        "task_id": "M09",
-        "difficulty": "medium",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 14.223609804175794,
-        "agent_iterations": 4,
-        "run_id": "heat_8a2c5576",
-        "config_produced": {
-          "dim": 2,
-          "nx": 64,
-          "ny": 64,
-          "k": 58,
-          "rho": 7200,
-          "cp": 470,
-          "source": 0,
-          "t_end": 100,
-          "dt": 0.1,
-          "theta": 1.0,
-          "bcs": [
-            {
-              "type": "dirichlet",
-              "value": 700,
-              "location": "bottom"
-            },
-            {
-              "type": "dirichlet",
-              "value": 300,
-              "location": "top"
-            },
-            {
-              "type": "neumann",
-              "value": 0,
-              "location": "left"
-            },
-            {
-              "type": "neumann",
-              "value": 0,
-              "location": "right"
-            }
-          ],
-          "u_init": 500,
-          "run_id": "heat_8a2c5576",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 0.8,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.9243678160919541,
-        "t_max_actual": 700.0000002213662,
-        "t_min_actual": 300.00000009487127,
-        "t_mean_actual": 500.0000282979843,
-        "physics_score": 0.9621839080459771
-      },
-      {
-        "task_id": "N06",
-        "difficulty": "novel",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 17.981701117940247,
-        "agent_iterations": 5,
-        "run_id": "heat_f09c63de",
-        "config_produced": {
-          "dim": 2,
-          "nx": 32,
-          "ny": 32,
-          "k": 0.42,
-          "rho": 1180.0,
-          "cp": 1940.0,
-          "source": 0.0,
-          "t_end": 500.0,
-          "dt": 0.1,
           "theta": 1.0,
           "bcs": [
             {
@@ -7543,74 +7927,8 @@
               "location": "left"
             },
             {
-              "type": "robin",
-              "alpha": 15.0,
-              "u_inf": 250.0,
-              "location": "right"
-            }
-          ],
-          "u_init": 325.0,
-          "run_id": "heat_f09c63de",
-          "output_dir": "/workspace/results"
-        },
-        "config_quality_score": 1.0,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 1.0,
-        "t_max_actual": 400.00000076784215,
-        "t_min_actual": 303.33784167499874,
-        "t_mean_actual": 326.63630939431306,
-        "physics_score": 1.0
-      },
-      {
-        "task_id": "H10",
-        "difficulty": "hard",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 22.092776952311397,
-        "agent_iterations": 6,
-        "run_id": "modified_cad904bf",
-        "config_produced": {},
-        "config_quality_score": 0.0,
-        "first_try_success": true,
-        "error_message": "",
-        "raw_response": {},
-        "property_fidelity": 0.0,
-        "t_max_actual": null,
-        "t_min_actual": null,
-        "t_mean_actual": null,
-        "physics_score": 0.5
-      },
-      {
-        "task_id": "M02",
-        "difficulty": "medium",
-        "mode": "kg_smart",
-        "success": true,
-        "wall_time_s": 11.559374458156526,
-        "agent_iterations": 3,
-        "run_id": "heat_8eb36bd2",
-        "config_produced": {
-          "dim": 2,
-          "nx": 48,
-          "ny": 48,
-          "k": 385,
-          "rho": 8960,
-          "cp": 385,
-          "source": 0.0,
-          "t_end": 5.0,
-          "dt": 0.1,
-          "theta": 1.0,
-          "bcs": [
-            {
               "type": "dirichlet",
-              "value": 400,
-              "location": "left"
-            },
-            {
-              "type": "robin",
-              "alpha": 25,
-              "u_inf": 293,
+              "value": 300.0,
               "location": "right"
             },
             {
@@ -7624,19 +7942,129 @@
               "location": "bottom"
             }
           ],
-          "u_init": 400,
-          "run_id": "heat_8eb36bd2",
+          "u_init": 350.0,
+          "run_id": "heat_525f3a2a",
           "output_dir": "/workspace/results"
         },
         "config_quality_score": 1.0,
         "first_try_success": true,
         "error_message": "",
         "raw_response": {},
-        "property_fidelity": 0.9899118392170771,
-        "t_max_actual": 400.0004930201748,
-        "t_min_actual": 399.8116814759476,
-        "t_mean_actual": 399.99435448386095,
-        "physics_score": 0.9949559196085386
+        "property_fidelity": 0.9938683827100534,
+        "t_max_actual": 399.9999951465066,
+        "t_min_actual": 299.9999963598799,
+        "t_mean_actual": 349.9999932478744,
+        "physics_score": 0.9969341913550267
+      },
+      {
+        "task_id": "E08",
+        "difficulty": "easy",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 13.00110070221126,
+        "agent_iterations": 4,
+        "run_id": "heat_fff685aa",
+        "config_produced": {
+          "dim": 2,
+          "nx": 24,
+          "ny": 24,
+          "k": 0.5,
+          "rho": 500,
+          "cp": 2000,
+          "source": 0,
+          "t_end": 100.0,
+          "dt": 1.0,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 500,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 300,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 400.0,
+          "run_id": "heat_fff685aa",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 1.0,
+        "t_max_actual": 499.99999456359353,
+        "t_min_actual": 299.99999673815614,
+        "t_mean_actual": 399.99999714203244,
+        "physics_score": 1.0
+      },
+      {
+        "task_id": "H08",
+        "difficulty": "hard",
+        "mode": "kg_smart",
+        "success": true,
+        "wall_time_s": 13.536758723668754,
+        "agent_iterations": 4,
+        "run_id": "heat_db77b739",
+        "config_produced": {
+          "dim": 2,
+          "nx": 128,
+          "ny": 64,
+          "k": 1.75,
+          "rho": 2400,
+          "cp": 880,
+          "source": 0,
+          "t_end": 1800,
+          "dt": 30,
+          "theta": 1.0,
+          "bcs": [
+            {
+              "type": "dirichlet",
+              "value": 1100,
+              "location": "left"
+            },
+            {
+              "type": "dirichlet",
+              "value": 293,
+              "location": "right"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "top"
+            },
+            {
+              "type": "neumann",
+              "value": 0,
+              "location": "bottom"
+            }
+          ],
+          "u_init": 696.5,
+          "run_id": "heat_db77b739",
+          "output_dir": "/workspace/results"
+        },
+        "config_quality_score": 1.0,
+        "first_try_success": true,
+        "error_message": "",
+        "raw_response": {},
+        "property_fidelity": 0.8643617021276595,
+        "t_max_actual": 1100.0000000137013,
+        "t_min_actual": 293.0000000036495,
+        "t_mean_actual": 696.500000357053,
+        "physics_score": 0.9321808510638298
       }
     ]
   }

@@ -24,10 +24,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import multiprocessing
 import os
 import random
 import signal
 import sys
+import threading
 import time
 from dataclasses import dataclass, asdict, field
 from datetime import datetime
@@ -50,8 +52,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from ablation.benchmark_tasks_v2 import ALL_TASKS_V2, get_tasks_by_difficulty
 
-TIMEOUT = 300  # 5 minutes per task max
-MAX_RETRIES = 3
+TIMEOUT = 420  # 7 minutes per task (allows for agent-internal retry)
+MAX_RETRIES = 1  # Agent handles retries internally via _AUTO_RETRY
 
 
 @dataclass
@@ -257,33 +259,53 @@ PROMPT_INJECT_SUFFIX = (
 
 
 def run_single_task(task: dict, mode: str, agent) -> TaskResult:
-    """Run one task with one agent, return structured result."""
+    """Run one task with one agent, return structured result.
+
+    Uses a background thread so the main thread can hard-interrupt via
+    ctypes if the agent hangs beyond TIMEOUT.
+    """
     description = task["description"]
     if mode == "prompt_inject":
         description += PROMPT_INJECT_SUFFIX
 
     t0 = time.perf_counter()
-    result = None
-    error_msg = ""
+    result_holder = [None]
+    error_holder = [""]
 
-    # Set alarm to prevent hangs
+    def _run():
+        try:
+            for attempt in range(MAX_RETRIES):
+                res = agent.run(description)
+                result_holder[0] = res
+                if res.get("run_id"):
+                    break
+                if attempt < MAX_RETRIES - 1:
+                    print(f"(retry {attempt+1}, no run_id) ", end="", flush=True)
+        except Exception as exc:
+            error_holder[0] = str(exc)
+
+    # Also set a signal.alarm as a backup (fires if thread doesn't return)
     old_handler = signal.signal(signal.SIGALRM, _timeout_handler)
-    signal.alarm(TIMEOUT)
-    try:
-        for attempt in range(MAX_RETRIES):
-            result = agent.run(description)
-            iters = result.get("iterations", 1)
-            if iters > 1 or result.get("run_id"):
-                break
-            if attempt < MAX_RETRIES - 1:
-                print(f"(retry {attempt+1}) ", end="", flush=True)
-    except TaskTimeout:
-        error_msg = f"Timeout after {TIMEOUT}s"
-    except Exception as exc:
-        error_msg = str(exc)
-    finally:
-        signal.alarm(0)
-        signal.signal(signal.SIGALRM, old_handler)
+    signal.alarm(TIMEOUT + 30)
+
+    worker = threading.Thread(target=_run, daemon=True)
+    worker.start()
+    worker.join(timeout=TIMEOUT)
+
+    if worker.is_alive():
+        error_holder[0] = f"Timeout after {TIMEOUT}s"
+        import ctypes
+        ctypes.pythonapi.PyThreadState_SetAsyncExc(
+            ctypes.c_ulong(worker.ident),
+            ctypes.py_object(SystemExit),
+        )
+        worker.join(timeout=10)
+
+    signal.alarm(0)
+    signal.signal(signal.SIGALRM, old_handler)
+
+    result = result_holder[0]
+    error_msg = error_holder[0]
 
     wall = time.perf_counter() - t0
 
@@ -359,6 +381,43 @@ def aggregate_by_difficulty(results: list[TaskResult]) -> dict:
     return {d: aggregate(rs) for d, rs in sorted(by_diff.items())}
 
 
+def _incremental_save(mode, results, tasks, seed, merge_path):
+    """Save partial results to disk so progress isn't lost on crash."""
+    output_dir = Path(__file__).resolve().parents[1] / "results"
+    output_dir.mkdir(exist_ok=True)
+    out_path = output_dir / "ablation_v2_results.json"
+
+    partial = {
+        "metadata": {
+            "version": "v2",
+            "n_tasks": len(tasks),
+            "seed": seed,
+            "kg_read_only": True,
+            "experiment_phase": "ablation_v2",
+            "last_updated": datetime.now().isoformat(),
+            "partial": True,
+        },
+        mode: {
+            "aggregate": aggregate(results),
+            "by_difficulty": aggregate_by_difficulty(results),
+            "tasks": [asdict(r) for r in results],
+        },
+    }
+
+    if merge_path and Path(merge_path).exists():
+        try:
+            with open(merge_path) as f:
+                existing = json.load(f)
+            existing[mode] = partial[mode]
+            existing["metadata"]["last_updated"] = datetime.now().isoformat()
+            partial = existing
+        except (json.JSONDecodeError, KeyError):
+            pass
+
+    with open(out_path, "w") as f:
+        json.dump(partial, f, indent=2, default=str)
+
+
 def run_ablation_v2(
     modes: list[str] | None = None,
     tasks: list[dict] | None = None,
@@ -403,16 +462,24 @@ def run_ablation_v2(
         agent = _make_agent(mode)
         print("done.")
 
-        # Warm up with a trivial task (not counted)
-        print("  Warming up...", end=" ", flush=True)
-        try:
-            agent.run(
-                "Run a minimal 2D heat equation: left T=0, right T=1, "
-                "4x4 mesh, k=1, rho=1, cp=1, t_end=0.01, dt=0.005."
-            )
-            print("done.")
-        except Exception as e:
-            print(f"warmup failed: {e}")
+        # Warm up with a trivial task (not counted) — skip for KG On
+        # to avoid mandatory KG query overhead on the warmup task
+        if mode != "kg_on":
+            print("  Warming up...", end=" ", flush=True)
+            saved_retry = getattr(agent, '_AUTO_RETRY', 1)
+            agent._AUTO_RETRY = 1  # no retry during warmup
+            try:
+                agent.run(
+                    "Run a minimal 2D heat equation: left T=0, right T=1, "
+                    "4x4 mesh, k=1, rho=1, cp=1, t_end=0.01, dt=0.005."
+                )
+                print("done.")
+            except Exception as e:
+                print(f"warmup failed: {e}")
+            finally:
+                agent._AUTO_RETRY = saved_retry
+        else:
+            print("  (skipping warmup for KG On)")
 
         results = []
         for i, task in enumerate(shuffled):
@@ -423,6 +490,10 @@ def run_ablation_v2(
             status = "OK" if tr.success else "FAIL"
             print(f"{status}  phys={tr.physics_score:.2f}  mpf={tr.property_fidelity:.2f}  "
                   f"t={tr.wall_time_s:.1f}s  iter={tr.agent_iterations}")
+
+            # Incremental save every 5 tasks to avoid losing progress
+            if (i + 1) % 5 == 0 or (i + 1) == len(shuffled):
+                _incremental_save(mode, results, tasks, seed, merge_path)
 
         all_results[mode] = results
 

@@ -28,11 +28,11 @@
 
 % KG On (mandatory) — blue
 \addplot[fill=nodeblue!55, draw=nodeblue!80] coordinates {
-  (Easy,   100)
-  (Medium,  67)
-  (Hard,    85)
-  (Novel,   50)
-  (Overall, 76)
+  (Easy,    92)
+  (Medium,  93)
+  (Hard,   100)
+  (Novel,   90)
+  (Overall, 94)
 };
 \addlegendentry{KG On}
 
@@ -48,11 +48,11 @@
 
 % KG Smart (warm-start + lazy) — orange
 \addplot[fill=nodeorange!55, draw=nodeorange!80] coordinates {
-  (Easy,    92)
+  (Easy,   100)
   (Medium, 100)
-  (Hard,    92)
-  (Novel,   90)
-  (Overall, 94)
+  (Hard,   100)
+  (Novel,  100)
+  (Overall,100)
 };
 \addlegendentry{KG Smart}
 

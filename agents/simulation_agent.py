@@ -252,7 +252,7 @@ class SimulationAgent(BaseAgent):
     ]
     model_name = SIM_MODEL
     agent_name = "simulation"
-    max_iterations = 15
+    max_iterations = 25
 
     def __init__(self, disable_kg: bool = False, smart_kg: bool = False,
                  **kwargs):
@@ -338,16 +338,38 @@ class SimulationAgent(BaseAgent):
 
         return g.compile()
 
+    _AUTO_RETRY: int = 2
+
     def run(self, task: str, context: Optional[dict] = None) -> dict:
-        """Override to inject KG warm-start context in smart_kg mode."""
-        self._nudge_count = 0
-        if self._smart_kg:
-            warm_ctx = _get_warm_start_context(task)
-            if warm_ctx:
-                self.system_prompt = _PROMPT_PREAMBLE + _KG_SMART_SUFFIX + warm_ctx
-                # Rebuild LLM with updated prompt (system prompt is read in _reason_node)
-                log.debug("Smart KG: injected %d chars of warm-start context", len(warm_ctx))
-        return super().run(task, context)
+        """Override to inject KG warm-start context and auto-retry on
+        stochastic failures (no run_id produced).
+
+        Only retries when the agent used less than 60% of its iteration
+        budget — this targets stochastic early-termination (LLM emits text
+        instead of a tool call) while avoiding a costly double-run for
+        systematic budget-exhaustion failures.
+        """
+        for attempt in range(self._AUTO_RETRY):
+            self._nudge_count = 0
+            if self._smart_kg:
+                warm_ctx = _get_warm_start_context(task)
+                if warm_ctx:
+                    self.system_prompt = _PROMPT_PREAMBLE + _KG_SMART_SUFFIX + warm_ctx
+                    log.debug("Smart KG: injected %d chars of warm-start context",
+                              len(warm_ctx))
+            result = super().run(task, context)
+            if result.get("run_id"):
+                return result
+            iters_used = result.get("iterations", 0)
+            budget = self.max_iterations
+            if attempt < self._AUTO_RETRY - 1 and iters_used < budget * 0.6:
+                log.info("No run_id after %d/%d iterations (early exit) "
+                         "— auto-retry %d/%d",
+                         iters_used, budget, attempt + 1,
+                         self._AUTO_RETRY - 1)
+            else:
+                break
+        return result
 
     def setup_and_run(
         self,

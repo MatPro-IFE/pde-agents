@@ -1,0 +1,348 @@
+{
+  "metadata": {
+    "timestamp": "2026-04-24T23:13:33.163282",
+    "kg_on_original_failures": [
+      "M08",
+      "M10",
+      "H12",
+      "H09",
+      "N04",
+      "N09",
+      "M11",
+      "N10",
+      "N08",
+      "M03",
+      "M06",
+      "N01"
+    ],
+    "kg_smart_original_failures": [
+      "E07",
+      "H04",
+      "N08"
+    ]
+  },
+  "results": {
+    "kg_on": {
+      "M08": {
+        "task_id": "M08",
+        "difficulty": "medium",
+        "success": false,
+        "wall_time_s": 50.4,
+        "iterations": 8,
+        "run_id": null,
+        "failure_class": "no_simulation_call",
+        "tool_sequence": [
+          "query_knowledge_graph",
+          "query_knowledge_graph",
+          "query_knowledge_graph",
+          "query_knowledge_graph"
+        ],
+        "answer_snippet": "",
+        "had_kg_query": true,
+        "had_warnings_check": false,
+        "had_run_simulation": false,
+        "had_validate_config": false
+      },
+      "M10": {
+        "task_id": "M10",
+        "difficulty": "medium",
+        "success": false,
+        "wall_time_s": 73.7,
+        "iterations": 9,
+        "run_id": null,
+        "failure_class": "no_simulation_call",
+        "tool_sequence": [
+          "query_knowledge_graph",
+          "query_knowledge_graph",
+          "query_knowledge_graph",
+          "query_knowledge_graph",
+          "query_knowledge_graph"
+        ],
+        "answer_snippet": "",
+        "had_kg_query": true,
+        "had_warnings_check": false,
+        "had_run_simulation": false,
+        "had_validate_config": false
+      },
+      "H12": {
+        "task_id": "H12",
+        "difficulty": "hard",
+        "success": false,
+        "wall_time_s": 109.5,
+        "iterations": 9,
+        "run_id": null,
+        "failure_class": "no_simulation_call",
+        "tool_sequence": [
+          "query_knowledge_graph",
+          "query_knowledge_graph",
+          "query_knowledge_graph",
+          "query_knowledge_graph",
+          "check_config_warnings"
+        ],
+        "answer_snippet": "The configuration has a high-severity warning indicating that `u_init` is significantly different from the minimum Dirichlet boundary condition value. This can cause large initial jumps leading to Gibbs-like overshoot.\n\nTo address this, we will set `u_init` closer to the minimum boundary temperature of 300 K.\n\nLet's modify the configuration and re-check it:\n\n```json\n{\n    \"dim\": 2,\n    \"nx\": 48,\n    \"ny\": 48,\n    \"k\": 401.0,\n    \"rho\": 10500.0,\n    \"cp\": 236.0,\n    \"source\": 0.0,\n    \"t_end\": 2.",
+        "had_kg_query": true,
+        "had_warnings_check": true,
+        "had_run_simulation": false,
+        "had_validate_config": false
+      },
+      "H09": {
+        "task_id": "H09",
+        "difficulty": "hard",
+        "success": true,
+        "wall_time_s": 78.2,
+        "iterations": 6,
+        "run_id": "heat_db89c63b",
+        "failure_class": "success",
+        "tool_sequence": [
+          "query_knowledge_graph",
+          "validate_config",
+          "run_simulation"
+        ],
+        "answer_snippet": "The simulation with run_id `heat_db89c63b` has successfully completed. Here are the key results:\n\n- **Wall Time**: 11.25 seconds\n- **Number of Degrees of Freedom (DOFs)**: 4,913\n- **Maximum Temperature (t_max)**: 500.0 K\n- **Minimum Temperature (t_min)**: 300.0 K\n\nThe results have been uploaded to the MinIO storage with the bucket `simulation-results` and prefix `runs/heat_db89c63b`.\n\nThis concludes the simulation task for the 3D heat conduction in a titanium aerospace component with specified b",
+        "had_kg_query": true,
+        "had_warnings_check": false,
+        "had_run_simulation": true,
+        "had_validate_config": true
+      },
+      "N04": {
+        "task_id": "N04",
+        "difficulty": "novel",
+        "success": true,
+        "wall_time_s": 52.6,
+        "iterations": 7,
+        "run_id": "heat_9aab46e3",
+        "failure_class": "success",
+        "tool_sequence": [
+          "query_knowledge_graph",
+          "get_run_status",
+          "validate_config",
+          "run_simulation"
+        ],
+        "answer_snippet": "The simulation with run_id `heat_9aab46e3` has successfully completed. Here are the key results:\n\n- **Wall Time**: 1.95 seconds\n- **Number of Degrees of Freedom (DOFs)**: 4,913\n- **Maximum Temperature**: 500.0 K\n- **Minimum Temperature**: 293.0 K\n\nThe simulation was set up with a 3D domain using a 16x16x16 mesh, thermal conductivity of 73 W/(m\u00b7K), density of 5420 kg/m\u00b3, specific heat capacity of 612 J/(kg\u00b7K), and a time step size of 0.1 seconds. The left face was set to 500 K, the right face to ",
+        "had_kg_query": true,
+        "had_warnings_check": false,
+        "had_run_simulation": true,
+        "had_validate_config": true
+      },
+      "N09": {
+        "task_id": "N09",
+        "difficulty": "novel",
+        "success": false,
+        "wall_time_s": 34.0,
+        "iterations": 7,
+        "run_id": null,
+        "failure_class": "no_simulation_call",
+        "tool_sequence": [
+          "query_knowledge_graph",
+          "get_run_status",
+          "debug_simulation"
+        ],
+        "answer_snippet": "",
+        "had_kg_query": true,
+        "had_warnings_check": false,
+        "had_run_simulation": false,
+        "had_validate_config": false
+      },
+      "M11": {
+        "task_id": "M11",
+        "difficulty": "medium",
+        "success": true,
+        "wall_time_s": 32.8,
+        "iterations": 8,
+        "run_id": "heat_4fa7721c",
+        "failure_class": "success",
+        "tool_sequence": [
+          "query_knowledge_graph",
+          "query_knowledge_graph",
+          "check_config_warnings",
+          "check_config_warnings",
+          "run_simulation"
+        ],
+        "answer_snippet": "The simulation with run_id `heat_4fa7721c` has successfully completed. Here are the key results:\n\n- **Wall Time**: 0.2238 seconds\n- **Number of Degrees of Freedom (DOFs)**: 1089\n- **Maximum Temperature (`t_max`)**: 379.99 K\n- **Minimum Temperature (`t_min`)**: 292.99 K\n\nThe simulation results have been uploaded to the MinIO bucket `simulation-results` under the prefix `runs/heat_4fa7721c`.\n\nThis completes the task as per the provided configuration and requirements.",
+        "had_kg_query": true,
+        "had_warnings_check": true,
+        "had_run_simulation": true,
+        "had_validate_config": false
+      },
+      "N10": {
+        "task_id": "N10",
+        "difficulty": "novel",
+        "success": true,
+        "wall_time_s": 281.6,
+        "iterations": 12,
+        "run_id": "modified_25bf1747",
+        "failure_class": "success",
+        "tool_sequence": [
+          "query_knowledge_graph",
+          "get_run_status",
+          "check_config_warnings",
+          "check_config_warnings",
+          "modify_config",
+          "modify_config",
+          "validate_config",
+          "check_config_warnings",
+          "run_simulation"
+        ],
+        "answer_snippet": "The simulation with run_id `heat_e16060aa` has successfully completed. Here are the key results:\n\n- **Wall Time**: 136.09 seconds\n- **Number of Degrees of Freedom (DOFs)**: 4225\n- **Maximum Temperature (`t_max`)**: 1000.0 K\n- **Minimum Temperature (`t_min`)**: Approximately 0 K\n\nThe results have been uploaded to the MinIO storage with the bucket `simulation-results` and prefix `runs/heat_e16060aa`.\n\nIf you need further analysis or additional simulations, feel free to request!",
+        "had_kg_query": true,
+        "had_warnings_check": true,
+        "had_run_simulation": true,
+        "had_validate_config": true
+      },
+      "N08": {
+        "task_id": "N08",
+        "difficulty": "novel",
+        "success": false,
+        "wall_time_s": 14494.8,
+        "iterations": 14,
+        "run_id": "heat_04c6dd8c",
+        "failure_class": "other",
+        "tool_sequence": [
+          "query_knowledge_graph",
+          "get_run_status",
+          "validate_config",
+          "run_simulation",
+          "debug_simulation",
+          "run_simulation",
+          "debug_simulation",
+          "run_simulation",
+          "debug_simulation",
+          "run_simulation",
+          "debug_simulation"
+        ],
+        "answer_snippet": "It seems there is a persistent issue with the simulation runs timing out and no configuration being found. Let's try to simplify the problem by reducing the mesh resolution and increasing the time step size slightly, while still ensuring stability.\n\nLet's reduce the mesh resolution to 32x32 and increase the time step size to \\(1 \\times 10^{-6}\\).\n\nHere is the updated configuration:\n\n```json\n{\n  \"dim\": 2,\n  \"nx\": 32,\n  \"ny\": 32,\n  \"k\": 312.0,\n  \"rho\": 3850.0,\n  \"cp\": 278.0,\n  \"source\": 0.0,\n  \"t_",
+        "had_kg_query": true,
+        "had_warnings_check": false,
+        "had_run_simulation": true,
+        "had_validate_config": true
+      },
+      "M03": {
+        "task_id": "M03",
+        "difficulty": "medium",
+        "success": false,
+        "wall_time_s": 10873.2,
+        "iterations": 11,
+        "run_id": "heat_6316e98e",
+        "failure_class": "other",
+        "tool_sequence": [
+          "query_knowledge_graph",
+          "get_run_status",
+          "validate_config",
+          "run_simulation",
+          "debug_simulation",
+          "run_simulation",
+          "debug_simulation",
+          "run_simulation"
+        ],
+        "answer_snippet": "It seems there is a persistent issue with the simulation runs timing out. Let's try reducing the time step size (`dt`) to see if that resolves the problem. We'll reduce `dt` from 0.01 to 0.005.\n\n{\n  \"name\": \"modify_config\",\n  \"arguments\": {\n    \"config_json\": \"{\\\"dim\\\": 2, \\\"nx\\\": 32, \\\"ny\\\": 32, \\\"k\\\": 200.0, \\\"rho\\\": 2700.0, \\\"cp\\\": 900.0, \\\"source\\\": 1000.0, \\\"t_end\\\": 2.0, \\\"dt\\\": 0.01, \\\"theta\\\": 1.0, \\\"bcs\\\": [{\\\"type\\\": \\\"dirichlet\\\", \\\"value\\\": 293.0, \\\"location\\\": \\\"left\\\"}, {\\\"type\\\": ",
+        "had_kg_query": true,
+        "had_warnings_check": false,
+        "had_run_simulation": true,
+        "had_validate_config": true
+      },
+      "M06": {
+        "task_id": "M06",
+        "difficulty": "medium",
+        "success": false,
+        "wall_time_s": 41.1,
+        "iterations": 7,
+        "run_id": null,
+        "failure_class": "no_simulation_call",
+        "tool_sequence": [
+          "query_knowledge_graph",
+          "query_knowledge_graph",
+          "check_config_warnings"
+        ],
+        "answer_snippet": "",
+        "had_kg_query": true,
+        "had_warnings_check": true,
+        "had_run_simulation": false,
+        "had_validate_config": false
+      },
+      "N01": {
+        "task_id": "N01",
+        "difficulty": "novel",
+        "success": false,
+        "wall_time_s": 3640.7,
+        "iterations": 6,
+        "run_id": "heat_0e1bdd22",
+        "failure_class": "other",
+        "tool_sequence": [
+          "query_knowledge_graph",
+          "run_simulation",
+          "debug_simulation"
+        ],
+        "answer_snippet": "It seems there was an issue with the run ID or the configuration file not being saved properly. Let's try running the simulation again to ensure everything is set up correctly.\n\n{\n  \"name\": \"validate_config\",\n  \"arguments\": {\n    \"config_json\": \"{\\\"dim\\\": 2, \\\"nx\\\": 48, \\\"ny\\\": 48, \\\"k\\\": 73.0, \\\"rho\\\": 5420.0, \\\"cp\\\": 612.0, \\\"source\\\": 0.0, \\\"t_end\\\": 1.0, \\\"dt\\\": 0.01, \\\"theta\\\": 1.0, \\\"bcs\\\": [{\\\"type\\\": \\\"dirichlet\\\", \\\"value\\\": 400.0, \\\"location\\\": \\\"left\\\"}, {\\\"type\\\": \\\"dirichlet\\\", \\\"va",
+        "had_kg_query": true,
+        "had_warnings_check": false,
+        "had_run_simulation": true,
+        "had_validate_config": false
+      }
+    },
+    "kg_smart": {
+      "E07": {
+        "task_id": "E07",
+        "difficulty": "easy",
+        "success": true,
+        "wall_time_s": 8257.4,
+        "iterations": 9,
+        "run_id": "heat_5f412225",
+        "failure_class": "success",
+        "tool_sequence": [
+          "validate_config",
+          "run_simulation",
+          "check_config_warnings",
+          "modify_config",
+          "validate_config",
+          "run_simulation",
+          "check_config_warnings",
+          "run_simulation"
+        ],
+        "answer_snippet": "The simulation with run_id `heat_dad9a229` has successfully completed. Here are the key results:\n\n- **Wall Time**: 0.159 seconds\n- **DOFs (Degrees of Freedom)**: 1089\n- **Temperature Range**:\n  - Maximum Temperature (`t_max`): 293.004 K\n  - Minimum Temperature (`t_min`): 292.9999999 K\n\nThe simulation ran efficiently within the expected time frame and produced consistent temperature values across the domain, indicating that the boundary conditions were correctly applied and the initial condition ",
+        "had_kg_query": false,
+        "had_warnings_check": true,
+        "had_run_simulation": true,
+        "had_validate_config": true
+      },
+      "H04": {
+        "task_id": "H04",
+        "difficulty": "hard",
+        "success": true,
+        "wall_time_s": 71.0,
+        "iterations": 7,
+        "run_id": "heat_43be1836",
+        "failure_class": "success",
+        "tool_sequence": [
+          "query_knowledge_graph",
+          "query_knowledge_graph",
+          "validate_config",
+          "run_simulation"
+        ],
+        "answer_snippet": "The simulation with run_id `heat_43be1836` has successfully completed. Here are the key results:\n\n- **Wall Time**: 1.2 seconds\n- **Number of Degrees of Freedom (DOFs)**: 4225\n- **Maximum Temperature**: ~800 K\n- **Minimum Temperature**: ~400 K\n\nThe simulation output files have been uploaded to the MinIO bucket `simulation-results` under the prefix `runs/heat_43be1836`.\n\nIf you need further analysis or additional simulations, feel free to request.",
+        "had_kg_query": true,
+        "had_warnings_check": false,
+        "had_run_simulation": true,
+        "had_validate_config": true
+      },
+      "N08": {
+        "task_id": "N08",
+        "difficulty": "novel",
+        "success": false,
+        "wall_time_s": 3638.0,
+        "iterations": 4,
+        "run_id": "heat_7df4ec29",
+        "failure_class": "other",
+        "tool_sequence": [
+          "query_knowledge_graph",
+          "validate_config",
+          "run_simulation"
+        ],
+        "answer_snippet": "",
+        "had_kg_query": true,
+        "had_warnings_check": false,
+        "had_run_simulation": true,
+        "had_validate_config": true
+      }
+    }
+  }
+}
