@@ -32,7 +32,7 @@ POSTGRES_USER = os.getenv("POSTGRES_USER", "pde_user")
 POSTGRES_PASS = os.getenv("POSTGRES_PASSWORD", "pde_secret_change_me")
 
 # Base host for external nav links (Docs, MLflow, MinIO, Neo4j). If set, used as-is;
-# otherwise derived from the request host so links work for any access URL (e.g. 10.213.0.10:8050).
+# otherwise derived from the request host so links work for any access URL.
 
 # ─── App initialization ───────────────────────────────────────────────────────
 

@@ -76,3 +76,7 @@ paper/*.fls
 # Evaluation raw simulation outputs (large binary)
 evaluation/results/vv_runs/
 evaluation/examples/output/
+
+# Graphify codebase analysis output (development tool, not part of the project)
+graphify-out/
+.graphify-venv/
