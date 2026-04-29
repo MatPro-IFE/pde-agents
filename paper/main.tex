@@ -205,11 +205,18 @@ produce and verify deterministic numerical outputs.
 \paragraph{Autonomous FEM systems.}
 FEniCS \citep{logg2012fenics} and its successor DOLFINx/FEniCSx
 \citep{barrata2023dolfinx} provide Python-scriptable FEM solvers that are
-amenable to LLM-driven automation.  Recent work on ``simulation copilots''
+amenable to LLM-driven automation.  Early work on ``simulation copilots''
 \citep{bauer2023llm, jiang2024llm} shows that LLMs can generate solver
 scripts from natural language with moderate success, but these approaches are
-single-turn and lack closed-loop debugging.  PDE-Agents provides a
-multi-turn, self-correcting agent that can iteratively debug failed simulations.
+single-turn and lack closed-loop debugging.  More recently, ALL-FEM
+\citep{deotale2026allfem} fine-tunes LLMs on 1{,}000+ verified FEniCS scripts
+and embeds them in a multi-agent workflow achieving 71.8\% code-level success
+on multiphysics benchmarks, and FEABench \citep{mudur2025feabench} provides a
+systematic evaluation using COMSOL Multiphysics (88\% executable API calls).
+PDE-Agents differs by using unmodified open-source LLMs with
+knowledge-graph augmentation rather than domain-specific fine-tuning, and by
+providing a controlled ablation of retrieval strategies with physics-aware
+quality metrics.
 
 \paragraph{Multi-agent orchestration.}
 LangGraph \citep{langgraph2024} implements graph-structured agent workflows
@@ -234,7 +241,10 @@ system to combine GraphRAG with a live, iterative FEM simulation loop.
 \paragraph{Knowledge graphs for materials science.}
 Materials-focused knowledge graphs (e.g.\ MatKG \citep{venugopal2022matkg},
 OPTIMADE \citep{andersen2021optimade}) encode material properties in RDF/OWL
-formats.  Our Neo4j KG is lighter-weight and purpose-built for run-time
+formats.  \citet{buehler2024mechgpt} demonstrates that retrieval-augmented
+ontological KG strategies outperform flat RAG for materials design by
+capturing mechanistic relationships between concepts.
+Our Neo4j KG is lighter-weight and purpose-built for run-time
 agent queries, prioritising latency over completeness.
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -1227,11 +1237,64 @@ warm-start context disambiguates underspecified problems.
 
 \subsection{Comparison with Prior Work}
 
+\paragraph{FEM code generation.}
 \citet{bauer2023llm} report $\approx 60\%$ one-shot success for
 GPT-4-driven FEniCS script generation; our 57.6\% first-try rate is
 broadly comparable using a fully local, open-source model stack.
 Unlike their single-turn approach, PDE-Agents recovers from failures
 through multi-turn self-correction, achieving 97.8\% final success.
+ALL-FEM \citep{deotale2026allfem} addresses the FEniCS automation problem
+through fine-tuning: a corpus of 1{,}000+ verified FEniCS scripts is
+used to fine-tune models from 3B to 120B parameters, and a multi-agent
+framework orchestrates problem formulation, code generation, and
+debugging.  Their best model (GPT~OSS 120B) achieves 71.8\% code-level
+success on 39 benchmarks spanning elasticity, plasticity, fluid flow,
+and multiphysics---a substantially broader PDE scope than ours.
+PDE-Agents differs in three respects: (i) we use unmodified
+open-source LLMs without domain-specific fine-tuning, relying instead
+on tool-call orchestration and KG-augmented prompting;
+(ii) our system manages the full simulation lifecycle (configuration,
+execution, monitoring, debugging) rather than generating standalone
+scripts; and (iii) we provide a formal V\&V study and a controlled
+ablation of knowledge graph integration modes, establishing when and
+why retrieval augmentation helps.
+
+\paragraph{FEA benchmarks.}
+FEABench \citep{mudur2025feabench} provides a systematic evaluation of
+LLM and agent capabilities for finite element analysis using COMSOL
+Multiphysics.  Their best agent strategy generates executable API calls
+88\% of the time across problems in heat transfer, structural mechanics,
+and electromagnetics.  Our work complements FEABench by targeting the
+open-source FEniCSx ecosystem and measuring not just execution success
+but \emph{output quality} (physics score, material property fidelity),
+exposing cases where computationally ``successful'' simulations produce
+physically incorrect results due to fabricated material properties.
+
+\paragraph{CFD agent systems.}
+The computational fluid dynamics community has been particularly active
+in LLM-driven automation.  OpenFOAMGPT~2.0 \citep{chen2025openfoamgpt2}
+achieves 100\% success across 450+ simulations using a four-agent
+pipeline (pre-processing, prompt generation, simulation, post-processing)
+with RAG-augmented retrieval.
+MetaOpenFOAM \citep{chen2024metaopenfoam} decomposes CFD workflows into
+subtasks using MetaGPT's assembly-line paradigm, reporting 85\% pass
+rates at \$0.22 per case.
+These systems validate the multi-agent pattern we adopt but target a
+different solver ecosystem and do not evaluate knowledge graph
+integration or measure output fidelity against ground-truth material
+properties.
+
+\paragraph{KG-augmented agents for materials science.}
+\citet{buehler2024mechgpt} demonstrates retrieval-augmented ontological
+knowledge graph strategies for materials design with a fine-tuned
+MechGPT model, showing that graph-structured retrieval
+outperforms flat RAG by providing mechanistic relationships between
+concepts.  Our KG Smart pattern shares the same insight---that structured
+knowledge improves over na\"ive retrieval---but applies it in a
+\emph{live simulation loop} rather than a generative design setting,
+and our ablation study provides controlled evidence for when
+graph-augmented retrieval helps (novel materials) versus when it adds
+overhead without benefit (standard tasks with well-known properties).
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{System Limitations and Future Work}
