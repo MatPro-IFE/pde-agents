@@ -176,7 +176,7 @@ stability rules form a rich, interconnected knowledge base.
         \emph{and} the highest output quality (\cref{sec:ablation}).
   \item We introduce a \emph{novel-material experiment} using three
         fictional materials absent from any LLM training corpus,
-        demonstrating that KG Smart achieves $2.7\times$ higher
+        demonstrating that KG Smart achieves ${\approx}\,2.9\times$ higher
         material property fidelity than the KG-free baseline, which
         fabricates physically incorrect properties (\cref{sec:novidium}).
   \item We trace KG~On's 3 systematic failures to budget exhaustion
@@ -772,10 +772,11 @@ conditions.
 \input{tables/ablation.tex}
 
 \paragraph{Success rate.}
-KG~Off and KG~Smart both achieve 100\% success ($n{=}50$), while
-KG~On reaches 94\% [84\%, 98\%].  The difference between KG~On and
-the other modes is not statistically significant ($p = 0.079$,
-Cohen's $h = 0.50$), but the three KG~On failures are systematic:
+KG~Off and KG~Smart both achieve 100\% success [93\%,\,100\%]
+($n{=}50$), while KG~On reaches 94\% [84\%,\,98\%].  The difference
+between KG~On and the other modes is not statistically significant
+($p = 0.079$, Cohen's $h = 0.50$), but the three KG~On failures are
+systematic:
 N08~(Pyrathane, timeout), and two medium tasks where mandatory KG
 tool calls exhaust the iteration budget.
 
@@ -873,7 +874,7 @@ deployment where output \emph{correctness} matters---not just
 completion---KG-enabled modes are necessary.  The novel-material rows
 of \cref{tab:ablation} make this unambiguous: KG~Off achieves
 $\text{MPF}{=}0.34$ and physics 0.59 (fabricated properties), while
-KG~Smart achieves $\text{MPF}{=}1.00$ and physics 1.00.
+KG~Smart achieves $\text{MPF}{=}1.00$ and physics 0.999.
 The adaptive decision framework (Algorithm~\ref{alg:kg-decision})
 already encodes this distinction, routing tasks to KG~Off when
 parameters are explicit and to KG~Smart otherwise.  We therefore focus
@@ -890,8 +891,8 @@ The novel-material tasks (defined in \cref{sec:ablation}) provide the
 clearest test of KG utility: the three fictional materials' properties
 exist \emph{only} in the knowledge graph.
 
-\textbf{KG Smart achieves perfect scores} (MPF$\,{=}\,$1.00,
-physics$\,{=}\,$1.00) across all completed novel tasks.  The warm-start
+\textbf{KG Smart achieves near-perfect scores} (MPF$\,{=}\,$1.00,
+physics$\,{=}\,$0.999) across all completed novel tasks.  The warm-start
 injection retrieves exact property values from the HNSW vector index
 before the agent loop begins, and the agent consistently uses them.
 
@@ -996,11 +997,12 @@ KG~Smart retains $\text{MPF}_w{=}1.00$ (success-only).
 \paragraph{Cost-benefit analysis.}
 \cref{tab:cost-benefit} compares the operational cost (time, iterations)
 against the accuracy benefit (MPF, physics score) for each KG mode.
-KG~Smart adds 122\% wall-time over KG~Off but delivers 2.7$\times$
-higher novel-task MPF and 1.5$\times$ higher accuracy-per-second
-(efficiency = MPF / wall-time).  KG~On is slowest (60.8\,s) and
-its mandatory retrieval overhead yields diminishing returns: 94\%
-success rate vs.\ 100\% for both alternatives.
+On novel tasks, KG~Smart adds significant wall-time over KG~Off
+(58.0\,s vs.\ 11.7\,s) but delivers ${\approx}\,2.9\times$ higher
+MPF (1.00 vs.\ 0.34) and $2.4\times$ higher efficiency
+(MPF\,/\,wall-time) than KG~On.  KG~On is slowest (111.4\,s on novel
+tasks) and its mandatory retrieval overhead yields diminishing returns:
+90\% success vs.\ 100\% for both alternatives.
 
 \input{tables/cost_benefit.tex}
 
