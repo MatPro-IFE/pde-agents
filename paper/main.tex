@@ -29,12 +29,15 @@
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
 \usepackage{listings}
-\usepackage{hyperref}
+\usepackage[colorlinks=true, linkcolor=nodered!70!black,
+            citecolor=nodeblue!80!black, urlcolor=nodeblue!80!black]{hyperref}
 \usepackage{cleveref}
 \usepackage{microtype}
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage[numbers,sort&compress]{natbib}
+\usepackage{authblk}
+\usepackage{orcidlink}
 
 \usetikzlibrary{arrows.meta, positioning, shapes.geometric, fit, backgrounds,
                 decorations.pathreplacing, calc}
@@ -66,17 +69,33 @@
        Framework for Automated Finite Element Simulations\\
        with Knowledge Graph-Augmented Reasoning}}
 
-\author{%
-  Sayan Adhikari, Gulshan Noorsumar, Øyvind Jensen\\
-  \small MatPro, Institute for Energy Technology\\
-  \small \texttt{[email]}
-}
+\author[1]{Sayan Adhikari\,\orcidlink{0000-0002-9316-3292}}
+\author[1]{Gulshan Noorsumar\,\orcidlink{0000-0002-6718-4508}}
+\author[1]{\O yvind Jensen\,\orcidlink{0000-0003-4353-9359}}
+\affil[1]{MatPro, Institute for Energy Technology (IFE), Kjeller, Norway}
 
-\date{\small Submitted: \today}
+\date{Preprint -- \today}
+
+\renewcommand\Authfont{\normalsize}
+\renewcommand\Affilfont{\small\itshape}
+
+\hypersetup{
+  pdftitle={PDE-Agents: An LLM-Orchestrated Multi-Agent Framework for
+            Automated Finite Element Simulations with Knowledge
+            Graph-Augmented Reasoning},
+  pdfauthor={Sayan Adhikari, Gulshan Noorsumar, Øyvind Jensen},
+  pdfsubject={LLM agents, finite element method, knowledge graphs},
+  pdfkeywords={LLM, FEM, knowledge graph, GraphRAG, multi-agent systems}
+}
 
 % ═════════════════════════════════════════════════════════════════════════════
 \begin{document}
 \maketitle
+
+\let\thefootnote\relax\footnotetext{%
+  \textit{Corresponding author:} Sayan Adhikari
+  (\texttt{sayan.adhikari@ife.no}).\\
+  \textit{Code:} \url{https://github.com/MatPro-IFE/pde-agents}}
 
 % ─────────────────────────────────────────────────────────────────────────────
 \begin{abstract}
