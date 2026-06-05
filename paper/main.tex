@@ -100,8 +100,8 @@ comparing KG~On, KG~Off, and KG~Smart,
 showing that KG~Smart achieves 100\% success \emph{and} the highest
 output quality (physics score 0.933 vs.\ 0.853 for KG~Off,
  MPF 0.926 vs.\ 0.796), and that our \emph{KG Smart}
-integration---combining warm-start injection with lazy conditional
-retrieval---matches KG~Off reliability while maximising output fidelity;
+integration, combining warm-start injection with lazy conditional
+retrieval, matches KG~Off reliability while maximising output fidelity;
 (iii) a novel-material experiment using three fictional materials
 whose properties exist only in the KG, where KG~Smart achieves
 near-perfect material property fidelity (MPF\,=\,1.00) versus 0.34 for the
@@ -180,8 +180,8 @@ stability rules form a rich, interconnected knowledge base.
         material property fidelity than the KG-free baseline, which
         fabricates physically incorrect properties (\cref{sec:novidium}).
   \item We trace KG~On's 3 systematic failures to budget exhaustion
-        and timeout, revealing that warm-start injection---not lazy
-        retrieval---is the dominant factor in KG~Smart's reliability
+        and timeout, revealing that warm-start injection, not lazy
+        retrieval, is the dominant factor in KG~Smart's reliability
         advantage (\cref{sec:failure-analysis}).
   \item We report production-scale agent quality metrics derived from
         1{,}369 real simulation runs and a controlled 100-task KG
@@ -546,8 +546,8 @@ In a production deployment, the agent retrieves these values from the
 Neo4j knowledge graph via \texttt{query\_knowledge\_graph}.
 
 \paragraph{Boundary conditions.}
-Panel~(a) applies the simplest configuration---Dirichlet conditions on
-opposing faces ($T=373.15$\,K left, $T=273.15$\,K right)---producing
+Panel~(a) applies the simplest configuration: Dirichlet conditions on
+opposing faces ($T=373.15$\,K left, $T=273.15$\,K right), producing
 the expected linear gradient.  Panel~(b) combines all four major
 BC types on a single domain: Dirichlet ($300$\,K, left), Neumann
 inward flux ($2$\,kW/m$^2$, top), Robin convection ($h=25$\,W/(m$^2
@@ -718,13 +718,13 @@ Fifty tasks span four difficulty levels:
 The three fictional materials are:
 \begin{itemize}
   \item \textbf{Novidium}: a ceramic-metallic composite ($k{=}73$\,W/m\,K,
-        $\rho{=}5420$\,kg/m$^3$, $c_p{=}612$\,J/kg\,K) ---
-        moderate conductor with unusual density.
+        $\rho{=}5420$\,kg/m$^3$, $c_p{=}612$\,J/kg\,K),
+        a moderate conductor with unusual density.
   \item \textbf{Cryonite}: a polymer-aerogel hybrid ($k{=}0.42$,
-        $\rho{=}1180$, $c_p{=}1940$) --- extreme insulator with
+        $\rho{=}1180$, $c_p{=}1940$), an extreme insulator with
         very low diffusivity ($\alpha \approx 1.8{\times}10^{-7}$\,m$^2$/s).
   \item \textbf{Pyrathane}: a refractory cermet ($k{=}312$,
-        $\rho{=}3850$, $c_p{=}278$) --- very high conductivity
+        $\rho{=}3850$, $c_p{=}278$), exhibiting very high conductivity
         and diffusivity ($\alpha \approx 2.9{\times}10^{-4}$\,m$^2$/s).
 \end{itemize}
 Each material is seeded as a \texttt{Material} node in Neo4j with linked
@@ -784,16 +784,16 @@ tool calls exhaust the iteration budget.
 KG~Smart achieves the highest output quality: mean physics score of
 \textbf{0.933} and MPF of \textbf{0.926}, compared to 0.853 / 0.796 for
 KG~Off (Cohen's $d = 0.46$ for physics, a medium effect).
-KG~On also outperforms KG~Off on quality (0.879 / 0.801 success-only)---the
-KG \emph{does} help the agent select more accurate material properties.
+KG~On also outperforms KG~Off on quality (0.879 / 0.801 success-only);
+the KG \emph{does} help the agent select more accurate material properties.
 
 \paragraph{Novel materials: the KG's decisive edge.}
 The clearest demonstration of KG value appears on the 10 novel-material
 tasks using fictional materials (Novidium, Cryonite, Pyrathane) whose
 properties exist only in the KG.  KG~Off ``succeeds'' on all 10 tasks
 but fabricates properties, producing a physics score of 0.590 and MPF of
-only 0.340.  KG~Smart achieves near-perfect quality---physics score
-0.999 and MPF = 1.000---while KG~On scores 0.887 / 0.889 (success-only,
+only 0.340.  KG~Smart achieves near-perfect quality (physics score
+0.999, MPF = 1.000), while KG~On scores 0.887 / 0.889 (success-only,
 9/10 tasks).  The knowledge graph is essential for materials absent
 from the LLM's training data.
 
@@ -809,7 +809,7 @@ and KG~On (60.8\,s), reflecting the iteration overhead of KG tool calls.
     on standard tasks while retaining high output fidelity.
     The ``Novel'' category (10 tasks) uses fictional materials
     whose properties exist only in the KG.  Note: success rate alone
-    is misleading for novel tasks---see the MPF/physics rows in
+    is misleading for novel tasks; see the MPF/physics rows in
     \cref{tab:ablation}.}
   \label{fig:ablation}
 \end{figure}
@@ -842,7 +842,7 @@ when the agent completes the task.  KG~On's success-only physics score
 (0.879) and MPF (0.801) both exceed KG~Off (0.853 / 0.796).  On novel
 materials, this gap widens dramatically: KG-enabled modes achieve
 MPF\,$\geq$\,0.89 versus 0.34 for KG~Off.  The knowledge graph is not
-the bottleneck---the \emph{integration pattern} is.
+the bottleneck; the \emph{integration pattern} is.
 
 \paragraph{KG Smart: corrective retrieval + warm-start.}
 Motivated by CRAG \citep{yan2024crag} (corrective RAG with adaptive
@@ -853,7 +853,7 @@ agents), we implemented a \emph{KG Smart} integration combining:
         the task description with \texttt{nomic-embed-text} and query the Neo4j
         HNSW vector index for the top-3 most similar past successful runs.
         Their configurations are injected directly into the system prompt as
-        few-shot reference examples---no tool call needed.
+        few-shot reference examples, requiring no tool call.
   \item \textbf{Lazy conditional retrieval.} KG tools remain available but the
         system prompt instructs the agent to use them \emph{only}
         after a simulation failure or when material properties are genuinely
@@ -869,12 +869,12 @@ best of both worlds: KG~Off reliability with KG-enhanced fidelity.
 \label{sec:novidium}
 
 The preceding analysis showed that KG access improves output quality
-\emph{conditional on success}---but standard success rate alone cannot
+\emph{conditional on success}, but standard success rate alone cannot
 capture this: a simulation with fabricated material properties still
 ``succeeds'' computationally.  To expose this gap, we introduced three
 physics-aware metrics (\cref{sec:ablation}): Material Property Fidelity
 (MPF), Physics Score, and sensitivity-weighted $\text{MPF}_w$.  These
-metrics measure how \emph{correctly}---not just whether---the agent
+metrics measure how \emph{correctly}, not just whether, the agent
 configures the simulation.  We validate them on the 10 novel-material
 tasks, which provide the clearest test of KG utility: the three
 fictional materials' properties exist \emph{only} in the knowledge graph.
@@ -889,8 +889,8 @@ before the agent loop begins, and the agent consistently uses them.
 properties across all 10 novel tasks.  KG Off assigns \emph{different}
 wrong values each run (the LLM hallucinates non-deterministically), but
 the errors are consistently severe: for Pyrathane, $k$ ranges from
-0.15 to 0.35\,W/m\,K---a $900{\times}$ to $2{,}080{\times}$ underestimate
-of the true $k{=}312$---effectively treating a refractory super-conductor
+0.15 to 0.35\,W/m\,K, a $900{\times}$ to $2{,}080{\times}$ underestimate
+of the true $k{=}312$, effectively treating a refractory super-conductor
 as an insulator.  In transient tasks, this causes output errors up to
 $|\Delta T_{\max}|{=}949$\,K, a physically impossible result arising
 from numerical instability on a system made artificially stiff by the
@@ -944,12 +944,12 @@ paired simulations: one with ground-truth properties (reference) and
 one with the fabricated properties from KG~Off.  \cref{tab:error-propagation}
 shows the results.  Steady-state Dirichlet tasks (G1, C1, P1) are
 analytically independent of $k$, $\rho$, $c_p$, confirming zero output
-error regardless of property error---an important control.  Transient
+error regardless of property error, an important control.  Transient
 and Robin tasks show significant deviations:
 
 \begin{itemize}
   \item \textbf{Pyrathane P2}: $|\Delta T_{\max}|{=}949$\,K
-        ($T_{\max}{=}2{,}949$\,K vs.\ $2{,}000$\,K reference)---the
+        ($T_{\max}{=}2{,}949$\,K vs.\ $2{,}000$\,K reference); the
         $2{,}080\times$ $k$ error causes numerical instability that
         \emph{heats} the domain beyond its initial condition, a
         physically impossible result.
@@ -1027,15 +1027,15 @@ To verify that the KG's value is model-agnostic, we repeated the
 novel-material experiment with \texttt{qwen3-coder-next} (80B total,
 3B active MoE).  \cref{tab:multi-model} shows that KG~Smart achieves
 $\text{MPF}{=}1.00$ with \emph{both} models, while KG~Off fabricates
-wrong properties with both---different wrong values, but the same
-failure mode.  This confirms that the warm-start vector search
+wrong properties with both (different wrong values, but the same
+failure mode).  This confirms that the warm-start vector search
 bypasses model-specific memorisation gaps entirely.
 
 \input{tables/multi_model.tex}
 
 \paragraph{Key takeaway.}
-The KG's value is not in making simulations \emph{run}---LLMs can
-already do that.  The KG's value is in making simulations produce
+The KG's value is not in making simulations \emph{run} (LLMs can
+already do that) but in making simulations produce
 \emph{correct physics}.  For any domain with proprietary materials,
 novel compounds, or in-house measurement data, the KG Smart pattern
 transforms the system from an ``expensive random number generator''
@@ -1050,8 +1050,8 @@ KG~Off is the fastest mode and matches KG~Smart on success rate for
 \emph{standard} tasks with well-known materials.  When the task
 description names ``steel'' or ``copper'', the LLM's parametric
 knowledge suffices and KG overhead is pure cost.  However, for any
-deployment where output \emph{correctness} matters---not just
-completion---KG-enabled modes are necessary.  The preceding analysis
+deployment where output \emph{correctness} matters, not just
+completion, KG-enabled modes are necessary.  The preceding analysis
 makes this unambiguous: KG~Off achieves $\text{MPF}{=}0.34$ and
 physics 0.59 on novel materials (fabricated properties), while
 KG~Smart achieves $\text{MPF}{=}1.00$ and physics 0.999.
@@ -1061,8 +1061,8 @@ parameters are explicit and to KG~Smart otherwise.  We therefore focus
 the remaining analysis on \textbf{KG On vs.\ KG Smart}: both modes
 have access to the same knowledge base, yet KG Smart achieves 6
 percentage points higher success and the highest quality scores.
-Understanding \emph{why}---and which component (warm-start vs.\ lazy
-retrieval) contributes most---is the subject of the next section.
+Understanding \emph{why}, and which component (warm-start vs.\ lazy
+retrieval) contributes most, is the subject of the next section.
 
 \subsection{Failure Analysis: KG On vs.\ KG Smart}
 \label{sec:failure-analysis}
@@ -1081,7 +1081,7 @@ implemented an \emph{auto-retry} mechanism directly in the agent:
 if the first attempt produces no \texttt{run\_id} and used less than
 60\% of its iteration budget (indicating early stochastic exit rather
 than budget exhaustion), the agent automatically retries once.
-This reduced KG~On failures from 12 to 3---eliminating all stochastic
+This reduced KG~On failures from 12 to 3, eliminating all stochastic
 failures while not masking systematic ones.
 
 \paragraph{KG On failure taxonomy.}
@@ -1104,7 +1104,7 @@ Budget exhaustion  & 2 &
   reaching \texttt{run\_simulation}. \\
 \addlinespace
 Timeout & 1 &
-  N08 (Pyrathane) --- the mandatory KG query workflow
+  N08 (Pyrathane): the mandatory KG query workflow
   combined with a numerically stiff problem exceeds the
   420\,s time limit. \\
 \bottomrule
@@ -1131,8 +1131,8 @@ properties upfront.
 \paragraph{Decomposing warm-start vs.\ lazy retrieval.}
 The failure data allows us to attribute KG~Smart's advantage to its
 two components without running a separate experiment.  All 3 systematic
-failures stem from the mandatory \emph{pre-simulation} KG workflow---the
-agent spends iterations on KG queries before ever attempting
+failures stem from the mandatory \emph{pre-simulation} KG workflow:
+the agent spends iterations on KG queries before ever attempting
 \texttt{run\_simulation}.  Warm-start injection eliminates this
 entirely: it provides material properties and reference configurations
 \emph{before} the agent loop begins, so the agent can proceed directly
@@ -1199,8 +1199,8 @@ To isolate the KG's causal effect on performance, we run a
 \emph{controlled} growth experiment.  The KG is initialised with only
 static material definitions (13 materials, 45 reference entries) but
 \emph{zero} Run nodes, so the agent has no prior simulation experience.
-We then run 100 tasks---two shuffled passes through the 50-task
-benchmark---sequentially in KG Smart mode with writes enabled; each
+We then run 100 tasks (two shuffled passes through the 50-task
+benchmark) sequentially in KG Smart mode with writes enabled; each
 successful run adds one \texttt{Run} node with an HNSW-indexed
 embedding and up to five \texttt{SIMILAR\_TO} edges.  By pass~2, the
 KG contains 50 Run nodes from pass~1, providing warm-start context
@@ -1258,7 +1258,7 @@ used to fine-tune models from 3B to 120B parameters, and a multi-agent
 framework orchestrates problem formulation, code generation, and
 debugging.  Their best model (GPT~OSS 120B) achieves 71.8\% code-level
 success on 39 benchmarks spanning elasticity, plasticity, fluid flow,
-and multiphysics---a substantially broader PDE scope than ours.
+and multiphysics, a substantially broader PDE scope than ours.
 PDE-Agents differs in three respects: (i) we use unmodified
 open-source LLMs without domain-specific fine-tuning, relying instead
 on tool-call orchestration and KG-augmented prompting;
@@ -1298,8 +1298,8 @@ properties.
 knowledge graph strategies for materials design with a fine-tuned
 MechGPT model, showing that graph-structured retrieval
 outperforms flat RAG by providing mechanistic relationships between
-concepts.  Our KG Smart pattern shares the same insight---that structured
-knowledge improves over na\"ive retrieval---but applies it in a
+concepts.  Our KG Smart pattern shares the same insight (that structured
+knowledge improves over na\"ive retrieval) but applies it in a
 \emph{live simulation loop} rather than a generative design setting,
 and our ablation study provides controlled evidence for when
 graph-augmented retrieval helps (novel materials) versus when it adds
@@ -1372,15 +1372,15 @@ spatial convergence validated against analytical solutions.
 
 \paragraph{The KG Smart integration pattern.}
 Our three-way ablation study across 50 benchmark tasks with a frozen KG
-reveals that the \emph{integration pattern}---not the knowledge source
-itself---determines KG utility.  KG~Off (no knowledge graph) achieves
+reveals that the \emph{integration pattern}, not the knowledge source
+itself, determines KG utility.  KG~Off (no knowledge graph) achieves
 100\% task completion but fabricates material properties, producing
 MPF\,=\,0.34 and $\text{MPF}_w{=}0.21$ on novel materials.
 KG~On (mandatory KG access) retrieves correct properties but retains
 a 6\% failure rate from budget exhaustion and timeout (even after
 implementing agent-level retry to eliminate stochastic failures).
-KG~Smart---combining warm-start injection with lazy conditional
-retrieval---achieves \textbf{100\% success with the highest output
+KG~Smart, combining warm-start injection with lazy conditional
+retrieval, achieves \textbf{100\% success with the highest output
 quality} (physics 0.933, MPF 0.926), resolving the
 reliability-vs-fidelity trade-off.
 
@@ -1399,7 +1399,7 @@ for the reliability gain.
 A controlled 100-task KG growth experiment shows that the KG's benefit
 is concentrated where it matters most.  Easy and medium tasks are already
 at quality ceiling ($\text{MPF}{\geq}0.96$) from the first pass; hard
-tasks---involving ambiguous descriptions and mixed boundary conditions---gain
+tasks, involving ambiguous descriptions and mixed boundary conditions, gain
 $+$8.8\% MPF and $+$5.8\% physics score from accumulated run history.
 For novel materials, the KG is indispensable: fabricated properties cause
 output errors up to 949\,K, while KG~Smart eliminates these errors entirely.
@@ -1425,9 +1425,9 @@ Three design principles emerged from the ablation and failure analysis:
 
 \paragraph{Broader implications.}
 The warm-start + lazy-retrieval pattern is not specific to heat transfer
-simulation.  Any tool-using agent domain with a growing knowledge base---
-materials science, drug discovery, circuit design, structural
-engineering---could benefit from the same architecture: embed the task,
+simulation.  Any tool-using agent domain with a growing knowledge base
+(materials science, drug discovery, circuit design, structural
+engineering) could benefit from the same architecture: embed the task,
 retrieve the most similar prior successes, inject them as few-shot
 context, and defer explicit knowledge queries to the failure-recovery
 path.  As knowledge graphs grow and LLMs improve, the quality gap
