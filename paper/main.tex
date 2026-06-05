@@ -698,8 +698,9 @@ snapshot, but no mode can write to it, ensuring that a failure in one
 mode cannot help subsequent modes.
 Tasks are shuffled independently per mode and run in-process inside the
 agents container to eliminate HTTP overhead.
-Confidence intervals use Wilson scores; pairwise comparisons use
-chi-squared tests and Cohen's~$h$ / Cohen's~$d$ effect sizes.
+Confidence intervals use Wilson scores \citep{wilson1927}; pairwise
+comparisons use chi-squared tests and Cohen's~$h$ / Cohen's~$d$ effect
+sizes \citep{cohen1988}.
 
 \paragraph{Benchmark tasks.}
 Fifty tasks span four difficulty levels:
