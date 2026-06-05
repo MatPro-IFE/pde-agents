@@ -865,31 +865,19 @@ As \cref{tab:ablation} shows, KG Smart achieves 100\% success
 quality across all modes (physics 0.933, MPF 0.926).  It delivers the
 best of both worlds: KG~Off reliability with KG-enhanced fidelity.
 
-\paragraph{Narrowing the focus: correctness over completion.}
-KG~Off is the fastest mode and matches KG~Smart on success rate for
-\emph{standard} tasks with well-known materials.  When the task
-description names ``steel'' or ``copper'', the LLM's parametric
-knowledge suffices and KG overhead is pure cost.  However, for any
-deployment where output \emph{correctness} matters---not just
-completion---KG-enabled modes are necessary.  The novel-material rows
-of \cref{tab:ablation} make this unambiguous: KG~Off achieves
-$\text{MPF}{=}0.34$ and physics 0.59 (fabricated properties), while
-KG~Smart achieves $\text{MPF}{=}1.00$ and physics 0.999.
-The adaptive decision framework (Algorithm~\ref{alg:kg-decision})
-already encodes this distinction, routing tasks to KG~Off when
-parameters are explicit and to KG~Smart otherwise.  We therefore focus
-the remaining analysis on \textbf{KG On vs.\ KG Smart}: both modes
-have access to the same knowledge base, yet KG Smart achieves 6
-percentage points higher success and the highest quality scores.
-Understanding \emph{why}---and which component (warm-start vs.\ lazy
-retrieval) contributes most---is the subject of the next sections.
-
-\subsection{Novel Material Analysis}
+\subsection{Physics-Aware Quality Metrics and Novel Material Validation}
 \label{sec:novidium}
 
-The novel-material tasks (defined in \cref{sec:ablation}) provide the
-clearest test of KG utility: the three fictional materials' properties
-exist \emph{only} in the knowledge graph.
+The preceding analysis showed that KG access improves output quality
+\emph{conditional on success}---but standard success rate alone cannot
+capture this: a simulation with fabricated material properties still
+``succeeds'' computationally.  To expose this gap, we introduced three
+physics-aware metrics (\cref{sec:ablation}): Material Property Fidelity
+(MPF), Physics Score, and sensitivity-weighted $\text{MPF}_w$.  These
+metrics measure how \emph{correctly}---not just whether---the agent
+configures the simulation.  We validate them on the 10 novel-material
+tasks, which provide the clearest test of KG utility: the three
+fictional materials' properties exist \emph{only} in the knowledge graph.
 
 \textbf{KG Smart achieves near-perfect scores} (MPF$\,{=}\,$1.00,
 physics$\,{=}\,$0.999) across all completed novel tasks.  The warm-start
@@ -1056,6 +1044,25 @@ quantifies this: fabricated properties cause output errors up to
 949\,K (47\% of the reference $T_{\max}$), while KG~Smart eliminates
 these errors entirely by retrieving exact properties before the agent
 loop begins.
+
+\paragraph{Narrowing the focus: correctness over completion.}
+KG~Off is the fastest mode and matches KG~Smart on success rate for
+\emph{standard} tasks with well-known materials.  When the task
+description names ``steel'' or ``copper'', the LLM's parametric
+knowledge suffices and KG overhead is pure cost.  However, for any
+deployment where output \emph{correctness} matters---not just
+completion---KG-enabled modes are necessary.  The preceding analysis
+makes this unambiguous: KG~Off achieves $\text{MPF}{=}0.34$ and
+physics 0.59 on novel materials (fabricated properties), while
+KG~Smart achieves $\text{MPF}{=}1.00$ and physics 0.999.
+The adaptive decision framework (Algorithm~\ref{alg:kg-decision})
+encodes this distinction, routing tasks to KG~Off when
+parameters are explicit and to KG~Smart otherwise.  We therefore focus
+the remaining analysis on \textbf{KG On vs.\ KG Smart}: both modes
+have access to the same knowledge base, yet KG Smart achieves 6
+percentage points higher success and the highest quality scores.
+Understanding \emph{why}---and which component (warm-start vs.\ lazy
+retrieval) contributes most---is the subject of the next section.
 
 \subsection{Failure Analysis: KG On vs.\ KG Smart}
 \label{sec:failure-analysis}
