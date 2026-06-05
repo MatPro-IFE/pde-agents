@@ -163,7 +163,8 @@ stability rules form a rich, interconnected knowledge base.
   \item We describe a novel \emph{GraphRAG integration pattern} that encodes
         material properties, known failure modes, and prior run lineage as a
         Neo4j knowledge graph with Hierarchical Navigable Small World
-        (HNSW) vector-indexed embeddings (\cref{sec:kg}).
+        (HNSW) vector-indexed embeddings \citep{malkov2020hnsw}
+        (\cref{sec:kg}).
   \item We conduct a rigorous V\&V study that confirms $\mathcal{O}(h^2)$
         spatial convergence for three closed-form benchmark cases, validating
         the numerical kernel against analytical solutions
@@ -403,8 +404,8 @@ enabling arbitrary complex domain topologies.
   \label{fig:kg}
 \end{figure*}
 
-The Neo4j knowledge graph (Neo4j 5 Community Edition) serves three
-functions:
+The Neo4j knowledge graph \citep{francis2018neo4j} (Neo4j 5 Community
+Edition) serves three functions:
 
 \begin{enumerate}
   \item \textbf{Material property lookup.}  A curated library of materials
@@ -440,8 +441,8 @@ functions:
 
   \item \textbf{Run lineage and semantic retrieval.}  Each completed
         \texttt{Run} node is embedded with \texttt{nomic-embed-text}
-        (768 dimensions) and indexed in a Hierarchical Navigable Small
-        World (HNSW) vector index.  Up to
+        \citep{nussbaum2024nomic} (768 dimensions) and indexed in an
+        HNSW vector index \citep{malkov2020hnsw}.  Up to
         $k{=}5$ \texttt{SIMILAR\_TO} edges are created to the nearest
         neighbours with cosine similarity $\ge 0.85$, precomputing the
         neighbourhood graph for fast agent traversal.  The Simulation
@@ -1287,7 +1288,8 @@ achieves 100\% success across 450+ simulations using a four-agent
 pipeline (pre-processing, prompt generation, simulation, post-processing)
 with RAG-augmented retrieval.
 MetaOpenFOAM \citep{chen2024metaopenfoam} decomposes CFD workflows into
-subtasks using MetaGPT's assembly-line paradigm, reporting 85\% pass
+subtasks using MetaGPT's \citep{hong2024metagpt} assembly-line paradigm,
+reporting 85\% pass
 rates at \$0.22 per case.
 These systems validate the multi-agent pattern we adopt but target a
 different solver ecosystem and do not evaluate knowledge graph
