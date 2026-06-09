@@ -11,34 +11,34 @@ A multi-agent ecosystem built on open-source LLMs running locally to solve PDEs 
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│                     ORCHESTRATOR (LangGraph)                              │
+│                     ORCHESTRATOR (LangGraph)                             │
 │               LLM: llama3.3:70b  (supervisor)                            │
 └──────────┬──────────────┬───────────────┬────────────────────────────────┘
            │              │               │
            ▼              ▼               ▼
- ┌──────────────────┐ ┌──────────────┐ ┌───────────────┐
- │  AGENT-1         │ │  AGENT-2     │ │  AGENT-3      │
- │  Simulation      │ │  Analytics   │ │  Database     │
- │  qwen2.5-coder   │ │  llama3.3    │ │  qwen2.5-coder│
- │  :32b            │ │  :70b        │ │  :14b         │
- └───────┬──────────┘ └──────┬───────┘ └──────┬────────┘
+ ┌──────────────────┐ ┌──────────────┐ ┌────────────────┐
+ │  AGENT-1         │ │  AGENT-2     │ │  AGENT-3       │
+ │  Simulation      │ │  Analytics   │ │  Database      │
+ │  qwen2.5-coder   │ │  llama3.3    │ │  qwen2.5-coder │
+ │  :32b            │ │  :70b        │ │  :14b          │
+ └───────┬──────────┘ └──────┬───────┘ └───────┬────────┘
          │                   │                 │
          │    ┌──────────────┴──────────────┐  │
          ▼    ▼                             ▼  ▼
- ┌──────────────┐  ┌──────────────┐  ┌────────────────────────────────────┐
- │  FEniCSx     │  │  NumPy       │  │  Neo4j Knowledge Graph (GraphRAG)  │
- │  DOLFINx     │  │  Plotly Dash │  │  ──────────────────────────────────│
- │  2D/3D FEM   │  │  PostgreSQL  │  │  Run nodes + 768-dim embeddings    │
- │  Gmsh meshes │  │  FastAPI     │  │  SIMILAR_TO KNN edges              │
- └──────────────┘  └──────────────┘  │  Reference + ReferenceChunk nodes  │
+ ┌──────────────┐  ┌──────────────┐  ┌─────────────────────────────────────┐
+ │  FEniCSx     │  │  NumPy       │  │  Neo4j Knowledge Graph (GraphRAG)   │
+ │  DOLFINx     │  │  Plotly Dash │  │  ───────────────────────────────────│
+ │  2D/3D FEM   │  │  PostgreSQL  │  │  Run nodes + 768-dim embeddings     │
+ │  Gmsh meshes │  │  FastAPI     │  │  SIMILAR_TO KNN edges               │
+ └──────────────┘  └──────────────┘  │  Reference + ReferenceChunk nodes   │
                                      │  Document chunk vector index (HNSW) │
                                      │  Cross-ref chunks → simulation runs │
-                                     └────────────────────────────────────┘
+                                     └─────────────────────────────────────┘
 
  ┌──────────────────────────────────────────────────────────────────────────┐
  │  Document Intelligence Pipeline (Celery + Docling)                       │
  │  PDFs / TXT / Markdown / Web ebooks → structured chunks → embeddings     │
- │  → (:ReferenceChunk) nodes → CROSS_REFS to similar :Run nodes           │
+ │  → (:ReferenceChunk) nodes → CROSS_REFS to similar :Run nodes            │
  └──────────────────────────────────────────────────────────────────────────┘
 ```
 
