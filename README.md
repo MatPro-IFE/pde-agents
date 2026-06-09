@@ -1107,7 +1107,7 @@ alongside this system for hybrid FEM + PINN workflows:
 
 | Use case | Approach |
 |----------|----------|
-| Validation | Run FEniCSx (ground truth) + PhysicsNemo (PINN), compare fields |
+| Validation | Run FEniCSx (ground truth) + PhysicsNemo (Physics Informed Neural Networks), compare fields |
 | Surrogate models | Generate FEM training data → train PhysicsNemo surrogate |
 | Fast parametric scans | FEM at sparse reference points, PINN to interpolate |
 | KG-guided training | Use KG similar-run search to find best FEM training seeds |
