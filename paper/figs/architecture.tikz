@@ -59,22 +59,22 @@
 
 \node[supnd] (sup) at (7.5, 10.6)
   {LangGraph Supervisor
-   \quad {\normalfont\footnotesize llama3.3:70b
+   \quad {\normalfont\footnotesize llama4:scout
    \enspace·\enspace router + synthesiser}};
 
 \node[agentnd={nodegreen}{}]  (sim)  at ( 2.0, 8.2)
   {\textbf{Simulation Agent}\\[2pt]
-   {\footnotesize qwen2.5-coder:32b}\\
+   {\footnotesize qwen3-coder-next}\\
    {\tiny KG Smart warm-start}};
 
 \node[agentnd={nodeorange}{}] (anal) at ( 7.5, 8.2)
   {\textbf{Analytics Agent}\\[2pt]
-   {\footnotesize llama3.3:70b}\\
+   {\footnotesize llama4:scout}\\
    {\tiny compare · suggest}};
 
 \node[agentnd={nodeblue}{}]   (dba)  at (13.0, 8.2)
   {\textbf{Database Agent}\\[2pt]
-   {\footnotesize qwen2.5-coder:14b}\\
+   {\footnotesize qwen3-coder:30b}\\
    {\tiny store · catalog · query}};
 
 \begin{scope}[on background layer]
@@ -115,9 +115,9 @@
    2× RTX PRO 6000 Blackwell \enspace·\enspace CUDA 13.1
    \enspace·\enspace 196\,GB VRAM\\[3pt]
    {\small
-    qwen2.5-coder:32b \enspace$|$\enspace
-    llama3.3:70b \enspace$|$\enspace
-    qwen2.5-coder:14b \enspace$|$\enspace
+    qwen3-coder-next \enspace$|$\enspace
+    llama4:scout \enspace$|$\enspace
+    qwen3-coder:30b \enspace$|$\enspace
     nomic-embed-text\;(768-d)}};
 
 \begin{scope}[on background layer]

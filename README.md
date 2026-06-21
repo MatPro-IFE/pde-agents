@@ -2,7 +2,8 @@
 
 A multi-agent ecosystem built on open-source LLMs running locally to solve PDEs with the Finite Element Method, enhanced with a GraphRAG knowledge graph for physics-informed reasoning, and a document intelligence pipeline that cross-references scientific literature to simulation runs.
 
-**Hardware:** 2× NVIDIA RTX PRO 6000 Blackwell Server Edition (~98 GB VRAM each · ~196 GB total) · CUDA 13.1  
+**Paper:** [arXiv:XXXX.XXXXX](https://arxiv.org/) (preprint)
+**Hardware:** 2x NVIDIA RTX PRO 6000 Blackwell Server Edition (~98 GB VRAM each, ~196 GB total), CUDA 13.1
 **FEM Solver:** DOLFINx (FEniCSx) `0.10.0.post2`
 
 ---
@@ -11,17 +12,17 @@ A multi-agent ecosystem built on open-source LLMs running locally to solve PDEs 
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│                     ORCHESTRATOR (LangGraph)                             │
-│               LLM: llama3.3:70b  (supervisor)                            │
+│                     ORCHESTRATOR (LangGraph)                              │
+│               LLM: llama4:scout  (supervisor + synthesiser)              │
 └──────────┬──────────────┬───────────────┬────────────────────────────────┘
            │              │               │
            ▼              ▼               ▼
- ┌──────────────────┐ ┌──────────────┐ ┌────────────────┐
- │  AGENT-1         │ │  AGENT-2     │ │  AGENT-3       │
- │  Simulation      │ │  Analytics   │ │  Database      │
- │  qwen2.5-coder   │ │  llama3.3    │ │  qwen2.5-coder │
- │  :32b            │ │  :70b        │ │  :14b          │
- └───────┬──────────┘ └──────┬───────┘ └───────┬────────┘
+ ┌──────────────────┐ ┌──────────────┐ ┌───────────────┐
+ │  AGENT-1         │ │  AGENT-2     │ │  AGENT-3      │
+ │  Simulation      │ │  Analytics   │ │  Database     │
+ │  qwen3-coder     │ │  llama4      │ │  qwen3-coder  │
+ │  -next           │ │  :scout      │ │  :30b         │
+ └───────┬──────────┘ └──────┬───────┘ └──────┬────────┘
          │                   │                 │
          │    ┌──────────────┴──────────────┐  │
          ▼    ▼                             ▼  ▼
@@ -46,10 +47,10 @@ A multi-agent ecosystem built on open-source LLMs running locally to solve PDEs 
 
 | Agent | Model | Role |
 |-------|-------|------|
-| Simulation Agent | `qwen2.5-coder:32b` | Set up, validate, run, and debug FEM simulations — three KG modes (see below) |
-| Analytics Agent  | `llama3.3:70b`      | Analyze results, compare runs, query the knowledge graph |
-| Database Agent   | `qwen2.5-coder:14b` | Store results, run SQL queries, catalog studies, search history |
-| Orchestrator     | `llama3.3:70b`      | Coordinate all agents, synthesise final report |
+| Simulation Agent | `qwen3-coder-next` | Set up, validate, run, and debug FEM simulations — three KG modes (see below) |
+| Analytics Agent  | `llama4:scout`      | Analyze results, compare runs, query the knowledge graph |
+| Database Agent   | `qwen3-coder:30b`   | Store results, run SQL queries, catalog studies, search history |
+| Orchestrator     | `llama4:scout`      | Coordinate all agents, synthesise final report |
 
 #### Simulation Agent — KG integration modes
 
@@ -138,10 +139,10 @@ docker exec pde-ollama ollama pull nomic-embed-text
 docker exec pde-ollama ollama list
 # Expected output once all pulls complete:
 # NAME                    SIZE
-# llama3.3:70b            42 GB
-# qwen2.5-coder:32b       19 GB
-# qwen2.5-coder:14b       9.0 GB
-# nomic-embed-text:latest 274 MB
+# qwen3-coder-next        ~48 GB
+# llama4:scout            ~30 GB
+# qwen3-coder:30b         ~18 GB
+# nomic-embed-text:latest  274 MB
 ```
 
 ### 4. Check all services are healthy
@@ -161,6 +162,127 @@ All services are accessible from the dashboard navbar or directly:
 | http://localhost:7474 | Neo4j Browser |
 | http://localhost:9001 | NeoDash (graph explorer — reuses MinIO console port) |
 | via SSH tunnel | MinIO console (see note above) |
+
+---
+
+## Reproducing Paper Results
+
+This section describes how to reproduce the experiments reported in the paper.
+All evaluation code lives in `evaluation/` and runs inside Docker containers.
+
+### Prerequisites
+
+1. Complete the Quick Start steps above (all 10 services running)
+2. All LLM models pulled (`make pull-models`)
+3. Embedding model ready: `docker exec pde-ollama ollama pull nomic-embed-text`
+
+### Step 1: Seed the knowledge graph
+
+```bash
+# Seed materials, known issues, and physics references
+curl -s -X POST http://localhost:8000/kg/seed | python3 -m json.tool
+
+# Run representative simulations to populate Run nodes (23 runs)
+docker exec pde-agents python3 /app/scripts/seed_knowledge_graph.py
+
+# Backfill embeddings and build KNN similarity edges
+docker exec pde-agents python3 -c "
+import sys; sys.path.insert(0, '/app')
+from knowledge_graph.graph import get_kg
+kg = get_kg()
+kg.backfill_embeddings(batch_size=50)
+kg.build_all_similar_to_edges(k=5, min_score=0.85)
+print(kg.stats())
+"
+```
+
+### Step 2: Verification and Validation (Table 2 in paper)
+
+Runs the FEM solver against 5 analytical benchmark cases at mesh resolutions
+N = 8, 16, 32, 64, 128. Verifies O(h^2) convergence for P1 elements.
+
+```bash
+make eval-vv
+# Output: evaluation/results/vv_results.json
+```
+
+### Step 3: KG Ablation Study (Tables 3-4 in paper)
+
+Compares three KG integration modes across 50 benchmark tasks.
+The KG is frozen (read-only) during the experiment.
+
+```bash
+# Snapshot the KG state first
+docker exec pde-agents python3 /app/evaluation/kg_snapshot.py save --name pre_ablation
+
+# 3-way ablation: KG On vs KG Off vs KG Smart
+make eval-ablation-smart
+# Output: evaluation/results/ablation_results.json
+```
+
+The ablation uses `SIMULATION_AGENT_MODEL` (default: `qwen3-coder-next`).
+To reproduce with the exact model, ensure your `.env` has:
+```
+SIM_MODEL=qwen3-coder-next
+```
+
+### Step 4: Novel Material Experiment (Section 6.4 in paper)
+
+Tests KG value with fictional materials (Novidium, Cryonite, Pyrathane) that
+exist only in the knowledge graph.
+
+```bash
+# Seed the 3 fictional materials into Neo4j
+docker exec pde-agents python3 /app/evaluation/ablation/seed_novidium.py
+
+# Run the 7 novel-material benchmark tasks
+docker exec pde-agents python3 /app/evaluation/ablation/run_ablation_v2.py \
+    --direct --modes kg_off kg_smart --difficulty novel
+```
+
+### Step 5: Agent Quality Metrics (Table 6 in paper)
+
+Mines the PostgreSQL `agent_run_logs` table for quantitative agent performance.
+
+```bash
+make eval-metrics
+# Output: evaluation/results/agent_metrics.json
+```
+
+### Step 6: Generate LaTeX Tables
+
+```bash
+make eval-tables
+# Output: evaluation/results/tables/*.tex
+```
+
+### Step 7: Full 805-run parametric study (optional)
+
+Generates the comprehensive simulation dataset used for KG population and
+parametric analysis figures. This takes several hours.
+
+```bash
+docker exec pde-agents python3 /app/scripts/sweep_full_study.py
+```
+
+### Environment variables for reproducibility
+
+| Variable | Paper default | Purpose |
+|----------|--------------|---------|
+| `SIM_MODEL` | `qwen3-coder-next` | Simulation Agent LLM |
+| `ANALYTICS_MODEL` | `llama4:scout` | Analytics Agent LLM |
+| `DB_MODEL` | `qwen3-coder:30b` | Database Agent LLM |
+| `OLLAMA_NUM_PARALLEL` | `4` | Max concurrent LLM requests |
+| `OLLAMA_MAX_LOADED_MODELS` | `3` | Max models in VRAM simultaneously |
+
+### Version pinning
+
+This repository is tagged `paper-v1` to mark the exact code state corresponding
+to the paper. To check out the paper version:
+
+```bash
+git checkout paper-v1
+```
 
 ---
 
@@ -908,20 +1030,20 @@ pde-agents/
 
 | Model | Params | VRAM | Role |
 |-------|--------|------|------|
-| `qwen2.5-coder:14b` | 14B | ~9 GB  | Database Agent — fast structured queries |
-| `qwen2.5-coder:32b` | 32B | ~19 GB | Simulation Agent — code generation & debugging |
-| `llama3.3:70b`      | 70B | ~42 GB | Analytics Agent + Orchestrator — reasoning |
+| `qwen3-coder-next`  | 80B (MoE) | ~48 GB | Simulation Agent — code generation & debugging |
+| `llama4:scout`      | 109B (17B active MoE) | ~30 GB | Analytics Agent + Orchestrator — reasoning |
+| `qwen3-coder:30b`   | 30B | ~18 GB | Database Agent — structured queries |
 | `nomic-embed-text`  | 137M | <1 GB | Embedding — 768-dim vectors for runs and document chunks |
 
-All LLMs fit simultaneously (~70 GB out of 196 GB available VRAM).
+All LLMs fit simultaneously (~97 GB out of 196 GB available VRAM).
 
 ```bash
 # Pull all required models (including embedding model)
 make pull-models
 
 # Optional: use alternative models — edit .env:
-SIM_MODEL=qwen2.5-coder:72b      # ~40 GB, premium code generation
-ANALYTICS_MODEL=deepseek-r1:70b  # strong chain-of-thought reasoning
+SIM_MODEL=qwen2.5-coder:32b      # ~20 GB, previous v1 default
+ANALYTICS_MODEL=llama3.3:70b     # ~42 GB, previous v1 default
 EMBED_MODEL=nomic-embed-text      # default embedding model (274 MB)
 ```
 
