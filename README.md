@@ -2,7 +2,7 @@
 
 A multi-agent ecosystem built on open-source LLMs running locally to solve PDEs with the Finite Element Method, enhanced with a GraphRAG knowledge graph for physics-informed reasoning, and a document intelligence pipeline that cross-references scientific literature to simulation runs.
 
-**Paper:** [arXiv:XXXX.XXXXX](https://arxiv.org/) (preprint)
+**Paper:** [arXiv:2606.07850](https://arxiv.org/abs/2606.07850) (preprint)
 **Hardware:** 2x NVIDIA RTX PRO 6000 Blackwell Server Edition (~98 GB VRAM each, ~196 GB total), CUDA 13.1
 **FEM Solver:** DOLFINx (FEniCSx) `0.10.0.post2`
 
