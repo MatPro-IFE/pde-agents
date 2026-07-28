@@ -392,8 +392,15 @@ if __name__ == "__main__":
         json.dump(analysis, f, indent=2)
     print(f"\nStatistics saved: {out_path}")
 
-    table_path = Path(results_path).parent.parent.parent / "paper" / "tables" / "ablation_v2.tex"
-    generate_latex_table(analysis, str(table_path))
+    # Write to the generated-tables directory, not paper/tables/.  The paper
+    # uses a hand-maintained ablation.tex (adds Wilson CIs, success-only rows
+    # and difficulty breakdown); emitting a second ablation table into
+    # paper/tables/ invites the wrong one being \input and lets the two
+    # drift apart silently.  This file serves as a machine-generated
+    # cross-check of the same numbers.
+    table_dir = Path(results_path).parent / "tables"
+    table_dir.mkdir(parents=True, exist_ok=True)
+    generate_latex_table(analysis, str(table_dir / "ablation_v2_generated.tex"))
 
     pgf_dir = Path(results_path).parent.parent.parent / "paper" / "data"
     generate_pgf_data(analysis, str(pgf_dir))

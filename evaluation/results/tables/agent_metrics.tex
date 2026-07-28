@@ -1,20 +1,21 @@
 \begin{table}[htbp]
 \centering
-\caption{Agent ecosystem performance metrics from production database.}
+\caption{Agent ecosystem performance metrics from production database.  FEniCSx runs, through 2026-04-17 (excludes the controlled ablation campaign and non-FEniCSx backends).}
 \label{tab:agent-metrics}
 \begin{tabular}{lr}
 \toprule
 Metric & Value \\
 \midrule
-Total simulation runs & 1135 \\
-Overall success rate & 97.4\% \\
-Unique agent tasks & 110 \\
-First-try success rate & 57.6\% \\
+Total simulation runs & 1369 \\
+Overall success rate & 97.8\% \\
+Unique agent tasks & 421 \\
+First-try success rate & 85.4\% \\
+Retry rate & 10.3\% \\
 Suggestion acceptance rate & 0.0\% \\
-Avg.\ steps/task (simulation) & 7.9 \\
-Avg.\ steps/task (database) & 6.2 \\
 Avg.\ steps/task (analytics) & 10.2 \\
-Avg.\ simulation time & 1.5s \\
+Avg.\ steps/task (database) & 6.2 \\
+Avg.\ steps/task (simulation) & 11.1 \\
+Avg.\ simulation time & 2.49s \\
 \bottomrule
 \end{tabular}
 \end{table}

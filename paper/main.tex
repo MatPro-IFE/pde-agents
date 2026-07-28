@@ -49,6 +49,16 @@
 \definecolor{nodegray}{RGB}{97,97,97}
 \definecolor{nodered}{RGB}{183,28,28}
 \definecolor{lightgray}{RGB}{240,240,240}
+\definecolor{revisionred}{RGB}{204,0,0}
+
+% ── Revision highlighting ─────────────────────────────────────────────────────
+% Text changed during the 2026-07 numbers audit is wrapped in \revised{...}.
+% Flip the switch below to \revisionsvisiblefalse to render a clean
+% camera-ready PDF without touching any of the marked passages.
+\newif\ifrevisionsvisible
+\revisionsvisibletrue
+\newcommand{\revised}[1]{%
+  \ifrevisionsvisible\textcolor{revisionred}{#1}\else#1\fi}
 
 % ── Listings style ────────────────────────────────────────────────────────────
 \lstset{
@@ -131,14 +141,15 @@ factor in KG~Smart's reliability advantage;
 that selects the optimal retrieval mode per task;
 (vi) production-scale agent quality
 metrics from 1{,}369 real simulation runs showing 97.8\% overall success
-and a 57.6\% first-try rate; and (vii) a controlled 100-task KG growth experiment showing
+and \revised{an 85.4\%} first-try rate; and (vii) a controlled 100-task KG growth experiment showing
 that accumulated run history yields a difficulty-dependent quality
 gain, with hard-task MPF improving by 8.8\% between passes while
 easy and novel tasks remain at ceiling.  All code, models, and evaluation artifacts
-are released openly.  Our findings demonstrate that \emph{integration
-pattern}, not knowledge content, determines whether GraphRAG augmentation
-helps or hinders LLM agents, and identify concrete design principles
-for autonomous FEM simulation assistants.
+are released openly.  Taken together, these results point to
+\emph{integration pattern}, rather than knowledge content, as what
+decides whether GraphRAG augmentation helps or hinders an LLM agent, and
+they yield concrete design principles for autonomous FEM simulation
+assistants.
 
 \smallskip\noindent\textbf{Keywords:} Large language model agents; finite element
 method; knowledge graph; GraphRAG; multi-agent systems; scientific computing
@@ -189,25 +200,25 @@ stability rules form a rich, interconnected knowledge base.
         the numerical kernel against analytical solutions
         (\cref{sec:vv}).
   \item We run a three-way ablation study (KG~On, KG~Off, KG~Smart)
-        over 50 tasks with a frozen knowledge graph, demonstrating that
-        KG-enabled modes produce higher-quality simulation outputs
-        (physics score, material property fidelity) than the KG-free
-        baseline, and that \emph{KG~Smart} achieves 100\% success
-        \emph{and} the highest output quality (\cref{sec:ablation}).
+        over 50 tasks with a frozen knowledge graph.  KG-enabled modes
+        produce higher-quality simulation outputs (physics score,
+        material property fidelity) than the KG-free baseline, and
+        \emph{KG~Smart} reaches 100\% success \emph{and} the highest
+        output quality (\cref{sec:ablation}).
   \item We introduce a \emph{novel-material experiment} using three
-        fictional materials absent from any LLM training corpus,
-        demonstrating that KG Smart achieves ${\approx}\,2.9\times$ higher
-        material property fidelity than the KG-free baseline, which
-        fabricates physically incorrect properties (\cref{sec:novidium}).
+        fictional materials absent from any LLM training corpus.
+        KG Smart attains ${\approx}\,2.9\times$ the material property
+        fidelity of the KG-free baseline, which fabricates physically
+        incorrect properties (\cref{sec:novidium}).
   \item We trace KG~On's 3 systematic failures to budget exhaustion
         and timeout, revealing that warm-start injection, not lazy
         retrieval, is the dominant factor in KG~Smart's reliability
         advantage (\cref{sec:failure-analysis}).
   \item We report production-scale agent quality metrics derived from
-        1{,}369 real simulation runs and a controlled 100-task KG
-        growth experiment demonstrating a difficulty-dependent quality
-        gain: hard-task MPF improves by 8.8\% as the KG accumulates
-        run history (\cref{sec:metrics}).
+        1{,}369 real simulation runs, together with a controlled
+        100-task KG growth experiment in which the quality gain proves
+        difficulty-dependent: hard-task MPF improves by 8.8\% as the KG
+        accumulates run history (\cref{sec:metrics}).
 \end{enumerate}
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -382,8 +393,8 @@ A separate compatibility issue emerged with Qwen3-Coder-Next: the model
 occasionally \emph{double-encodes} JSON tool arguments (e.g.\
 \texttt{"\{$\backslash$"key$\backslash$": $\backslash$"val$\backslash$"\}"}).
 All tool functions now use a \texttt{\_safe\_json\_parse} helper that detects
-and recursively unwraps such double-encoded strings, ensuring seamless
-operation across model families without model-specific workarounds.
+and recursively unwraps such double-encoded strings, so the same tool code
+works across model families without model-specific workarounds.
 Llama~4~Scout, by contrast, uses the standard \texttt{tool\_calls} field
 natively and requires no special parsing.
 
@@ -543,8 +554,8 @@ polynomial space, confirming correct solver implementation.
 \subsection{Representative Simulation Gallery}
 \label{sec:gallery}
 
-Beyond numerical convergence, a practical simulation assistant must
-demonstrate breadth: the ability to handle diverse materials, boundary
+Beyond numerical convergence, a practical simulation assistant needs
+breadth: it must handle diverse materials, boundary
 condition types, domain geometries, time dependence, and dimensionality.
 Figure~\ref{fig:examples} presents six representative heat-transfer
 problems, each solved end-to-end by the Simulation Agent from a single
@@ -581,12 +592,12 @@ with Robin convection on the top face of a 3D cube.
 
 \paragraph{Geometry.}
 Panels (a), (b), and (d) use structured Cartesian meshes on the
-unit square.  Panels~(c) and~(e) demonstrate Gmsh-based meshing
+unit square.  Panels~(c) and~(e) use Gmsh-based meshing
 of non-trivial geometries: a plate with a circular cutout
 (Gmsh boolean difference, $r=0.15$, $\approx$5\,000 vertices) and
 an L-shaped domain ($[0,1]^2 \setminus [0.5,1]^2$, mesh size
 $\approx$0.02).  Panel~(f) meshes a unit cube with $24^3$
-tetrahedra ($\approx$15\,600 vertices), demonstrating 3D capability.
+tetrahedra ($\approx$15\,600 vertices), exercising the 3D path.
 
 \paragraph{Time dependence.}
 Panel~(e) solves the transient heat equation using 100 implicit-Euler
@@ -809,7 +820,7 @@ KG~On also outperforms KG~Off on quality (0.879 / 0.801 success-only);
 the KG \emph{does} help the agent select more accurate material properties.
 
 \paragraph{Novel materials: the KG's decisive edge.}
-The clearest demonstration of KG value appears on the 10 novel-material
+KG value shows most clearly on the 10 novel-material
 tasks using fictional materials (Novidium, Cryonite, Pyrathane) whose
 properties exist only in the KG.  KG~Off ``succeeds'' on all 10 tasks
 but fabricates properties, producing a physics score of 0.590 and MPF of
@@ -1178,7 +1189,7 @@ recovery but is secondary for the reliability gain.
 
 Beyond the controlled ablation, we analyse the system's behaviour across all
 simulation runs accumulated during development, testing, and ablation
-experiments.  Of these, 805 originate from a comprehensive automated parameter sweep across 8 physics
+experiments.  Of these, 805 originate from an automated parameter sweep across 8 physics
 studies (geometry, material, boundary conditions, initial conditions,
 time-stepping, 3D geometry, Robin convection, and multi-material) run via
 \texttt{scripts/sweep\_full\_study.py}; the remainder are interactive and
@@ -1189,7 +1200,7 @@ ablation runs accumulated through normal system use.
 \subsection{Success and Failure Modes}
 
 The 97.8\% overall success rate (1{,}339/1{,}369 from PostgreSQL
-\texttt{simulation\_runs}) demonstrates production-grade reliability
+\texttt{simulation\_runs}) indicates production-grade reliability
 for the full agent stack.  Of the 2.2\% failures, the majority are attributable to invalid boundary condition
 combinations (e.g.\ pure Neumann systems without a reference point), mesh
 resolution requests exceeding GPU memory, and numerical divergence on
@@ -1197,21 +1208,32 @@ stiff transients.
 
 \subsection{Iteration Efficiency}
 
-Mean reasoning steps per completed task: Simulation Agent 7.9,
-Analytics Agent 10.2, Database Agent 6.2.  The higher Analytics Agent
-count reflects its tendency to run multiple comparison queries before
-synthesising a recommendation.  The Database Agent's lower count
-reflects the relative simplicity of structured SQL-style queries over
-natural-language reasoning.
+\revised{Mean reasoning steps per completed task: Simulation Agent 11.1,
+Analytics Agent 10.2, Database Agent 6.2.  The Simulation Agent's count
+covers a full cycle of validating a configuration, revising it, launching
+the solver and checking the result, and configurations are often revised
+more than once before launch.  The Analytics Agent runs several
+comparison queries before settling on a recommendation.}  The Database
+Agent's lower count reflects the relative simplicity of structured
+SQL-style queries over natural-language reasoning.
 
 \subsection{First-Try Rate}
 
-57.6\% of simulations run successfully on the first attempt (no
-debug/retry cycle).  The remaining 42.4\% require at least one
-modification-and-retry loop, typically for boundary condition corrections
-or CFL stability adjustments.  This is consistent with the complexity
-of translating free-form natural language to precise numerical
-configurations.
+\revised{85.4\% of simulation tasks succeed on the first attempt, with no
+modification-and-retry loop.  Another 10.3\% call the solver more than
+once, or fall back to \texttt{debug\_simulation}, before succeeding;
+these are usually boundary condition corrections or CFL stability
+adjustments.  The remaining 4.3\% fail on a single attempt and never
+retry.}
+
+\revised{Attempts are counted from \texttt{run\_simulation} tool calls rather
+than from distinct run identifiers.  Counting identifiers does not work
+here: the agent logger back-fills the most recent \texttt{run\_id} across
+every step of a task once it is known, which makes a task that retried
+look identical to one that did not.  Counting tool calls recovers the
+real attempt count.  Retries turn out to be less frequent than the
+aggregate success rate suggests, but they are still what carries the
+system from 85.4\% to 97.8\% final success.}
 
 \subsection{KG Growth and Learning Curve}
 \label{sec:kg-growth}
@@ -1269,10 +1291,14 @@ warm-start context disambiguates underspecified problems.
 
 \paragraph{FEM code generation.}
 \citet{bauer2023llm} report $\approx 60\%$ one-shot success for
-GPT-4-driven FEniCS script generation; our 57.6\% first-try rate is
-broadly comparable using a fully local, open-source model stack.
-Unlike their single-turn approach, PDE-Agents recovers from failures
-through multi-turn self-correction, achieving 97.8\% final success.
+GPT-4-driven FEniCS script generation.  \revised{Our 85.4\% first-try rate is
+higher, but the two numbers measure different tasks and are not directly
+comparable: their system has to emit a complete, syntactically valid
+FEniCS script, while ours fills in a parameter set for a fixed,
+pre-verified solver.  What does carry across is the architecture.  Unlike}
+their single-turn approach, PDE-Agents recovers from failures through
+multi-turn self-correction, reaching 97.8\% final success with a fully
+local, open-source model stack.
 ALL-FEM \citep{deotale2026allfem} addresses the FEniCS automation problem
 through fine-tuning: a corpus of 1{,}000+ verified FEniCS scripts is
 used to fine-tune models from 3B to 120B parameters, and a multi-agent
@@ -1332,9 +1358,30 @@ overhead without benefit (standard tasks with well-known properties).
 \label{sec:limitations}
 
 \paragraph{Solver scope.}
-The current solver supports only scalar heat equations.  Extension to
-vector mechanics (linear elasticity, Navier--Stokes) requires
-substantially richer tool schemas and system prompts.
+The current solver supports only scalar heat equations.  \revised{This is the main limitation of the present work.  Extending to
+vector mechanics (linear elasticity, Navier--Stokes) is not simply a
+matter of richer tool schemas; it requires new solver kernels, each with
+its own variational form, function spaces and verification.}
+
+\revised{The narrow scope is also what makes our central measurement
+possible.  Because the agent fills in parameters for a fixed,
+independently verified solver instead of emitting solver code, every run
+produces a configuration whose material properties can be checked
+directly against ground truth, which is what MPF (\cref{sec:novidium})
+measures.  A system that generates solver code covers far broader physics
+but cannot isolate property fidelity the same way, since a failure may
+lie in the code, in the parameters, or in both.}
+
+\revised{The obvious next step is to test on physics we did not write
+ourselves.  ALL-FEM \citep{deotale2026allfem} has released a public
+benchmark of FEM problems with ground-truth solutions covering
+elasticity, plasticity, Newtonian and non-Newtonian flow, and
+fluid--structure
+interaction.\footnote{\url{https://github.com/fenics-llm/FEM_Dataset}}
+Most of these are beyond our solver today, so evaluating on them means
+implementing the corresponding kernels first.  We see that work,
+combining KG-augmented memory with multi-physics breadth, as more
+valuable than an incremental extension of the present study.}
 
 \paragraph{Model scale and open-source evolution.}
 The system defaults have been upgraded from the initial v1 models
@@ -1360,6 +1407,26 @@ Future work will explore:
 relevance, (b) dynamic confidence-based retrieval (only query KG when the
 LLM's uncertainty exceeds a threshold), and (c) richer warm-start context
 including failure diagnostics from similar past runs.
+
+\revised{\paragraph{Is retrieval necessary, or would a better prompt suffice?}
+A fair objection to any retrieval-augmented result is that the same
+information could simply be written into the prompt.  We tested this with
+a \emph{prompt-injection} control on the preliminary 7-task
+novel-material benchmark: the KG was disabled and the true properties of
+Novidium, Cryonite and Pyrathane were appended verbatim to each task
+description.  It matched KG~Smart on fidelity (MPF~$=1.00$) and was the
+fastest mode overall ($11.7$\,s mean).  That is the expected outcome,
+since the answer was handed to the model.}
+
+\revised{The control still tells us something useful about where the
+difficulty lies.  Prompt injection assumes you already know which
+materials a task will involve and what their properties are.  It is a
+manual step, repeated per task, and it does not scale beyond a handful of
+known entities.  KG~Smart reaches the same fidelity by retrieving those
+properties through embedding similarity, without being told which
+material the task names.  The result worth reporting is not that
+retrieved context helps, which is unsurprising, but that automatic
+retrieval matches hand-curated context with no human in the loop.}
 
 \paragraph{Verification scope.}
 The V\&V study covers only steady-state and simple transient heat
@@ -1457,12 +1524,12 @@ between KG-enabled and KG-free agents will only widen for novel or
 proprietary domains where the LLM's training data provides no coverage.
 
 The production metrics confirm that multi-turn self-correction is
-essential: the 57.6\% first-try rate improves to 97.8\% through
+essential: the \revised{85.4\%} first-try rate improves to 97.8\% through
 iterative debugging, underscoring the value of agent-level orchestration
 over single-turn code generation.  PDE-Agents establishes both a working
 platform and a rigorous empirical baseline for the emerging field of
-LLM-driven autonomous simulation, demonstrating that structured knowledge
-integration transforms an agent from an ``expensive random number
+LLM-driven autonomous simulation, showing that structured knowledge
+integration turns an agent from an ``expensive random number
 generator'' into a reliable engineering tool.
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -1490,5 +1557,30 @@ Computational resources were provided by the Institute for Energy Technology (IF
 % ─────────────────────────────────────────────────────────────────────────────
 \bibliographystyle{unsrtnat}
 \bibliography{references}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\appendix
+
+\section{\texorpdfstring{\revised{Full h-Refinement Data}}{Full h-Refinement Data}}
+\label{app:vv-detail}
+
+\revised{\Cref{tab:vv-detail} reports the full mesh-refinement study behind the
+convergence rates summarised in \cref{tab:vv-convergence}: $L^2$ and
+$L^\infty$ error norms at every resolution $N \in \{8, 16, 32, 64, 128\}$
+for all three benchmark cases.}
+
+\revised{The two norms are computed differently, and for one case they disagree
+by several orders of magnitude.  $\|e\|_{L^2}$ is assembled by quadrature
+over each element, so it measures error throughout the domain, including
+between nodes.  $\|e\|_{L^\infty}$ is evaluated only at the degrees of
+freedom.  For the constant-source (1D-like Poisson) case the P1 solution
+is \emph{nodally exact}, which is a standard superconvergence result, so
+the nodal norm sits at machine precision ($\approx 10^{-10}$) at every
+resolution while the integrated norm decays at $\mathcal{O}(h^2)$ as
+expected.  Convergence rates are therefore fitted from $\|e\|_{L^2}$
+alone; a rate fitted from nodal values would say nothing useful about
+this case.}
+
+\input{tables/vv_detail}
 
 \end{document}

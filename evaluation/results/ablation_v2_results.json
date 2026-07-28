@@ -11,7 +11,16 @@
     "kg_read_only": true,
     "experiment_phase": "ablation_v2",
     "timestamp": "2026-04-20T13:40:01.460486",
-    "last_updated": "2026-04-28T11:10:41.058680"
+    "last_updated": "2026-04-28T11:10:41.058680",
+    "models": {
+      "simulation_agent": "qwen3-coder-next",
+      "analytics_agent": "llama4:scout",
+      "database_agent": "qwen3-coder:30b",
+      "orchestrator": "llama4:scout",
+      "embeddings": "nomic-embed-text"
+    },
+    "decisive_model": "qwen3-coder-next",
+    "provenance_note": "Models were not recorded at run time (2026-04-20 to 2026-04-28). The values above are the SIMULATION_AGENT_MODEL / ANALYTICS_AGENT_MODEL / DATABASE_AGENT_MODEL / ORCHESTRATOR_MODEL defaults in effect on that revision, and are reported as inferred rather than measured. The ablation drives SimulationAgent directly and never invokes the orchestrator, so simulation_agent is the model that determines these results. Runs made after this revision record provenance automatically via _provenance()."
   },
   "kg_on": {
     "aggregate": {

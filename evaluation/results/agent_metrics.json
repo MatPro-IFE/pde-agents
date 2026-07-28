@@ -1,28 +1,36 @@
 {
-  "timestamp": "2026-04-07T10:59:32",
+  "timestamp": "2026-07-28T11:27:43",
+  "window": {
+    "start": null,
+    "end": "2026-04-17",
+    "excluded_run_prefixes": [
+      "alsim_"
+    ],
+    "rationale": "Organic FEniCSx usage only: ends before the controlled KG ablation campaign (2026-04-20) and the SharedModules backend (2026-06-15), so production metrics exclude experimental runs and non-FEniCSx solvers."
+  },
   "db_stats": {
-    "total_runs": 1135,
-    "successful_runs": 1105,
+    "total_runs": 1369,
+    "successful_runs": 1339,
     "failed_runs": 30,
-    "overall_success_rate": 0.973568281938326,
-    "total_log_entries": 896,
-    "unique_tasks": 110,
+    "overall_success_rate": 0.9780861943024105,
+    "total_log_entries": 4532,
+    "unique_tasks": 421,
     "total_suggestions": 0
   },
   "task_metrics": {
-    "simulation": {
-      "n_tasks": 53,
-      "avg_steps_per_task": 7.943396226415095,
-      "min_steps": 2,
-      "max_steps": 14,
-      "median_steps": 8
-    },
     "database": {
       "n_tasks": 27,
       "avg_steps_per_task": 6.222222222222222,
       "min_steps": 2,
       "max_steps": 20,
       "median_steps": 5
+    },
+    "simulation": {
+      "n_tasks": 364,
+      "avg_steps_per_task": 11.145604395604396,
+      "min_steps": 2,
+      "max_steps": 45,
+      "median_steps": 8
     },
     "analytics": {
       "n_tasks": 30,
@@ -33,11 +41,152 @@
     }
   },
   "tool_metrics": {
-    "unknown": {
-      "calls": 228,
-      "successes": 99,
-      "failures": 127,
-      "success_rate": 0.4342105263157895
+    "store_result": {
+      "calls": 15,
+      "successes": 8,
+      "failures": 7,
+      "ungraded": 0,
+      "success_rate": 0.5333333333333333
+    },
+    "validate_config": {
+      "calls": 305,
+      "successes": 304,
+      "failures": 0,
+      "ungraded": 0,
+      "success_rate": 1.0
+    },
+    "run_simulation": {
+      "calls": 286,
+      "successes": 281,
+      "failures": 2,
+      "ungraded": 0,
+      "success_rate": 0.9929328621908127
+    },
+    "analyze_run": {
+      "calls": 22,
+      "successes": 12,
+      "failures": 10,
+      "ungraded": 0,
+      "success_rate": 0.5454545454545454
+    },
+    "suggest_next_run": {
+      "calls": 4,
+      "successes": 4,
+      "failures": 0,
+      "ungraded": 0,
+      "success_rate": 1.0
+    },
+    "modify_config": {
+      "calls": 114,
+      "successes": 112,
+      "failures": 0,
+      "ungraded": 0,
+      "success_rate": 1.0
+    },
+    "debug_simulation": {
+      "calls": 2,
+      "successes": 2,
+      "failures": 0,
+      "ungraded": 0,
+      "success_rate": 1.0
+    },
+    "search_history": {
+      "calls": 7,
+      "successes": 7,
+      "failures": 0,
+      "ungraded": 0,
+      "success_rate": 1.0
+    },
+    "list_runs_for_analysis": {
+      "calls": 18,
+      "successes": 18,
+      "failures": 0,
+      "ungraded": 0,
+      "success_rate": 1.0
+    },
+    "fetch_run_data": {
+      "calls": 1,
+      "successes": 0,
+      "failures": 0,
+      "ungraded": 0,
+      "success_rate": null
+    },
+    "compare_runs": {
+      "calls": 37,
+      "successes": 35,
+      "failures": 0,
+      "ungraded": 0,
+      "success_rate": 1.0
+    },
+    "get_run_status": {
+      "calls": 93,
+      "successes": 92,
+      "failures": 0,
+      "ungraded": 0,
+      "success_rate": 1.0
+    },
+    "check_config_warnings": {
+      "calls": 139,
+      "successes": 119,
+      "failures": 19,
+      "ungraded": 0,
+      "success_rate": 0.8623188405797102
+    },
+    "query_knowledge_graph": {
+      "calls": 190,
+      "successes": 187,
+      "failures": 0,
+      "ungraded": 0,
+      "success_rate": 1.0
+    },
+    "catalog_study": {
+      "calls": 1,
+      "successes": 1,
+      "failures": 0,
+      "ungraded": 0,
+      "success_rate": 1.0
+    },
+    "db_health_check": {
+      "calls": 2,
+      "successes": 2,
+      "failures": 0,
+      "ungraded": 0,
+      "success_rate": 1.0
+    },
+    "search_similar_runs": {
+      "calls": 1,
+      "successes": 1,
+      "failures": 0,
+      "ungraded": 0,
+      "success_rate": 1.0
+    },
+    "list_recent_runs": {
+      "calls": 1,
+      "successes": 1,
+      "failures": 0,
+      "ungraded": 0,
+      "success_rate": 1.0
+    },
+    "get_recommendation": {
+      "calls": 1,
+      "successes": 1,
+      "failures": 0,
+      "ungraded": 0,
+      "success_rate": 1.0
+    },
+    "generate_config": {
+      "calls": 1,
+      "successes": 1,
+      "failures": 0,
+      "ungraded": 0,
+      "success_rate": 1.0
+    },
+    "unmatched": {
+      "calls": 0,
+      "successes": 0,
+      "failures": 0,
+      "ungraded": 3,
+      "success_rate": null
     }
   },
   "suggestion_metrics": {
@@ -60,10 +209,10 @@
       },
       "simulation": {
         "reasoning": {
-          "avg_ms": 4304.607594936709,
-          "min_ms": 622,
-          "max_ms": 25259,
-          "n_samples": 158
+          "avg_ms": 4003.9327445652175,
+          "min_ms": 295,
+          "max_ms": 51720,
+          "n_samples": 1472
         }
       },
       "database": {
@@ -76,19 +225,22 @@
       }
     },
     "simulation_wall_time": {
-      "avg_s": 1.4632742594974981,
-      "min_s": 0.007785265799611807,
-      "max_s": 234.56,
-      "n_runs": 1109
+      "avg_s": 2.494297932446652,
+      "min_s": 0.007719079032540321,
+      "max_s": 1354.8665912495926,
+      "n_runs": 1343
     }
   },
   "orchestrator_metrics": {
     "n_orchestrated_tasks": 0,
     "total_agent_messages": 0,
     "note": "No orchestrator task logs found; agent messages available",
-    "total_sim_tasks": 33,
-    "single_attempt_tasks": 33,
-    "first_try_successes": 19,
-    "first_try_success_rate": 0.5757575757575758
+    "total_sim_tasks": 253,
+    "single_attempt_tasks": 227,
+    "retried_tasks": 26,
+    "first_try_successes": 216,
+    "first_try_success_rate": 0.8537549407114624,
+    "retry_rate": 0.10276679841897234,
+    "attempt_detection": "run_simulation tool-call count (run_id is overwritten by backfill)"
   }
 }

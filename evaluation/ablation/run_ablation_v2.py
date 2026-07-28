@@ -56,6 +56,45 @@ TIMEOUT = 420  # 7 minutes per task (allows for agent-internal retry)
 MAX_RETRIES = 1  # Agent handles retries internally via _AUTO_RETRY
 
 
+def _provenance() -> dict:
+    """Capture what actually produced these numbers.
+
+    Results are only reproducible if the model and code revision are
+    recorded alongside them. The ablation drives ``SimulationAgent``
+    directly and never invokes the orchestrator, so
+    ``SIMULATION_AGENT_MODEL`` is the model that determines the outcome;
+    the others are recorded for completeness.
+    """
+    import subprocess
+
+    def _git(*args: str) -> str | None:
+        try:
+            return subprocess.run(
+                ("git", *args),
+                cwd=str(Path(__file__).resolve().parents[2]),
+                capture_output=True, text=True, timeout=10, check=True,
+            ).stdout.strip() or None
+        except Exception:
+            return None
+
+    dirty = _git("status", "--porcelain")
+    return {
+        "models": {
+            "simulation_agent": os.getenv("SIMULATION_AGENT_MODEL", "qwen3-coder-next"),
+            "analytics_agent": os.getenv("ANALYTICS_AGENT_MODEL", "qwen3-coder:30b"),
+            "database_agent": os.getenv("DATABASE_AGENT_MODEL", "qwen3-coder:30b"),
+            "orchestrator": os.getenv("ORCHESTRATOR_MODEL", "qwen3-coder:30b"),
+            "embeddings": "nomic-embed-text",
+        },
+        "decisive_model": os.getenv("SIMULATION_AGENT_MODEL", "qwen3-coder-next"),
+        "git_commit": _git("rev-parse", "HEAD"),
+        "git_branch": _git("rev-parse", "--abbrev-ref", "HEAD"),
+        "git_dirty": bool(dirty) if dirty is not None else None,
+        "ollama_base_url": os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
+        "timeout_s": TIMEOUT,
+    }
+
+
 @dataclass
 class TaskResult:
     task_id: str
@@ -396,6 +435,7 @@ def _incremental_save(mode, results, tasks, seed, merge_path):
             "experiment_phase": "ablation_v2",
             "last_updated": datetime.now().isoformat(),
             "partial": True,
+            **_provenance(),
         },
         mode: {
             "aggregate": aggregate(results),
@@ -542,6 +582,7 @@ def run_ablation_v2(
             "kg_read_only": True,
             "experiment_phase": "ablation_v2",
             "timestamp": datetime.now().isoformat(),
+            **_provenance(),
         },
     }
     for mode in modes:

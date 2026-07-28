@@ -1857,8 +1857,10 @@ def _check_service(name: str, check_fn) -> html.Div:
 )
 def refresh_system_health(n):
     OLLAMA_URL = os.getenv("OLLAMA_BASE_URL", "http://ollama:11434")
-    SIM_MODEL  = os.getenv("SIMULATION_AGENT_MODEL", "qwen2.5-coder:32b")
-    DB_MODEL   = os.getenv("DATABASE_AGENT_MODEL",   "qwen2.5-coder:14b")
+    # Keep these fallbacks in step with the agent modules, otherwise the
+    # health panel reports models the agents are not actually using.
+    SIM_MODEL  = os.getenv("SIMULATION_AGENT_MODEL", "qwen3-coder-next")
+    DB_MODEL   = os.getenv("DATABASE_AGENT_MODEL",   "qwen3-coder:30b")
 
     def check_postgres():
         import psycopg2

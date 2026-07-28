@@ -1,6 +1,6 @@
-\begin{table}[htbp]
-\centering
-\caption{Detailed convergence data: $L^2$ error norms at each mesh resolution.}
+\begin{table*}[htbp]
+\centering\footnotesize
+\caption{Detailed convergence data: error norms at each mesh resolution.  $\|e\|_{L^2}$ is integrated over each element with quadrature of degree 8, so it captures the error \emph{between} nodes; $\|e\|_{L^\infty}$ is evaluated at the degrees of freedom only.  For the constant-source case the P1 solution is nodally exact, so $\|e\|_{L^\infty}$ sits at machine precision while $\|e\|_{L^2}$ correctly exhibits $\mathcal{O}(h^2)$ interpolation error --- the two norms measure different things, and only the integrated norm is used to fit convergence rates.}
 \label{tab:vv-detail}
 \begin{tabular}{lrrrr}
 \toprule
@@ -12,13 +12,13 @@ Case & $N$ & DOFs & $\|e\|_{L^2}$ & $\|e\|_{L^\infty}$ \\
    & 64 & 4,225 & 1.10e-09 & 3.00e-09 \\
    & 128 & 16,641 & 2.47e-09 & 6.40e-09 \\
 \addlinespace
-  2D Transient Fourier Mode Deca & 8 & 81 & 4.38e-03 & 4.88e-03 \\
+  2D Transient Fourier Mode Decay & 8 & 81 & 4.38e-03 & 4.88e-03 \\
    & 16 & 289 & 9.48e-04 & 2.64e-03 \\
    & 32 & 1,089 & 2.39e-04 & 6.62e-04 \\
    & 64 & 4,225 & 5.98e-05 & 1.65e-04 \\
    & 128 & 16,641 & 1.50e-05 & 4.13e-05 \\
 \addlinespace
-  2D Steady-State with Constant  & 8 & 81 & 1.43e-03 & 1.12e-10 \\
+  2D Steady-State with Constant Source (1D-like) & 8 & 81 & 1.43e-03 & 1.12e-10 \\
    & 16 & 289 & 3.57e-04 & 2.28e-11 \\
    & 32 & 1,089 & 8.91e-05 & 1.22e-10 \\
    & 64 & 4,225 & 2.23e-05 & 1.83e-10 \\
@@ -26,4 +26,4 @@ Case & $N$ & DOFs & $\|e\|_{L^2}$ & $\|e\|_{L^\infty}$ \\
 \addlinespace
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
