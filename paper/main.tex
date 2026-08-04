@@ -17,9 +17,8 @@
 \usepackage{tabularx}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
-\usepackage{tikz}
-\usepackage{pgfplots}
-\pgfplotsset{compat=1.18}
+\usepackage{graphicx}
+\usepackage{epstopdf}
 \usepackage{listings}
 \usepackage[colorlinks=true, linkcolor=nodered!70!black,
             citecolor=nodeblue!80!black, urlcolor=nodeblue!80!black]{hyperref}
@@ -27,16 +26,9 @@
 \usepackage{microtype}
 \usepackage{subcaption}
 
-\usetikzlibrary{arrows.meta, positioning, shapes.geometric, fit, backgrounds,
-                decorations.pathreplacing, calc}
-
 % ── Colour palette ────────────────────────────────────────────────────────────
 \definecolor{nodeblue}{RGB}{52,120,190}
-\definecolor{nodegreen}{RGB}{56,142,60}
-\definecolor{nodeorange}{RGB}{230,81,0}
-\definecolor{nodegray}{RGB}{97,97,97}
 \definecolor{nodered}{RGB}{183,28,28}
-\definecolor{lightgray}{RGB}{240,240,240}
 \definecolor{revisionred}{RGB}{204,0,0}
 
 % ── Revision highlighting ─────────────────────────────────────────────────────
@@ -275,7 +267,7 @@ agent queries, prioritising latency over completeness.
 
 \begin{figure*}[htbp]
   \centering
-  \resizebox{\textwidth}{!}{\input{figs/architecture.tikz}}
+  \includegraphics[width=\textwidth]{figs/architecture.eps}
   \caption{System architecture of PDE-Agents (four-tier layout).
     \textit{Tier 1}: user natural-language interface.
     \textit{Tier 2}: Multi-Agent Orchestration — a LangGraph Supervisor
@@ -409,7 +401,7 @@ enabling arbitrary complex domain topologies.
 
 \begin{figure*}[htbp]
   \centering
-  \resizebox{0.85\textwidth}{!}{\input{figs/kg_visual.tikz}}
+  \includegraphics[width=0.85\textwidth]{figs/kg_visual.eps}
   \caption{Knowledge graph visualisation (Neo4j-style).
     \textbf{Blue circles}: material nodes (double border = novel/fictional
     materials known only to the KG).
@@ -523,7 +515,7 @@ linear regression on the log-log plot.
 
 \begin{figure}[htbp]
   \centering
-  \input{figs/convergence.tikz}
+  \includegraphics[width=\columnwidth]{figs/convergence.eps}
   \caption{Spatial convergence study.  Cases 2 and 3 exhibit the expected
     $\mathcal{O}(h^2)$ rate for P1 elements.  Case 1 is algebraically exact
     (linear profile is represented exactly in the P1 space), with
@@ -641,7 +633,7 @@ the solver.
 
 \begin{figure*}[htbp]
   \centering
-  \includegraphics[width=\textwidth]{figs/sim_examples.png}
+  \includegraphics[width=\textwidth]{figs/sim_examples.jpg}
   \caption{Representative temperature fields produced by PDE-Agents
     (six cases, all in Kelvin).
     %
@@ -702,7 +694,7 @@ failure-recovery path only.
 
 \begin{figure*}[htbp]
   \centering
-  \resizebox{0.92\textwidth}{!}{\input{figs/kg_modes.tikz}}
+  \includegraphics[width=0.92\textwidth]{figs/kg_modes.eps}
   \caption{Agent workflow under the three KG integration modes.
     \textbf{(a)} KG~Off: fast but the LLM fabricates material properties.
     \textbf{(b)} KG~On: mandatory KG queries add latency and trigger
@@ -826,7 +818,7 @@ and KG~On (60.8\,s), reflecting the iteration overhead of KG tool calls.
 
 \begin{figure}[htbp]
   \centering
-  \input{figs/ablation_bar.tikz}
+  \includegraphics[width=\columnwidth]{figs/ablation_bar.eps}
   \caption{Success rate by difficulty level across three KG integration
     strategies.  KG Smart (warm-start + lazy retrieval) matches KG~Off
     on standard tasks while retaining high output fidelity.
@@ -951,7 +943,7 @@ Material & Mode & $k$ (W/m\,K) & $\rho$ (kg/m$^3$) & $c_p$ (J/kg\,K) \\
 
 \begin{figure}[htbp]
   \centering
-  \input{figs/mpf_comparison.tikz}
+  \includegraphics[width=\columnwidth]{figs/mpf_comparison.eps}
   \caption{Material Property Fidelity (MPF) per fictional material.
     KG Off scores below 0.5 for all three materials, with Pyrathane
     at 0.15 (conductivity error: $2{,}080\times$).  KG Smart retrieves
@@ -986,7 +978,7 @@ and Robin tasks show significant deviations:
 
 \begin{figure}[htbp]
   \centering
-  \input{figs/error_magnification.tikz}
+  \includegraphics[width=\columnwidth]{figs/error_magnification.eps}
   \caption{Error magnification: mean material property error (\%)
     vs.\ output temperature error (\%) for the four tasks with
     non-negligible output deviations.  P2's output error (24.4\%)
@@ -1250,7 +1242,7 @@ pre-seeded Material nodes rather than accumulated Run history.
 
 \begin{figure}[htbp]
   \centering
-  \resizebox{\linewidth}{!}{\input{figs/kg_growth.tikz}}
+  \includegraphics[width=\linewidth]{figs/kg_growth.eps}
   \caption{Paired KG growth comparison: success-only MPF and physics
     score for the same tasks run in pass~1 (0 prior Run nodes) vs.\
     pass~2 (50 prior Run nodes).  Only tasks succeeding in both passes
