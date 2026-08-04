@@ -2,23 +2,15 @@
 % PDE-Agents: An LLM-Orchestrated Multi-Agent Framework for Automated
 % Finite Element Simulations with Knowledge Graph Augmentation
 %
-% Target journal: Engineering with Computers (Springer) — double-column format
-% ISSN 0177-0667 | IF ~8.7 | Scope: AI/ML applied to engineering computation
-%
-% Alternative targets:
-%   1. Computer Methods in Applied Mechanics and Engineering (CMAME), Elsevier
-%   2. Advanced Engineering Informatics, Elsevier
+% Target journal: Computer Methods in Applied Mechanics and Engineering (CMAME)
+% Elsevier | ISSN 0045-7825 | IF ~7.3
 % ─────────────────────────────────────────────────────────────────────────────
 
-\documentclass[twocolumn]{article}
+\documentclass[preprint,review,12pt]{elsarticle}
 
 % ── Packages ──────────────────────────────────────────────────────────────────
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-\usepackage{lmodern}
-\usepackage[a4paper, top=2.2cm, bottom=2.2cm, left=1.8cm, right=1.8cm]{geometry}
+\usepackage{lineno}
 \usepackage{amsmath,amssymb,bm}
-\usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{booktabs}
 \usepackage{multirow}
@@ -33,11 +25,7 @@
             citecolor=nodeblue!80!black, urlcolor=nodeblue!80!black]{hyperref}
 \usepackage{cleveref}
 \usepackage{microtype}
-\usepackage{caption}
 \usepackage{subcaption}
-\usepackage[numbers,sort&compress]{natbib}
-\usepackage{authblk}
-\usepackage{orcidlink}
 
 \usetikzlibrary{arrows.meta, positioning, shapes.geometric, fit, backgrounds,
                 decorations.pathreplacing, calc}
@@ -52,9 +40,6 @@
 \definecolor{revisionred}{RGB}{204,0,0}
 
 % ── Revision highlighting ─────────────────────────────────────────────────────
-% Text changed during the 2026-07 numbers audit is wrapped in \revised{...}.
-% Flip the switch below to \revisionsvisiblefalse to render a clean
-% camera-ready PDF without touching any of the marked passages.
 \newif\ifrevisionsvisible
 \revisionsvisiblefalse
 \newcommand{\revised}[1]{%
@@ -74,21 +59,10 @@
   xleftmargin=1.5em, framexleftmargin=1.5em,
 }
 
-% ── Meta ──────────────────────────────────────────────────────────────────────
-\title{\textbf{PDE-Agents: An LLM-Orchestrated Multi-Agent\\
-       Framework for Automated Finite Element Simulations\\
-       with Knowledge Graph-Augmented Reasoning}}
+% ── Journal ───────────────────────────────────────────────────────────────────
+\journal{Computer Methods in Applied Mechanics and Engineering}
 
-\author[1]{Sayan Adhikari\,\orcidlink{0000-0002-9316-3292}}
-\author[1]{Gulshan Noorsumar\,\orcidlink{0000-0002-6718-4508}}
-\author[1]{\O yvind Jensen\,\orcidlink{0000-0003-4353-9359}}
-\affil[1]{MatPro, Institute for Energy Technology (IFE), Kjeller, Norway}
-
-\date{Preprint -- \today}
-
-\renewcommand\Authfont{\normalsize}
-\renewcommand\Affilfont{\small\itshape}
-
+% ── PDF metadata ──────────────────────────────────────────────────────────────
 \hypersetup{
   pdftitle={PDE-Agents: An LLM-Orchestrated Multi-Agent Framework for
             Automated Finite Element Simulations with Knowledge
@@ -100,19 +74,30 @@
 
 % ═════════════════════════════════════════════════════════════════════════════
 \begin{document}
-\maketitle
 
-\let\thefootnote\relax\footnotetext{%
-  \textit{Corresponding author:} Sayan Adhikari
-  (\texttt{sayan.adhikari@ife.no}).\\
-  \textit{Code:} \url{https://github.com/MatPro-IFE/pde-agents}}
+\begin{frontmatter}
 
-% ─────────────────────────────────────────────────────────────────────────────
+\title{PDE-Agents: An LLM-Orchestrated Multi-Agent
+       Framework for Automated Finite Element Simulations
+       with Knowledge Graph-Augmented Reasoning\tnoteref{code}}
+\tnotetext[code]{Code: \url{https://github.com/MatPro-IFE/pde-agents}}
+
+\author[ife]{Sayan Adhikari\corref{cor1}}
+\ead{sayan.adhikari@ife.no}
+\author[ife]{Gulshan Noorsumar}
+\author[ife]{\O yvind Jensen}
+
+\cortext[cor1]{Corresponding author}
+
+\affiliation[ife]{organization={MatPro, Institute for Energy Technology (IFE)},
+            city={Kjeller},
+            country={Norway}}
+
 \begin{abstract}
 We present \textit{PDE-Agents}, a multi-agent ecosystem that automates the
 full lifecycle of partial differential equation (PDE) / finite element method
 (FEM) simulations through natural-language interaction.  The system combines three specialist large language model (LLM)
-agents—Simulation, Analytics, and Database—orchestrated via a LangGraph
+agents---Simulation, Analytics, and Database---orchestrated via a LangGraph
 supervisor graph, with a locally-deployed open-source LLM stack
 (Qwen3-Coder-Next, Llama~4~Scout) running on dual NVIDIA RTX PRO 6000
 Blackwell GPUs ($\approx$196\,GB combined VRAM).  The architecture is
@@ -150,11 +135,17 @@ are released openly.  Taken together, these results point to
 decides whether GraphRAG augmentation helps or hinders an LLM agent, and
 they yield concrete design principles for autonomous FEM simulation
 assistants.
-
-\smallskip\noindent\textbf{Keywords:} Large language model agents; finite element
-method; knowledge graph; GraphRAG; multi-agent systems; scientific computing
-automation; verification and validation.
 \end{abstract}
+
+\begin{keyword}
+Large language model agents \sep finite element method \sep knowledge graph
+\sep GraphRAG \sep multi-agent systems \sep scientific computing automation
+\sep verification and validation
+\end{keyword}
+
+\end{frontmatter}
+
+\linenumbers
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Introduction}
@@ -272,7 +263,7 @@ system to combine GraphRAG with a live, iterative FEM simulation loop.
 \paragraph{Knowledge graphs for materials science.}
 Materials-focused knowledge graphs (e.g.\ MatKG \citep{venugopal2022matkg},
 OPTIMADE \citep{andersen2021optimade}) encode material properties in RDF/OWL
-formats.  \citet{buehler2024mechgpt} demonstrates that retrieval-augmented
+formats.  Buehler~\cite{buehler2024mechgpt} demonstrates that retrieval-augmented
 ontological KG strategies outperform flat RAG for materials design by
 capturing mechanistic relationships between concepts.
 Our Neo4j KG is lighter-weight and purpose-built for run-time
@@ -1290,7 +1281,7 @@ warm-start context disambiguates underspecified problems.
 \subsection{Comparison with Prior Work}
 
 \paragraph{FEM code generation.}
-\citet{bauer2023llm} report $\approx 60\%$ one-shot success for
+Bauer et al.~\cite{bauer2023llm} report $\approx 60\%$ one-shot success for
 GPT-4-driven FEniCS script generation.  \revised{Our 85.4\% first-try rate is
 higher, but the two numbers measure different tasks and are not directly
 comparable: their system has to emit a complete, syntactically valid
@@ -1342,7 +1333,7 @@ integration or measure output fidelity against ground-truth material
 properties.
 
 \paragraph{KG-augmented agents for materials science.}
-\citet{buehler2024mechgpt} demonstrates retrieval-augmented ontological
+Buehler~\cite{buehler2024mechgpt} demonstrates retrieval-augmented ontological
 knowledge graph strategies for materials design with a fine-tuned
 MechGPT model, showing that graph-structured retrieval
 outperforms flat RAG by providing mechanistic relationships between
@@ -1538,30 +1529,36 @@ All code, evaluation scripts, and result JSON files are available at
 \url{https://github.com/MatPro-IFE/pde-agents}.  The Neo4j knowledge
 graph seed data is included in the repository at \texttt{knowledge\_graph/seeder.py}.
 
-\section*{Author Contributions}
-\textbf{Sayan Adhikari}: Conceptualization, Methodology, Investigation, Software, Data Curation, Formal Analysis, Visualization, Writing -- Original Draft, Writing -- Review \& Editing.
-\textbf{Gulshan Noorsumar}: Conceptualization, Methodology, Investigation, Validation, Writing -- Review \& Editing.
-\textbf{\O yvind Jensen}: Supervision, Writing -- Review \& Editing.
+\section*{CRediT authorship contribution statement}
+\textbf{Sayan Adhikari}: Conceptualization, Methodology, Investigation, Software, Data Curation, Formal Analysis, Visualization, Writing -- original draft, Writing -- review \& editing.
+\textbf{Gulshan Noorsumar}: Conceptualization, Methodology, Investigation, Validation, Writing -- review \& editing.
+\textbf{\O yvind Jensen}: Supervision, Writing -- review \& editing.
 
-\section*{Declaration of Generative AI in the Writing Process}
-During the preparation of this manuscript, Anthropic's Claude Opus~4.6 was used to assist with language editing, grammar refinement, and the programmatic generation of TikZ figures (Figures~1 and~2).
-All scientific content, experimental design, analysis, and interpretation were performed by the human authors, who reviewed and take full responsibility for the final manuscript.
+\section*{Declaration of generative AI and AI-assisted technologies in the manuscript preparation process}
+During the preparation of this work the authors used Anthropic's Claude
+Opus~4.6 in order to assist with language editing, grammar refinement,
+and the programmatic generation of TikZ figures (Figures~1 and~2).
+After using this tool, the authors reviewed and edited the content as
+needed and take full responsibility for the content of the published
+article.
 
-\section*{Competing Interests}
-The authors declare no competing interests.
+\section*{Declaration of competing interest}
+The authors declare that they have no known competing financial interests
+or personal relationships that could have appeared to influence the work
+reported in this paper.
 
 \section*{Acknowledgements}
 The authors thank the anonymous reviewers for their constructive feedback.
 Computational resources were provided by the Institute for Energy Technology (IFE).
 
 % ─────────────────────────────────────────────────────────────────────────────
-\bibliographystyle{unsrtnat}
+\bibliographystyle{elsarticle-num}
 \bibliography{references}
 
 % ─────────────────────────────────────────────────────────────────────────────
 \appendix
 
-\section{\texorpdfstring{\revised{Full h-Refinement Data}}{Full h-Refinement Data}}
+\section{Full h-Refinement Data}
 \label{app:vv-detail}
 
 \revised{\Cref{tab:vv-detail} reports the full mesh-refinement study behind the
