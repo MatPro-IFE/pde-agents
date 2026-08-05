@@ -1,0 +1,109 @@
+\documentclass[12pt]{letter}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\definecolor{linkblue}{RGB}{52,120,190}
+\hypersetup{colorlinks=true, urlcolor=linkblue, linkcolor=linkblue}
+
+\signature{Sayan Adhikari\\
+Corresponding Author\\
+Institute for Energy Technology (IFE)\\
+Kjeller, Norway\\
+\href{mailto:sayan.adhikari@ife.no}{sayan.adhikari@ife.no}}
+
+\address{Institute for Energy Technology (IFE)\\
+Instituttveien 18\\
+2007 Kjeller, Norway}
+
+\date{\today}
+
+\begin{document}
+
+\begin{letter}{Editorial Office\\
+Computer Methods in Applied Mechanics and Engineering\\
+Elsevier}
+
+\opening{Dear Editor,}
+
+We submit the manuscript entitled \textbf{``PDE-Agents: An LLM-Orchestrated
+Multi-Agent Framework for Automated Finite Element Simulations with Knowledge
+Graph-Augmented Reasoning''} for consideration as an original research article
+in \textit{Computer Methods in Applied Mechanics and Engineering}.
+
+\medskip
+\textbf{Computational-methods contribution.}\quad
+The manuscript introduces a new computational framework---not merely an
+application of existing tools---that changes how finite element simulations can
+be set up, executed, analysed, and iteratively improved.  Specifically, we
+contribute:
+
+\begin{enumerate}
+\item A \textbf{multi-agent orchestration architecture} (LangGraph supervisor
+  pattern) in which three specialist large language model (LLM) agents
+  (Simulation, Analytics, Database) autonomously conduct the full FEM
+  simulation lifecycle from natural-language task descriptions.  This is the
+  first system to combine LLM-based multi-agent orchestration with a
+  production-grade FEM solver (DOLFINx/FEniCSx).
+
+\item A \textbf{GraphRAG knowledge-augmented reasoning} layer (Neo4j knowledge
+  graph with 768-dimensional vector embeddings) that provides agents with
+  curated material properties, known failure patterns, boundary-condition
+  statistics, and prior run lineage \emph{before} committing to expensive
+  compute.  We introduce a novel \textit{KG~Smart} integration strategy
+  combining warm-start injection with lazy conditional retrieval, and show that
+  \emph{integration pattern}---not knowledge content---determines whether
+  GraphRAG augmentation helps or hinders an LLM agent.
+
+\item A \textbf{rigorous evaluation framework} comprising: (i) formal V\&V
+  confirming $\mathcal{O}(h^2)$ spatial convergence across all benchmark cases;
+  (ii) a three-way ablation study across 50 benchmark tasks demonstrating that
+  KG~Smart achieves 100\% success rate with the highest output quality; (iii) a
+  novel-material experiment proving KG value for genuinely unseen data
+  (MPF\,=\,1.00 vs.\ 0.34 for the KG-free baseline); and (iv) production-scale
+  metrics from 1,369 real simulation runs showing 97.8\% overall success.
+\end{enumerate}
+
+\medskip
+\textbf{Why CMAME.}\quad
+This work sits at the intersection of computational mechanics and AI-augmented
+scientific computing---a topic area explicitly within CMAME's scope, which
+includes physically based machine-learning methods and digital-twin
+technologies.  Our contribution is methodological: we propose, implement, and
+rigorously evaluate a new computational framework for automating FEM
+simulations, rather than merely applying an existing solver to a new problem.
+The benchmark suite includes cases where the method can plausibly fail (novel
+materials, ambiguous specifications, numerically challenging configurations),
+and we report explicit failure-mode analysis.  We believe this work will be of
+broad interest to the CMAME readership working on computational automation,
+knowledge-augmented simulation, and AI for scientific computing.
+
+\medskip
+\textbf{Novelty and relation to prior work.}\quad
+While recent works such as ChemCrow and Coscientist have demonstrated LLM
+agents for chemistry, no prior work combines multi-agent LLM orchestration with
+production FEM solvers and graph-based retrieval-augmented generation for
+computational mechanics.  Our controlled ablation isolating integration pattern
+as the determining factor for GraphRAG utility is, to our knowledge, the first
+such result in the scientific computing literature.
+
+\medskip
+\textbf{Reproducibility.}\quad
+All code, models, evaluation scripts, and the knowledge graph schema are
+released openly at
+\url{https://github.com/MatPro-IFE/pde-agents}.  The system runs entirely on
+locally deployed open-source LLMs (Qwen3-Coder-Next, Llama~4~Scout) without
+requiring proprietary API access.
+
+\medskip
+\textbf{Declarations.}\quad
+This manuscript is original, has not been published previously, and is not
+under consideration elsewhere.  All authors have approved the manuscript and
+agree with its submission to CMAME.  There are no conflicts of interest to
+declare.
+
+\closing{Sincerely,}
+
+\end{letter}
+\end{document}
