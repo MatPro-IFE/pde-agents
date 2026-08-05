@@ -1,384 +1,332 @@
 #!/usr/bin/env python3
-"""Generate the graphical abstract for the PDE-Agents CMAME paper.
+"""Graphical abstract for PDE-Agents CMAME paper.
 
-Elsevier spec: 531 × 1328 px minimum, landscape, no text smaller than 8pt.
-We render at 300 DPI → 4.43 × 11.07 inches, output as TIFF + EPS + PDF.
+Elsevier spec: min 1328x531 px, 500:200 ratio, 300 DPI, white bg.
+We render at 3x for crisp output: 3984 x 1593 px.
 """
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.patches import FancyBboxPatch, FancyArrowPatch, Circle
-import matplotlib.patheffects as pe
 import numpy as np
 
-# ── Colour palette (matches paper) ──────────────────────────────────────────
-BG          = "#FFFFFF"
-DARK        = "#1A1A2E"
-BLUE        = "#3478BE"      # nodeblue
-BLUE_LIGHT  = "#D6E6F5"
-GREEN       = "#388E3C"
-GREEN_LIGHT = "#DFF0D8"
-ORANGE      = "#E65100"
-ORANGE_LIGHT= "#FFF3E0"
-RED         = "#B71C1C"       # nodered
-PURPLE      = "#5E35B1"
-PURPLE_LIGHT= "#EDE7F6"
-GRAY        = "#616161"
-GRAY_LIGHT  = "#F5F5F5"
-GOLD        = "#F9A825"
-TEAL        = "#00897B"
-TEAL_LIGHT  = "#E0F2F1"
+# ── Modern colour palette (3 hues + neutrals) ───────────────────────────────
+BLUE       = "#2563EB"
+BLUE_50    = "#EFF6FF"
+BLUE_100   = "#DBEAFE"
+BLUE_200   = "#BFDBFE"
+TEAL       = "#0D9488"
+TEAL_50    = "#F0FDFA"
+TEAL_100   = "#CCFBF1"
+AMBER      = "#D97706"
+AMBER_50   = "#FFFBEB"
+AMBER_100  = "#FEF3C7"
+SLATE_900  = "#0F172A"
+SLATE_700  = "#334155"
+SLATE_500  = "#64748B"
+SLATE_300  = "#CBD5E1"
+SLATE_200  = "#E2E8F0"
+SLATE_100  = "#F1F5F9"
+SLATE_50   = "#F8FAFC"
+WHITE      = "#FFFFFF"
+RED_600    = "#DC2626"
+GREEN_600  = "#16A34A"
 
 DPI = 300
-fig, ax = plt.subplots(figsize=(11.07, 4.43), dpi=DPI)
+W, H = 13.28, 5.31  # inches → 3984 x 1593 px at 300 DPI
+
+fig, ax = plt.subplots(figsize=(W, H), dpi=DPI)
 ax.set_xlim(0, 100)
 ax.set_ylim(0, 40)
 ax.set_aspect("equal")
 ax.axis("off")
-fig.patch.set_facecolor(BG)
-ax.set_facecolor(BG)
+fig.patch.set_facecolor(WHITE)
+ax.set_facecolor(WHITE)
+
+FONT = "Roboto"
 
 
-def rounded_box(x, y, w, h, color, border_color=None, alpha=1.0, lw=1.5,
-                radius=0.6, zorder=2):
-    box = FancyBboxPatch((x, y), w, h,
-                         boxstyle=f"round,pad={radius}",
-                         facecolor=color, edgecolor=border_color or color,
-                         linewidth=lw, alpha=alpha, zorder=zorder,
-                         mutation_scale=1)
+def pill(x, y, w, h, fc, ec=None, lw=1.2, zorder=2, alpha=1.0):
+    """Rounded rectangle with large corner radius (pill shape)."""
+    r = min(h / 3, 0.8)
+    box = FancyBboxPatch(
+        (x, y), w, h, boxstyle=f"round,pad={r}",
+        facecolor=fc, edgecolor=ec or fc,
+        linewidth=lw, alpha=alpha, zorder=zorder)
     ax.add_patch(box)
     return box
 
 
-def arrow(x1, y1, x2, y2, color=GRAY, lw=1.8, style="-|>", zorder=3):
-    ar = FancyArrowPatch((x1, y1), (x2, y2),
-                         arrowstyle=style, color=color,
-                         linewidth=lw, mutation_scale=14, zorder=zorder,
-                         connectionstyle="arc3,rad=0")
-    ax.add_patch(ar)
-
-
-def curved_arrow(x1, y1, x2, y2, color=GRAY, lw=1.5, rad=0.25, zorder=3):
-    ar = FancyArrowPatch((x1, y1), (x2, y2),
-                         arrowstyle="-|>", color=color,
-                         linewidth=lw, mutation_scale=12, zorder=zorder,
-                         connectionstyle=f"arc3,rad={rad}")
+def flow_arrow(x1, y1, x2, y2, color=SLATE_300, lw=2.0, zorder=3):
+    """Clean directional arrow."""
+    ar = FancyArrowPatch(
+        (x1, y1), (x2, y2),
+        arrowstyle="-|>", color=color,
+        linewidth=lw, mutation_scale=18, zorder=zorder)
     ax.add_patch(ar)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-#  TITLE BAR (top)
+#  PANEL 1 — INPUT (left, ~18%)
 # ═══════════════════════════════════════════════════════════════════════════
-rounded_box(0.5, 36.0, 99, 3.5, DARK, lw=0, radius=0.4, zorder=1)
-ax.text(50, 37.75, "PDE-Agents",
-        fontsize=16, fontweight="bold", color="white",
-        ha="center", va="center", fontfamily="sans-serif", zorder=5)
-ax.text(50, 36.7,
-        "LLM-Orchestrated Multi-Agent Framework for Automated FEM Simulations "
-        "with Knowledge Graph-Augmented Reasoning",
-        fontsize=7, color="#B0BEC5", ha="center", va="center",
-        fontfamily="sans-serif", zorder=5)
+# Section background
+pill(1, 1, 16, 38, SLATE_50, SLATE_200, lw=1.0, zorder=1)
 
-# ═══════════════════════════════════════════════════════════════════════════
-#  SECTION 1: USER INPUT (left)
-# ═══════════════════════════════════════════════════════════════════════════
-rounded_box(1, 25.5, 12, 9, GRAY_LIGHT, GRAY, alpha=0.5, lw=1.2)
-ax.text(7, 33.5, "Natural Language", fontsize=7.5, fontweight="bold",
-        color=DARK, ha="center", va="center")
-ax.text(7, 32.5, "Interface", fontsize=7.5, fontweight="bold",
-        color=DARK, ha="center", va="center")
+ax.text(9, 36, "Natural Language", fontsize=11, fontweight="bold",
+        color=SLATE_900, ha="center", va="center", fontfamily=FONT)
+ax.text(9, 34, "Input", fontsize=11, fontweight="bold",
+        color=SLATE_900, ha="center", va="center", fontfamily=FONT)
 
 # Chat bubble
-rounded_box(2.2, 28.8, 9.6, 2.8, "white", BLUE, lw=1, radius=0.4)
-ax.text(7, 30.8, '"Run a 2D heat simulation', fontsize=5.5, color=DARK,
-        ha="center", va="center", fontstyle="italic")
-ax.text(7, 29.8, 'on a steel plate at 500 K"', fontsize=5.5, color=DARK,
-        ha="center", va="center", fontstyle="italic")
-
-# User icon
-circle = Circle((7, 27), 1.0, facecolor=BLUE_LIGHT, edgecolor=BLUE,
-                linewidth=1.2, zorder=3)
-ax.add_patch(circle)
-ax.text(7, 27, "USER", fontsize=6, ha="center", va="center", zorder=4,
-        fontweight="bold", color=BLUE)
-
-# ═══════════════════════════════════════════════════════════════════════════
-#  SECTION 2: MULTI-AGENT ORCHESTRATOR (center)
-# ═══════════════════════════════════════════════════════════════════════════
-# Outer orchestrator box
-rounded_box(15, 14, 38, 21.5, "white", BLUE, lw=2.0, radius=0.8)
-ax.text(34, 34.2, "LangGraph Multi-Agent Orchestrator",
-        fontsize=8, fontweight="bold", color=BLUE, ha="center", va="center")
-
-# Supervisor node
-rounded_box(27, 31, 14, 2.5, BLUE, BLUE, alpha=0.15, lw=1.5)
-ax.text(34, 32.25, "SUPERVISOR ROUTER", fontsize=7, fontweight="bold",
-        color=BLUE, ha="center", va="center")
-
-# Agent boxes
-agent_data = [
-    (16, 22.5, "Simulation\nAgent", BLUE, BLUE_LIGHT, "SIM",
-     "FEM setup\n& execution"),
-    (28, 22.5, "Analytics\nAgent", GREEN, GREEN_LIGHT, "ANA",
-     "Result analysis\n& optimization"),
-    (40, 22.5, "Database\nAgent", ORANGE, ORANGE_LIGHT, "DB",
-     "Storage\n& retrieval"),
-]
-
-for x, y, label, color, bg, icon, desc in agent_data:
-    rounded_box(x, y, 10.5, 7.5, bg, color, lw=1.5, radius=0.5)
-    icon_circle = Circle((x + 5.25, 29), 1.2, facecolor=color,
-                          edgecolor="white", linewidth=1.2, alpha=0.9,
-                          zorder=4)
-    ax.add_patch(icon_circle)
-    ax.text(x + 5.25, 29, icon, fontsize=5.5, ha="center", va="center",
-            zorder=5, fontweight="bold", color="white")
-    ax.text(x + 5.25, 26.8, label, fontsize=6.5, fontweight="bold",
-            color=color, ha="center", va="center", linespacing=1.3)
-    ax.text(x + 5.25, 24.2, desc, fontsize=5, color=GRAY,
-            ha="center", va="center", linespacing=1.2)
-
-# Arrows: supervisor → agents
-for x_off in [21.25, 33.25, 45.25]:
-    arrow(x_off, 31, x_off, 30.2, color=BLUE, lw=1.2)
-
-# Feedback loop arrows: agents → supervisor
-curved_arrow(21.25, 30.2, 27, 32.25, color=BLUE, lw=0.8, rad=-0.3)
-curved_arrow(45.25, 30.2, 41, 32.25, color=BLUE, lw=0.8, rad=0.3)
-
-# LLM badge
-rounded_box(17, 15, 33, 2.8, PURPLE_LIGHT, PURPLE, lw=1, radius=0.3)
-ax.text(33.5, 16.4, "LOCAL OPEN-SOURCE LLMs   |   Qwen3-Coder-Next (80B)   |   "
-        "Llama 4 Scout   |   2x RTX PRO 6000 (196 GB VRAM)",
-        fontsize=5, color=PURPLE, ha="center", va="center",
-        fontweight="bold")
-
-# ═══════════════════════════════════════════════════════════════════════════
-#  SECTION 3: KNOWLEDGE GRAPH (bottom center)
-# ═══════════════════════════════════════════════════════════════════════════
-rounded_box(15, 1.5, 21, 11.5, TEAL_LIGHT, TEAL, lw=1.8, radius=0.6)
-ax.text(25.5, 12, "GraphRAG Knowledge Base", fontsize=7.5,
-        fontweight="bold", color=TEAL, ha="center", va="center")
-
-# Mini graph nodes
-graph_nodes = [
-    (19, 8.5, "Material", BLUE, 1.2),
-    (25.5, 9.5, "Run", TEAL, 1.4),
-    (32, 8.5, "BC Config", GREEN, 1.2),
-    (19, 5, "Known\nIssue", RED, 1.2),
-    (25.5, 4, "Reference", PURPLE, 1.2),
-    (32, 5, "Thermal\nClass", ORANGE, 1.2),
-]
-for nx_, ny_, label, color, r in graph_nodes:
-    circle = Circle((nx_, ny_), r, facecolor=color, edgecolor="white",
-                     linewidth=1.5, alpha=0.85, zorder=4)
-    ax.add_patch(circle)
-    ax.text(nx_, ny_, label, fontsize=3.8, color="white", ha="center",
-            va="center", fontweight="bold", zorder=5, linespacing=1.1)
-
-# Graph edges
-graph_edges = [
-    (19, 8.5, 25.5, 9.5), (25.5, 9.5, 32, 8.5),
-    (19, 5, 25.5, 4), (25.5, 4, 32, 5),
-    (19, 8.5, 19, 5), (32, 8.5, 32, 5),
-    (25.5, 9.5, 25.5, 4), (25.5, 9.5, 19, 5), (25.5, 9.5, 32, 5),
-]
-for x1, y1, x2, y2 in graph_edges:
-    ax.plot([x1, x2], [y1, y2], color=TEAL, alpha=0.3, lw=1.0, zorder=3)
-
-# KG details
-ax.text(25.5, 2.3, "Neo4j  ·  768-dim Embeddings  ·  HNSW Vector Search",
-        fontsize=4.5, color=TEAL, ha="center", va="center",
+pill(2.5, 22, 13, 9, WHITE, BLUE_200, lw=1.5, zorder=3)
+ax.text(9, 28.5, '"Simulate heat transfer', fontsize=8,
+        color=SLATE_700, ha="center", va="center", fontfamily=FONT,
+        fontstyle="italic")
+ax.text(9, 26, 'in a steel plate', fontsize=8,
+        color=SLATE_700, ha="center", va="center", fontfamily=FONT,
+        fontstyle="italic")
+ax.text(9, 23.5, 'at 500 K"', fontsize=8,
+        color=SLATE_700, ha="center", va="center", fontfamily=FONT,
         fontstyle="italic")
 
-# Arrow: orchestrator ↔ KG
-arrow(25.5, 14, 25.5, 13.2, color=TEAL, lw=1.5)
-ax.text(27.5, 13.6, "warm-start\ninjection", fontsize=4.5, color=TEAL,
-        ha="left", va="center", fontstyle="italic", linespacing=1.1)
+# User circle
+circle = Circle((9, 16), 2.5, facecolor=BLUE_100, edgecolor=BLUE,
+                linewidth=1.5, zorder=3)
+ax.add_patch(circle)
+# Simple user silhouette using shapes
+head = Circle((9, 17.2), 0.9, facecolor=BLUE, edgecolor="none", zorder=4)
+ax.add_patch(head)
+body = FancyBboxPatch((7.2, 14), 3.6, 2.2, boxstyle="round,pad=0.4",
+                       facecolor=BLUE, edgecolor="none", zorder=4)
+ax.add_patch(body)
+
+ax.text(9, 10.5, "Domain Expert", fontsize=7.5, color=SLATE_500,
+        ha="center", va="center", fontfamily=FONT)
+ax.text(9, 8.5, "or Researcher", fontsize=7.5, color=SLATE_500,
+        ha="center", va="center", fontfamily=FONT)
 
 # ═══════════════════════════════════════════════════════════════════════════
-#  SECTION 4: FEM SOLVER (bottom right)
+#  FLOW ARROW 1
 # ═══════════════════════════════════════════════════════════════════════════
-rounded_box(38, 1.5, 16, 11.5, BLUE_LIGHT, BLUE, lw=1.8, radius=0.6)
-ax.text(46, 12, "FEM Solver", fontsize=7.5, fontweight="bold",
-        color=BLUE, ha="center", va="center")
-
-# Heat equation
-ax.text(46, 9.8, r"$\rho\, c_p\, \frac{\partial u}{\partial t}"
-        r" - \nabla \cdot (k\,\nabla u) = f$",
-        fontsize=8, color=DARK, ha="center", va="center")
-
-# DOLFINx badge
-rounded_box(40.5, 6.5, 11, 2.2, "white", BLUE, lw=1, radius=0.3)
-ax.text(46, 7.6, "DOLFINx / FEniCSx", fontsize=6, fontweight="bold",
-        color=BLUE, ha="center", va="center")
-
-# Features
-features = ["PETSc KSP solvers", "θ-scheme time integration",
-            "Gmsh geometries (9 types)", "Dirichlet / Neumann / Robin BCs"]
-for i, f in enumerate(features):
-    ax.text(46, 5.5 - i * 1.0, f"· {f}", fontsize=4.5, color=GRAY,
-            ha="center", va="center")
-
-# Arrow: orchestrator → FEM
-arrow(46, 14, 46, 13.2, color=BLUE, lw=1.5)
+flow_arrow(17.5, 20, 20.5, 20, color=BLUE, lw=2.5)
 
 # ═══════════════════════════════════════════════════════════════════════════
-#  SECTION 5: KEY RESULTS (right panel)
+#  PANEL 2 — SYSTEM (center, ~42%)
 # ═══════════════════════════════════════════════════════════════════════════
-rounded_box(56, 1.5, 43, 33.5, GRAY_LIGHT, GRAY, alpha=0.3, lw=1.2,
-            radius=0.8)
-ax.text(77.5, 34, "Key Results", fontsize=9, fontweight="bold",
-        color=DARK, ha="center", va="center")
+pill(21, 1, 40, 38, WHITE, BLUE, lw=2.0, zorder=1)
 
-# ── Result card 1: V&V ──
-rounded_box(57.5, 28, 13, 5, "white", BLUE, lw=1.2, radius=0.4)
-ax.text(64, 32, "V&V Convergence", fontsize=6, fontweight="bold",
-        color=BLUE, ha="center", va="center")
-ax.text(64, 30.5, r"$\mathcal{O}(h^2)$", fontsize=14, fontweight="bold",
-        color=BLUE, ha="center", va="center")
-ax.text(64, 28.8, "All benchmarks pass", fontsize=5, color=GRAY,
-        ha="center", va="center")
+# Title
+ax.text(41, 37, "PDE-Agents", fontsize=13, fontweight="bold",
+        color=BLUE, ha="center", va="center", fontfamily=FONT)
+ax.text(41, 35, "Multi-Agent Orchestrator", fontsize=9,
+        color=SLATE_500, ha="center", va="center", fontfamily=FONT)
 
-# ── Result card 2: Success Rate ──
-rounded_box(72, 28, 13, 5, "white", GREEN, lw=1.2, radius=0.4)
-ax.text(78.5, 32, "Task Success", fontsize=6, fontweight="bold",
-        color=GREEN, ha="center", va="center")
-ax.text(78.5, 30.5, "100%", fontsize=14, fontweight="bold",
-        color=GREEN, ha="center", va="center")
-ax.text(78.5, 28.8, "KG Smart (50 tasks)", fontsize=5, color=GRAY,
-        ha="center", va="center")
+# ── Supervisor bar ──
+pill(24, 30.5, 34, 3, BLUE, BLUE, lw=0, zorder=3, alpha=0.1)
+pill(24, 30.5, 34, 3, "none", BLUE, lw=1.5, zorder=4)
+ax.text(41, 32, "LangGraph Supervisor Router", fontsize=8,
+        fontweight="bold", color=BLUE, ha="center", va="center",
+        fontfamily=FONT)
 
-# ── Result card 3: Production ──
-rounded_box(86.5, 28, 11.5, 5, "white", ORANGE, lw=1.2, radius=0.4)
-ax.text(92.25, 32, "Production Runs", fontsize=6, fontweight="bold",
-        color=ORANGE, ha="center", va="center")
-ax.text(92.25, 30.5, "1,369", fontsize=14, fontweight="bold",
-        color=ORANGE, ha="center", va="center")
-ax.text(92.25, 28.8, "97.8% success rate", fontsize=5, color=GRAY,
-        ha="center", va="center")
+# ── Three agent cards ──
+agents = [
+    ("Simulation", BLUE, BLUE_50, "SIM"),
+    ("Analytics", TEAL, TEAL_50, "ANA"),
+    ("Database", AMBER, AMBER_50, "DB"),
+]
 
-# ── Ablation comparison bar chart ──
-rounded_box(57.5, 14.5, 40.5, 12.5, "white", GRAY, lw=1, radius=0.4)
-ax.text(77.75, 26, "Three-Way KG Ablation Study", fontsize=7,
-        fontweight="bold", color=DARK, ha="center", va="center")
+card_w, card_h = 10.5, 10
+card_y = 18.5
+card_xs = [24, 35.5, 47]
 
-# Bar chart data
-categories = ["Success\nRate", "Physics\nScore", "MPF", "First-Try\nSuccess"]
-kg_on   = [0.72, 0.84, 0.76, 0.56]
-kg_off  = [1.00, 0.853, 0.796, 0.82]
-kg_smart = [1.00, 0.933, 0.926, 0.92]
+for i, (name, color, bg, abbr) in enumerate(agents):
+    x = card_xs[i]
+    pill(x, card_y, card_w, card_h, bg, color, lw=1.5, zorder=3)
 
-bar_w = 1.8
-gap = 9.2
-x_start = 61
+    # Icon circle
+    icon_c = Circle((x + card_w/2, card_y + 7.5), 1.5,
+                     facecolor=color, edgecolor="none", zorder=4)
+    ax.add_patch(icon_c)
+    ax.text(x + card_w/2, card_y + 7.5, abbr, fontsize=6.5,
+            fontweight="bold", color=WHITE, ha="center", va="center",
+            fontfamily=FONT, zorder=5)
 
-for i, (cat, v1, v2, v3) in enumerate(zip(categories, kg_on, kg_off, kg_smart)):
-    bx = x_start + i * gap
-    max_h = 8.5
-    y_base = 15.5
+    ax.text(x + card_w/2, card_y + 4.2, f"{name}", fontsize=8,
+            fontweight="bold", color=color, ha="center", va="center",
+            fontfamily=FONT)
+    ax.text(x + card_w/2, card_y + 2.5, "Agent", fontsize=8,
+            fontweight="bold", color=color, ha="center", va="center",
+            fontfamily=FONT)
+
+    # Connector: supervisor → agent
+    flow_arrow(x + card_w/2, 30.5, x + card_w/2, card_y + card_h,
+               color=SLATE_300, lw=1.2)
+
+# ── LLM bar at bottom ──
+pill(24, 14, 34, 3.5, SLATE_50, SLATE_200, lw=1.0, zorder=3)
+ax.text(41, 15.75, "Local LLMs: Qwen3-Coder-Next  |  Llama 4 Scout  |"
+        "  2\u00d7 RTX PRO 6000",
+        fontsize=6.5, color=SLATE_500, ha="center", va="center",
+        fontfamily=FONT)
+
+# ── Knowledge Graph section ──
+pill(24, 2, 34, 11, TEAL_50, TEAL, lw=1.5, zorder=2)
+ax.text(41, 11.8, "GraphRAG Knowledge Base", fontsize=8.5,
+        fontweight="bold", color=TEAL, ha="center", va="center",
+        fontfamily=FONT)
+
+# Clean graph visualization
+nodes = [
+    (30, 7.5, "Run", 1.5),
+    (36, 9, "Material", 1.2),
+    (36, 5, "Issue", 1.2),
+    (46, 9, "BC", 1.0),
+    (46, 5, "Ref", 1.0),
+    (52, 7.5, "Domain", 1.0),
+]
+edges = [
+    (0, 1), (0, 2), (0, 3), (0, 4), (0, 5),
+    (1, 3), (2, 4), (3, 5),
+]
+for n1, n2 in edges:
+    ax.plot([nodes[n1][0], nodes[n2][0]],
+            [nodes[n1][1], nodes[n2][1]],
+            color=TEAL, alpha=0.25, lw=1.2, zorder=3)
+for nx_, ny_, label, r in nodes:
+    c = Circle((nx_, ny_), r, facecolor=TEAL, edgecolor=WHITE,
+               linewidth=1.2, alpha=0.8, zorder=4)
+    ax.add_patch(c)
+    ax.text(nx_, ny_, label, fontsize=5 if r >= 1.2 else 4.5,
+            fontweight="bold", color=WHITE, ha="center", va="center",
+            fontfamily=FONT, zorder=5)
+
+ax.text(41, 2.8, "Neo4j  \u00b7  768-dim embeddings  \u00b7  "
+        "HNSW vector search  \u00b7  warm-start injection",
+        fontsize=5.5, color=TEAL, ha="center", va="center",
+        fontfamily=FONT, fontstyle="italic")
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  FLOW ARROW 2
+# ═══════════════════════════════════════════════════════════════════════════
+flow_arrow(61.5, 20, 64.5, 20, color=BLUE, lw=2.5)
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  PANEL 3 — RESULTS (right, ~35%)
+# ═══════════════════════════════════════════════════════════════════════════
+
+# ── FEM equation + solver ──
+pill(65, 27, 33.5, 12, BLUE_50, BLUE_200, lw=1.2, zorder=1)
+
+ax.text(81.75, 37, "FEM Simulation Output", fontsize=10,
+        fontweight="bold", color=SLATE_900, ha="center", va="center",
+        fontfamily=FONT)
+
+ax.text(81.75, 34, r"$\rho\, c_p\, \dfrac{\partial u}{\partial t}"
+        r" - \nabla \!\cdot\! (k\,\nabla u) = f$",
+        fontsize=12, color=SLATE_900, ha="center", va="center")
+
+ax.text(81.75, 31, "DOLFINx / FEniCSx  \u00b7  PETSc KSP  \u00b7  "
+        "\u03b8-scheme  \u00b7  Gmsh geometries",
+        fontsize=6, color=SLATE_500, ha="center", va="center",
+        fontfamily=FONT)
+
+# Convergence badge
+pill(67, 28, 9, 2.3, WHITE, BLUE, lw=1.2, zorder=3)
+ax.text(71.5, 29.15, r"$\mathcal{O}(h^2)$ verified", fontsize=7,
+        fontweight="bold", color=BLUE, ha="center", va="center",
+        fontfamily=FONT)
+
+# ── Key metrics row ──
+metrics = [
+    ("100%", "Task Success", "KG Smart (50 tasks)", GREEN_600),
+    ("97.8%", "Production SR", "1,369 real runs", BLUE),
+    ("1.00", "MPF Score", "Novel materials", TEAL),
+    ("2.9\u00d7", "KG Advantage", "vs. KG-free baseline", AMBER),
+]
+
+mx_start = 66
+mx_w = 8
+for i, (value, title, sub, color) in enumerate(metrics):
+    mx = mx_start + i * mx_w + i * 0.3
+    my = 14
+
+    pill(mx, my, mx_w, 12, WHITE, SLATE_200, lw=1.0, zorder=2)
+
+    ax.text(mx + mx_w/2, 23.5, value, fontsize=16, fontweight="bold",
+            color=color, ha="center", va="center", fontfamily=FONT)
+    ax.text(mx + mx_w/2, 20.5, title, fontsize=7, fontweight="bold",
+            color=SLATE_700, ha="center", va="center", fontfamily=FONT)
+    ax.text(mx + mx_w/2, 18.5, sub, fontsize=5.5,
+            color=SLATE_500, ha="center", va="center", fontfamily=FONT)
+
+    # Decorative bar at top of card
+    pill(mx + 0.3, my + 11.2, mx_w - 0.6, 0.5, color, color, lw=0,
+         zorder=3)
+
+# ── KG ablation mini-bars ──
+pill(65, 1, 33.5, 12, SLATE_50, SLATE_200, lw=1.0, zorder=1)
+
+ax.text(81.75, 12, "Three-Way KG Ablation", fontsize=8.5,
+        fontweight="bold", color=SLATE_900, ha="center", va="center",
+        fontfamily=FONT)
+
+bar_data = [
+    ("Success Rate", 0.72, 1.00, 1.00),
+    ("Physics Score", 0.84, 0.853, 0.933),
+    ("MPF", 0.76, 0.796, 0.926),
+    ("First-Try", 0.56, 0.82, 0.92),
+]
+
+bar_x_start = 67
+bar_gap = 7.8
+bar_max_h = 7.5
+bar_y = 2.5
+bar_w = 1.6
+
+for i, (label, v_on, v_off, v_smart) in enumerate(bar_data):
+    bx = bar_x_start + i * bar_gap
 
     # KG On
-    h1 = v1 * max_h
-    rounded_box(bx - 3.0, y_base, bar_w, h1, RED, RED, alpha=0.7,
-                lw=0, radius=0.2, zorder=3)
-    ax.text(bx - 2.1, y_base + h1 + 0.3, f"{v1:.0%}", fontsize=4.5,
-            color=RED, ha="center", va="bottom", fontweight="bold", zorder=4)
+    h = v_on * bar_max_h
+    pill(bx, bar_y, bar_w, h, RED_600, RED_600, lw=0, alpha=0.6, zorder=3)
 
     # KG Off
-    h2 = v2 * max_h
-    rounded_box(bx - 0.9, y_base, bar_w, h2, GRAY, GRAY, alpha=0.5,
-                lw=0, radius=0.2, zorder=3)
-    ax.text(bx + 0.0, y_base + h2 + 0.3, f"{v2:.0%}", fontsize=4.5,
-            color=GRAY, ha="center", va="bottom", fontweight="bold", zorder=4)
+    h = v_off * bar_max_h
+    pill(bx + bar_w + 0.3, bar_y, bar_w, h, SLATE_300, SLATE_300, lw=0,
+         alpha=0.8, zorder=3)
 
     # KG Smart
-    h3 = v3 * max_h
-    rounded_box(bx + 1.2, y_base, bar_w, h3, TEAL, TEAL, alpha=0.85,
-                lw=0, radius=0.2, zorder=3)
-    ax.text(bx + 2.1, y_base + h3 + 0.3, f"{v3:.0%}", fontsize=4.5,
-            color=TEAL, ha="center", va="bottom", fontweight="bold", zorder=4)
+    h = v_smart * bar_max_h
+    pill(bx + 2*(bar_w + 0.3), bar_y, bar_w, h, TEAL, TEAL, lw=0,
+         alpha=0.85, zorder=3)
 
-    ax.text(bx, 15.0, cat, fontsize=4.5, color=GRAY, ha="center",
-            va="top", linespacing=1.1)
+    ax.text(bx + 1.5*(bar_w + 0.3) - 0.15, 1.8, label, fontsize=5,
+            color=SLATE_500, ha="center", va="top", fontfamily=FONT)
 
-# Legend
-for i, (label, color) in enumerate([("KG On", RED), ("KG Off", GRAY),
-                                     ("KG Smart", TEAL)]):
-    lx = 86 + i * 4.2
-    rounded_box(lx, 24.5, 1.2, 0.8, color, color, alpha=0.7 if label != "KG Smart" else 0.85,
-                lw=0, radius=0.15)
-    ax.text(lx + 1.6, 24.9, label, fontsize=4.5, color=color,
-            ha="left", va="center", fontweight="bold")
-
-# ── Novel material result ──
-rounded_box(57.5, 2, 40.5, 11.5, "white", PURPLE, lw=1.2, radius=0.4)
-ax.text(77.75, 12.5, "Novel Material Experiment — KG Value Proof",
-        fontsize=6.5, fontweight="bold", color=PURPLE, ha="center",
-        va="center")
-
-# MPF comparison
-ax.text(66, 10.5, "Material Property Fidelity (MPF)", fontsize=5.5,
-        color=DARK, ha="center", va="center", fontweight="bold")
-
-# KG Off bar
-rounded_box(60, 7, 12, 2.5, RED, RED, alpha=0.15, lw=1, radius=0.3)
-ax.text(61, 8.25, "KG Off", fontsize=5.5, fontweight="bold", color=RED,
-        ha="left", va="center")
-ax.text(71, 8.25, "0.34", fontsize=9, fontweight="bold", color=RED,
-        ha="right", va="center")
-
-# KG Smart bar
-rounded_box(60, 3.5, 12, 2.5, TEAL, TEAL, alpha=0.15, lw=1, radius=0.3)
-ax.text(61, 4.75, "KG Smart", fontsize=5.5, fontweight="bold", color=TEAL,
-        ha="left", va="center")
-ax.text(71, 4.75, "1.00", fontsize=9, fontweight="bold", color=TEAL,
-        ha="right", va="center")
-
-# Arrow showing improvement
-ax.annotate("", xy=(73.5, 4.75), xytext=(73.5, 8.25),
-            arrowprops=dict(arrowstyle="-|>", color=GOLD, lw=2.5,
-                            mutation_scale=16),
-            zorder=5)
-ax.text(74.5, 6.5, "2.9×", fontsize=10, fontweight="bold", color=GOLD,
-        ha="left", va="center", zorder=5)
-
-# Example materials
-materials = [
-    ("Pyrathane", "k=312 W/(m·K)", "KG Off used k=0.15\n→ 2,080× error"),
-    ("Cryonite", "k=0.42 W/(m·K)", "Extreme insulator\ncorrectly identified"),
-    ("Novidium", "k=73 W/(m·K)", "Moderate conductor\nexact retrieval"),
-]
-for i, (name, prop, note) in enumerate(materials):
-    mx = 80 + i * 6
-    rounded_box(mx - 2.5, 3.5, 5.8, 6.5, PURPLE_LIGHT, PURPLE, lw=0.8,
-                radius=0.3, alpha=0.5)
-    ax.text(mx + 0.4, 9, name, fontsize=5, fontweight="bold",
-            color=PURPLE, ha="center", va="center")
-    ax.text(mx + 0.4, 7.8, prop, fontsize=4, color=DARK,
-            ha="center", va="center")
-    ax.text(mx + 0.4, 5.5, note, fontsize=3.5, color=GRAY,
-            ha="center", va="center", linespacing=1.2)
-
-# ═══════════════════════════════════════════════════════════════════════════
-#  CONNECTING ARROWS (left → center, center → right)
-# ═══════════════════════════════════════════════════════════════════════════
-arrow(13, 30, 14.8, 30, color=DARK, lw=2.0)
-arrow(53.2, 25, 55.8, 25, color=DARK, lw=2.0)
+# Legend (bottom right)
+legend_items = [("KG On", RED_600, 0.6), ("KG Off", SLATE_300, 0.8),
+                ("KG Smart", TEAL, 0.85)]
+for i, (label, color, alpha) in enumerate(legend_items):
+    lx = 90 + i * 3.2
+    pill(lx, 10.2, 1.0, 0.7, color, color, lw=0, alpha=alpha, zorder=4)
+    ax.text(lx + 1.3, 10.55, label, fontsize=4.5, color=SLATE_700,
+            ha="left", va="center", fontfamily=FONT)
 
 # ═══════════════════════════════════════════════════════════════════════════
 #  SAVE
 # ═══════════════════════════════════════════════════════════════════════════
-plt.tight_layout(pad=0.3)
+plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
-out_dir = "/home/ife12524/matpro_files/sadhi/Projects_SIM/pde-agents/paper"
-fig.savefig(f"{out_dir}/graphical_abstract.pdf", dpi=DPI, bbox_inches="tight",
-            facecolor=BG)
-fig.savefig(f"{out_dir}/graphical_abstract.tiff", dpi=DPI, bbox_inches="tight",
-            facecolor=BG, pil_kwargs={"compression": "tiff_lzw"})
-fig.savefig(f"{out_dir}/graphical_abstract.png", dpi=DPI, bbox_inches="tight",
-            facecolor=BG)
+out = "/home/ife12524/matpro_files/sadhi/Projects_SIM/pde-agents/paper"
+fig.savefig(f"{out}/graphical_abstract.png", dpi=DPI, bbox_inches="tight",
+            facecolor=WHITE, pad_inches=0.1)
+fig.savefig(f"{out}/graphical_abstract.tiff", dpi=DPI, bbox_inches="tight",
+            facecolor=WHITE, pad_inches=0.1,
+            pil_kwargs={"compression": "tiff_lzw"})
+fig.savefig(f"{out}/graphical_abstract.pdf", dpi=DPI, bbox_inches="tight",
+            facecolor=WHITE, pad_inches=0.1)
 plt.close()
 
-print("Graphical abstract saved as PDF, TIFF, and PNG.")
+print("Graphical abstract saved (PNG, TIFF, PDF).")
+print(f"  Dimensions: {W*DPI:.0f} x {H*DPI:.0f} px at {DPI} DPI")
