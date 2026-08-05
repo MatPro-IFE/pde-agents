@@ -526,7 +526,22 @@ linear regression on the log-log plot.
 
 \subsection{Results}
 
-\input{tables/vv_convergence.tex}
+\begin{table}[htbp]
+\centering\small
+\caption{Verification: spatial convergence rates for the heat equation solver.
+         Expected rate is $\mathcal{O}(h^2)$ for $P_1$ elements.}
+\label{tab:vv-convergence}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lp{4.2cm}ccc@{}}
+\toprule
+Case & Description & DOFs & $\|e\|_{L^2}$ & Rate \\
+\midrule
+  Steady Linear     & Linear $T(x,y){=}x{+}2y$; exact in $P_1$ space          & 16\,641 & $2.47{\times}10^{-9}$ & \textit{exact} \\
+  Transient Fourier & $e^{-2\pi^2 t}\sin(\pi x)\sin(\pi y)$ decay mode    & 16\,641 & $1.50{\times}10^{-5}$ & 2.04            \\
+  Steady Poisson    & $-\nabla^2 u = 1$; exact soln.\ via Green's fn.     & 16\,641 & $5.57{\times}10^{-6}$ & 2.00            \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 All three cases pass: Cases 2 and 3 achieve rates of $2.04$ and $2.00$,
 consistent with the theoretical $\mathcal{O}(h^2)$ prediction for P1
@@ -784,7 +799,43 @@ MPF and $\text{MPF}_w$ both approach 1.0 across all modes.
 \cref{tab:ablation} presents aggregate results across the three
 conditions.
 
-\input{tables/ablation.tex}
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{Three-way KG ablation across 50 benchmark tasks with frozen
+         knowledge graph ($n{=}50$ per mode).  ``Success-only'' rows isolate
+         output quality by excluding failed runs; \revised{in the overall rows a
+         failed run scores MPF\,=\,0 and phys\,=\,0.5, except N08, which
+         produced no usable output and scores 0 on both.}  95\% Wilson CIs
+         for success rate.}
+\label{tab:ablation}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccc}
+\toprule
+Metric & KG Off & KG On & KG Smart \\
+\midrule
+  Success rate          & \textbf{100\%} [93,100] & 94\% [84,98] & \textbf{100\%} [93,100]  \\[2pt]
+\multicolumn{4}{l}{\textit{Overall (all tasks):}} \\
+  \quad Physics score   & 0.853 $\pm$ 0.21 & 0.846 $\pm$ 0.24 & \textbf{0.933 $\pm$ 0.13} \\
+  \quad MPF             & 0.796 $\pm$ 0.30 & 0.752 $\pm$ 0.39 & \textbf{0.926 $\pm$ 0.16} \\[2pt]
+\multicolumn{4}{l}{\textit{Success-only quality:}} \\
+  \quad Physics score   & 0.853 $\pm$ 0.21 & 0.879 $\pm$ 0.19 & \textbf{0.933 $\pm$ 0.13} \\
+  \quad MPF             & 0.796 $\pm$ 0.30 & 0.801 $\pm$ 0.35 & \textbf{0.926 $\pm$ 0.16} \\[2pt]
+  Wall time (s)         & \textbf{12.9 $\pm$ 4.9} & 60.8 $\pm$ 73.2 & 28.7 $\pm$ 39.3 \\
+\midrule
+\multicolumn{4}{l}{\textit{By difficulty (success rate):}} \\
+  \quad Easy (12)       & \textbf{100\%}  & 92\%  & \textbf{100\%}  \\
+  \quad Medium (15)     & \textbf{100\%}  & 93\%  & \textbf{100\%} \\
+  \quad Hard (13)       & \textbf{100\%}  & \textbf{100\%}  & \textbf{100\%}  \\
+  \quad Novel (10)      & 100\%* & 90\%  & \textbf{100\%}  \\
+\midrule
+\multicolumn{4}{l}{\textit{Novel tasks quality:}} \\
+  \quad Physics score   & 0.590  & 0.887$^\dagger$ & \textbf{0.999} \\
+  \quad MPF             & 0.340  & 0.889$^\dagger$ & \textbf{1.000} \\
+\bottomrule
+\multicolumn{4}{l}{\scriptsize *KG Off ``succeeds'' but fabricates properties (MPF\,=\,0.34).}\\
+\multicolumn{4}{l}{\scriptsize $^\dagger$Success-only (9/10 tasks); N08 timed out.}\\
+\end{tabular}
+\end{table}
 
 \paragraph{Success rate.}
 KG~Off and KG~Smart both achieve 100\% success [93\%,\,100\%]
@@ -974,7 +1025,37 @@ and Robin tasks show significant deviations:
         from incorrect diffusivity altering the transient profile.
 \end{itemize}
 
-\input{tables/error_propagation.tex}
+% Error propagation: how wrong material properties affect simulation output
+\begin{table}[t]
+\centering
+\caption{Error propagation from fabricated properties (KG~Off) to
+simulation output.  Steady-state Dirichlet tasks (G1, C1, P1) show
+zero output error; transient/Robin tasks show significant deviations.}
+\label{tab:error-propagation}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llrrrrrr@{}}
+\toprule
+Task & Mat. & $|\Delta T_{\!\max}|$ & $|\Delta T_{\!\min}|$ &
+  $|\Delta T_{\!\mathrm{mean}}|$ & $\epsilon_k$ & $\epsilon_\rho$ & $\epsilon_{c_p}$ \\
+  &  & (K) & (K) & (K) & (\%) & (\%) & (\%) \\
+\midrule
+G1 & Nov. &   $<$0.1 &   $<$0.1 &    $<$0.1 &  86 &  45 &  18 \\
+G2 & Nov. &   $<$0.1 &   $<$0.1 &    20.7 &  38 &  65 &  78 \\
+G3 & Nov. &   $<$0.1 &   46.6 &     1.3 &  86 &  45 &  18 \\
+\midrule
+C1 & Cryo. &   $<$0.1 &   $<$0.1 &    $<$0.1 & 64 &  19 &  29 \\
+C2 & Cryo. &   $<$0.1 &    9.5 &     0.3 & 138 & 659 &  77 \\
+\midrule
+P1 & Pyra. &   $<$0.1 &   $<$0.1 &    $<$0.1 & 100 &  58 & 224 \\
+P2 & Pyra. & \textbf{949} & $<$0.1 & \textbf{363} & 100 &  58 & 188 \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.3em}
+{\scriptsize $\epsilon_p = |p_{\text{fab}} - p_{\text{true}}|/p_{\text{true}}$.
+P2's $k$ error ($2{,}080\times$) produces 949\,K $T_{\max}$ overshoot.}
+\end{table}
 
 \begin{figure}[htbp]
   \centering
@@ -1007,7 +1088,30 @@ MPF (1.00 vs.\ 0.34) and $2.4\times$ higher efficiency
 tasks) and its mandatory retrieval overhead yields diminishing returns:
 90\% success vs.\ 100\% for both alternatives.
 
-\input{tables/cost_benefit.tex}
+\begin{table}[t]
+\centering
+\caption{Cost-benefit of KG modes on the novel-material subset of the
+50-task ablation ($n{=}10$).  \revised{Quality columns are all-task means, so
+KG~On's failed task (N08) is included at MPF\,=\,0; the success-only
+values in \cref{tab:ablation} are correspondingly higher (0.889).}
+Efficiency $=$ MPF / wall-time ($\times10^{-2}$).}
+\label{tab:cost-benefit}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+Mode & Succ. & Time & Iter. & MPF & Phys. & Eff. \\
+     &       & (s)  &       &     & Score & ($\!\times\!10^{-2}$) \\
+\midrule
+KG Off   & 100\% & \textbf{11.7} & \textbf{3.0} & 0.34 & 0.59 & 2.92 \\
+KG On    &  90\% & 111.4 & 7.4 & 0.80 & 0.80 & 0.72 \\
+KG Smart & \textbf{100\%} & 58.0 & 4.9 & \textbf{1.00} & \textbf{1.00} & \textbf{1.72} \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.3em}
+{\scriptsize KG Smart: +396\% time, +194\% MPF vs.\ KG Off; +2.4$\times$ efficiency vs.\ KG On.}
+\end{table}
 
 \paragraph{Adaptive KG decision framework.}
 Based on the preceding analysis, we propose a simple decision algorithm
@@ -1046,7 +1150,35 @@ wrong properties with both (different wrong values, but the same
 failure mode).  This confirms that the warm-start vector search
 bypasses model-specific memorisation gaps entirely.
 
-\input{tables/multi_model.tex}
+% Multi-model cross-validation: novel-material tasks (n=7, earlier experiment)
+\begin{table}[t]
+\centering
+\caption{Cross-model validation on novel tasks ($n{=}7$, earlier
+  experiment with v1 benchmark).  KG~Smart achieves perfect MPF with
+  both LLM backends.}
+\label{tab:multi-model}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llcccc@{}}
+\toprule
+Model & Mode & Succ. & Qual. & MPF & Phys. \\
+\midrule
+\multirow{3}{*}{Qwen2.5-Coder 32B}
+  & KG On    & 57\% & 0.41 & 0.43 & 0.64 \\
+  & KG Off   & 100\% & 0.61 & 0.34 & 0.63 \\
+  & KG Smart & 100\% & 0.96 & \textbf{1.00} & \textbf{1.00} \\
+\midrule
+\multirow{3}{*}{Qwen3-Coder-Next 80B}
+  & KG On    &  71\% & 0.14 & 0.14 & 0.57 \\
+  & KG Off   &  86\% & 0.54 & 0.40 & 0.70 \\
+  & KG Smart & 100\% & 0.96 & \textbf{1.00} & \textbf{1.00} \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.3em}
+{\scriptsize Warm-start vector search retrieves exact properties before the
+LLM reasons, eliminating dependence on memorised material data.}
+\end{table}
 
 \paragraph{Key takeaway.}
 The KG's value is not in making simulations \emph{run} (LLMs can
@@ -1178,7 +1310,29 @@ time-stepping, 3D geometry, Robin convection, and multi-material) run via
 \texttt{scripts/sweep\_full\_study.py}; the remainder are interactive and
 ablation runs accumulated through normal system use.
 
-\input{tables/agent_metrics.tex}
+\begin{table}[htbp]
+\centering
+\caption{Agent ecosystem performance metrics from production database.
+\revised{FEniCSx runs, through 2026-04-17 (excludes the controlled ablation
+campaign and non-FEniCSx backends).}}
+\label{tab:agent-metrics}
+\begin{tabular}{lr}
+\toprule
+Metric & Value \\
+\midrule
+Total simulation runs & 1369 \\
+Overall success rate & 97.8\% \\
+Unique agent tasks & \revised{421} \\
+First-try success rate & \revised{85.4\%} \\
+\revised{Retry rate} & \revised{10.3\%} \\
+Suggestion acceptance rate & 0.0\% \\
+Avg.\ steps/task (analytics) & 10.2 \\
+Avg.\ steps/task (database) & 6.2 \\
+Avg.\ steps/task (simulation) & \revised{11.1} \\
+Avg.\ simulation time & \revised{2.49s} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{Success and Failure Modes}
 
@@ -1570,6 +1724,34 @@ expected.  Convergence rates are therefore fitted from $\|e\|_{L^2}$
 alone; a rate fitted from nodal values would say nothing useful about
 this case.}
 
-\input{tables/vv_detail}
+\begin{table*}[htbp]
+\centering\footnotesize
+\caption{Detailed convergence data: error norms at each mesh resolution.  $\|e\|_{L^2}$ is integrated over each element with quadrature of degree 8, so it captures the error \emph{between} nodes; $\|e\|_{L^\infty}$ is evaluated at the degrees of freedom only.  For the constant-source case the P1 solution is nodally exact, so $\|e\|_{L^\infty}$ sits at machine precision while $\|e\|_{L^2}$ shows the expected $\mathcal{O}(h^2)$ interpolation error.  The two norms measure different things, and only the integrated norm is used to fit convergence rates.}
+\label{tab:vv-detail}
+\begin{tabular}{lrrrr}
+\toprule
+Case & $N$ & DOFs & $\|e\|_{L^2}$ & $\|e\|_{L^\infty}$ \\
+\midrule
+  2D Steady-State Linear Profile & 8 & 81 & 4.22e-11 & 1.12e-10 \\
+   & 16 & 289 & 3.65e-09 & 1.44e-08 \\
+   & 32 & 1,089 & 3.89e-10 & 1.11e-09 \\
+   & 64 & 4,225 & 1.10e-09 & 3.00e-09 \\
+   & 128 & 16,641 & 2.47e-09 & 6.40e-09 \\
+\addlinespace
+  2D Transient Fourier Mode Decay & 8 & 81 & 4.38e-03 & 4.88e-03 \\
+   & 16 & 289 & 9.48e-04 & 2.64e-03 \\
+   & 32 & 1,089 & 2.39e-04 & 6.62e-04 \\
+   & 64 & 4,225 & 5.98e-05 & 1.65e-04 \\
+   & 128 & 16,641 & 1.50e-05 & 4.13e-05 \\
+\addlinespace
+  2D Steady-State with Constant Source (1D-like) & 8 & 81 & 1.43e-03 & 1.12e-10 \\
+   & 16 & 289 & 3.57e-04 & 2.28e-11 \\
+   & 32 & 1,089 & 8.91e-05 & 1.22e-10 \\
+   & 64 & 4,225 & 2.23e-05 & 1.83e-10 \\
+   & 128 & 16,641 & 5.57e-06 & 2.68e-10 \\
+\addlinespace
+\bottomrule
+\end{tabular}
+\end{table*}
 
 \end{document}
