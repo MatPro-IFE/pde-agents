@@ -49,9 +49,9 @@
 \node[ann, anchor=west] at ($(a1.east)+(0.1,0)$)
   {LLM guesses\\[-1pt]properties};
 
-\node[lbl] at (\colA, -5.0) {\textit{Fast (14\,s avg.)}};
-\node[lbl] at (\colA, -5.35) {\textit{Wrong physics}};
-\node[lbl] at (\colA, -5.7) {\textit{MPF\,=\,0.34}};
+\node[lbl] at (\colA, -5.0) {\textit{Fast (12.9\,s avg.)}};
+\node[lbl] at (\colA, -5.35) {\textit{100\% success*}};
+\node[lbl] at (\colA, -5.7) {\textit{MPF\,=\,0.80}};
 
 % ═══════════ COLUMN B — KG On ═══════════
 \node[agentstep] (b1) at (\colB, {-1*\rs})  {Parse task};
@@ -77,9 +77,9 @@
 \node[ann, anchor=west] at ($(b2.east)+(0.1,0)$)
   {Required\\[-1pt]every run};
 
-\node[lbl] at (\colB, -7.2) {\textit{Slow (64\,s avg.)}};
-\node[lbl] at (\colB, -7.55) {\textit{57\% success}};
-\node[lbl] at (\colB, -7.9) {\textit{MPF\,=\,0.43}};
+\node[lbl] at (\colB, -7.2) {\textit{Slow (60.8\,s avg.)}};
+\node[lbl] at (\colB, -7.55) {\textit{94\% success}};
+\node[lbl] at (\colB, -7.9) {\textit{MPF\,=\,0.75}};
 
 % ═══════════ COLUMN C — KG Smart ═══════════
 \node[warmstart] (c0) at (\colC, {-0.4*\rs}) {Warm-start inject};
@@ -111,12 +111,17 @@
 \node[ann, anchor=east] at ($(c1.west)+(-0.1,0)$)
   {Uses injected\\[-1pt]context};
 
-\node[lbl] at (\colC, -7.2) {\textit{Balanced (24\,s avg.)}};
+\node[lbl] at (\colC, -7.2) {\textit{Balanced (28.7\,s avg.)}};
 \node[lbl] at (\colC, -7.55) {\textit{100\% success}};
-\node[lbl] at (\colC, -7.9) {\textit{MPF\,=\,1.00}};
+\node[lbl] at (\colC, -7.9) {\textit{MPF\,=\,0.93}};
+
+% ═══════════ FOOTNOTE ═══════════
+\node[font=\tiny, text=black!45, anchor=west] at (-1.5, -8.5)
+  {*Fabricates properties for novel materials (novel-task MPF\,=\,0.34).
+   All numbers from the 50-task ablation (\cref{tab:ablation}).};
 
 % ═══════════ SEPARATORS ═══════════
-\draw[black!12, thin] (2.5, 0.9) -- (2.5, -8.2);
-\draw[black!12, thin] (7.5, 0.9) -- (7.5, -8.2);
+\draw[black!12, thin] (2.5, 0.9) -- (2.5, -8.9);
+\draw[black!12, thin] (7.5, 0.9) -- (7.5, -8.9);
 
 \end{tikzpicture}

@@ -123,7 +123,8 @@ A central novelty is the integration of a \emph{GraphRAG} knowledge base
 material properties, known failure patterns, and prior run lineage.
 We report seven empirical contributions: (i) a formal verification and
 validation (V\&V) study confirming second-order spatial convergence (\(\mathcal{O}(h^2)\))
-for all three benchmark cases on the heat equation solver; (ii) a
+for two non-trivial benchmark cases and algebraic exactness for the
+linear case on the heat equation solver; (ii) a
 three-way ablation study across 50 benchmark tasks with a frozen KG,
 comparing KG~On, KG~Off, and KG~Smart,
 showing that KG~Smart achieves 100\% success \emph{and} the highest
@@ -153,7 +154,7 @@ assistants.
 
 \smallskip\noindent\textbf{Keywords:} Large language model agents; finite element
 method; knowledge graph; GraphRAG; multi-agent systems; scientific computing
-automation; verification and validation.
+automation.
 \end{abstract}
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -196,7 +197,9 @@ stability rules form a rich, interconnected knowledge base.
         (HNSW) vector-indexed embeddings \citep{malkov2020hnsw}
         (\cref{sec:kg}).
   \item We conduct a rigorous V\&V study that confirms $\mathcal{O}(h^2)$
-        spatial convergence for three closed-form benchmark cases, validating
+        spatial convergence for two non-trivial benchmark cases
+        (transient Fourier and steady Poisson) and algebraic exactness
+        for the linear profile case, validating
         the numerical kernel against analytical solutions
         (\cref{sec:vv}).
   \item We run a three-way ablation study (KG~On, KG~Off, KG~Smart)
@@ -443,7 +446,7 @@ Edition) serves three functions:
         density $\rho$, and specific heat $c_p$ ranges, sourced from
         engineering handbooks and validated against ASM International data.
         Approximate values: steel $k \approx 50$\,W/mK, copper
-        $k \approx 385$\,W/mK, aluminium $k \approx 200$\,W/mK.
+        $k \approx 385$\,W/mK, aluminium $k \approx 205$\,W/mK.
 
   \item \textbf{Failure pattern catalogue.}  \texttt{KnownIssue} nodes
         encode failure modes observed during system operation.
@@ -566,7 +569,7 @@ post-processing.  All cases use P1 Lagrange elements on triangular
 Temperature fields are reported in Kelvin throughout for consistency.
 
 \paragraph{Materials.}
-The gallery covers four distinct engineering alloys whose thermal
+The gallery covers five engineering metals whose thermal
 conductivities span two orders of magnitude:
 copper ($k=385$\,W/(m$\cdot$K), panel~a),
 AISI 1010 steel ($k=50$\,W/(m$\cdot$K), panel~b),
@@ -717,7 +720,8 @@ failure-recovery path only.
     \textbf{(b)} KG~On: mandatory KG queries add latency and trigger
     retry loops that exhaust the iteration budget.
     \textbf{(c)} KG~Smart: a one-shot warm-start injects relevant context
-    before the loop; KG queries occur only on failure (dashed path).}
+    before the loop; KG queries occur only on failure (dashed path).
+    Annotation values are from the 50-task ablation (\cref{tab:ablation}).}
   \label{fig:kg-modes}
 \end{figure*}
 
@@ -1060,7 +1064,11 @@ novel-material experiment with \texttt{qwen3-coder-next} (80B total,
 3B active MoE).  \cref{tab:multi-model} shows that KG~Smart achieves
 $\text{MPF}{=}1.00$ with \emph{both} models, while KG~Off fabricates
 wrong properties with both (different wrong values, but the same
-failure mode).  This confirms that the warm-start vector search
+failure mode).  This experiment uses the earlier 7-task novel-material
+set rather than the full 50-task benchmark, as it targets
+model-dependence specifically; the main ablation (\cref{tab:ablation})
+already covers the full benchmark on the primary model.
+This confirms that the warm-start vector search
 bypasses model-specific memorisation gaps entirely.
 
 \input{tables/multi_model.tex}
@@ -1231,8 +1239,13 @@ than from distinct run identifiers.  Counting identifiers does not work
 here: the agent logger back-fills the most recent \texttt{run\_id} across
 every step of a task once it is known, which makes a task that retried
 look identical to one that did not.  Counting tool calls recovers the
-real attempt count.  Retries turn out to be less frequent than the
-aggregate success rate suggests, but they are still what carries the
+real attempt count.  Note that the first-try and retry percentages above
+are computed over 421 agent tasks (from \texttt{agent\_run\_logs}),
+whereas the 97.8\% overall success rate in \cref{sec:metrics} is
+computed over 1{,}369 individual simulation runs (from
+\texttt{simulation\_runs}); the different denominators account for the
+apparent gap between the 4.3\% task-level failure rate and the 2.2\%
+run-level failure rate.  Retries carry the
 system from 85.4\% to 97.8\% final success.}
 
 \subsection{KG Growth and Learning Curve}
@@ -1456,8 +1469,9 @@ parameter choices, providing a fully auditable reasoning trail.
 We have presented PDE-Agents, an open, containerised multi-agent ecosystem
 that automates finite element simulations through natural-language interaction
 with locally-deployed open-source LLMs.  The system achieves 97.8\% overall
-success across 1{,}369 production runs and demonstrates $\mathcal{O}(h^2)$
-spatial convergence validated against analytical solutions.
+success across 1{,}369 production runs, with $\mathcal{O}(h^2)$
+spatial convergence confirmed for two non-trivial benchmark cases
+and algebraic exactness for the linear case.
 
 \paragraph{The KG Smart integration pattern.}
 Our three-way ablation study across 50 benchmark tasks with a frozen KG
