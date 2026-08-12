@@ -19,35 +19,33 @@ Instituttveien 18, 2007 Kjeller, Norway}
 \begin{document}
 
 \begin{letter}{Editorial Office\\
-Computer Methods in Applied Mechanics and Engineering}
+Engineering Applications of Artificial Intelligence}
 
 \opening{Dear Editor,}
 
-We submit \textbf{``PDE-Agents: An LLM-Orchestrated Multi-Agent Framework for
-Automated Finite Element Simulations with Knowledge Graph-Augmented Reasoning''}
-for consideration as an original research article in CMAME.
+We submit \textbf{``Partial Differential Equation Agents (PDE-Agents): A Large
+Language Model-Orchestrated Multi-Agent Framework for Automated Finite Element
+Simulations with Knowledge Graph-Augmented Reasoning''} for consideration as an
+original research article in Engineering Applications of Artificial Intelligence.
 
-The manuscript introduces a computational framework in which three specialist
-large language model agents autonomously set up, run, analyse, and iteratively
-improve finite element simulations from natural-language descriptions. A
-GraphRAG knowledge base (Neo4j, 768-dim vector embeddings) grounds agent
-reasoning in curated material properties, failure patterns, and prior run
-lineage. We propose a novel \emph{KG Smart} integration strategy and show that
-\emph{integration pattern}, rather than knowledge content alone, determines
-whether retrieval augmentation improves agent performance.
+The manuscript introduces a framework in which three specialist large language
+model agents autonomously set up, run, analyse, and iteratively improve finite
+element simulations from natural-language descriptions. A graph-based
+retrieval-augmented generation knowledge base (Neo4j, 768-dimensional vector
+embeddings) grounds agent reasoning in curated material properties, failure
+patterns, and prior run lineage. We propose a novel \emph{KG Smart} integration
+strategy and show that \emph{integration pattern}, rather than knowledge content
+alone, determines whether retrieval augmentation improves agent performance.
 
-The contribution is methodological. We present and evaluate a new computational
-framework rather than apply an existing solver to a new problem. The evaluation
-includes verification and validation confirming $\mathcal{O}(h^2)$ convergence,
-a three-way ablation across 50 tasks, a novel-material experiment
-(MPF = 1.00 vs.\ 0.34 for the baseline), and production metrics from 1,369 runs
-(97.8\% success). All code and data are available at
-\url{https://github.com/MatPro-IFE/pde-agents}.
+The evaluation includes verification and validation confirming
+$\mathcal{O}(h^2)$ convergence, a three-way ablation across 50 tasks, a
+novel-material experiment (material property fidelity = 1.00 vs.\ 0.34 for the
+baseline), and production metrics from 1,369 runs (97.8\% success). All code and
+data are available at \url{https://github.com/MatPro-IFE/pde-agents}.
 
-This work falls within CMAME's scope of physically based machine-learning
-methods and computational automation. To our knowledge, no prior work combines
-multi-agent LLM orchestration with production FEM solvers and graph-based
-retrieval for computational mechanics. The manuscript is original, is not under
+To our knowledge, no prior work combines multi-agent large language model
+orchestration with production finite element solvers and graph-based retrieval
+for engineering simulation automation. The manuscript is original, is not under
 consideration elsewhere, and all authors have approved its submission.
 
 \closing{Sincerely,}

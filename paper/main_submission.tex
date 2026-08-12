@@ -52,11 +52,12 @@
 }
 
 % ── Journal ───────────────────────────────────────────────────────────────────
-\journal{Computer Methods in Applied Mechanics and Engineering}
+\journal{Engineering Applications of Artificial Intelligence}
 
 % ── PDF metadata ──────────────────────────────────────────────────────────────
 \hypersetup{
-  pdftitle={PDE-Agents: An LLM-Orchestrated Multi-Agent Framework for
+  pdftitle={Partial Differential Equation Agents (PDE-Agents):
+            A Large Language Model-Orchestrated Multi-Agent Framework for
             Automated Finite Element Simulations with Knowledge
             Graph-Augmented Reasoning},
   pdfauthor={Sayan Adhikari, Gulshan Noorsumar, Øyvind Jensen},
@@ -69,7 +70,8 @@
 
 \begin{frontmatter}
 
-\title{PDE-Agents: An LLM-Orchestrated Multi-Agent
+\title{Partial Differential Equation Agents (PDE-Agents):
+       A Large Language Model-Orchestrated Multi-Agent
        Framework for Automated Finite Element Simulations
        with Knowledge Graph-Augmented Reasoning\tnoteref{code}}
 \tnotetext[code]{Code: \url{https://github.com/MatPro-IFE/pde-agents}}
@@ -88,51 +90,51 @@
 \begin{abstract}
 We present \textit{PDE-Agents}, a multi-agent ecosystem that automates the
 full lifecycle of partial differential equation (PDE) / finite element method
-(FEM) simulations through natural-language interaction.  The system combines three specialist large language model (LLM)
-agents---Simulation, Analytics, and Database---orchestrated via a LangGraph
-supervisor graph, with a locally-deployed open-source LLM stack
-(Qwen3-Coder-Next, Llama~4~Scout) running on dual NVIDIA RTX PRO 6000
-Blackwell GPUs ($\approx$196\,GB combined VRAM).  The architecture is
-model-agnostic; we report cross-model validation across two
+(FEM) simulations through natural-language interaction.  The system combines
+three specialist large language model (LLM) agents---Simulation, Analytics,
+and Database---orchestrated via a LangGraph supervisor graph, with a
+locally-deployed open-source LLM stack (Qwen3-Coder-Next, Llama~4~Scout)
+running on dual NVIDIA RTX PRO 6000 Blackwell graphics processing units
+(GPUs) with approximately 196 gigabytes of combined video memory.  The
+architecture is model-agnostic; we report cross-model validation across two
 generations of open-source LLMs.
-A central novelty is the integration of a \emph{GraphRAG} knowledge base
-(Neo4j + 768-dimensional vector embeddings) that enriches agents with curated
-material properties, known failure patterns, and prior run lineage.
+A central novelty is the integration of a \emph{graph-based
+retrieval-augmented generation} (GraphRAG) knowledge base (Neo4j +
+768-dimensional vector embeddings) that enriches agents with curated material
+properties, known failure patterns, and prior run lineage.
 We report seven empirical contributions: (i) a formal verification and
-validation (V\&V) study confirming second-order spatial convergence (\(\mathcal{O}(h^2)\))
-for two non-trivial benchmark cases and algebraic exactness for the
-linear case on the heat equation solver; (ii) a
-three-way ablation study across 50 benchmark tasks with a frozen KG,
-comparing KG~On, KG~Off, and KG~Smart,
-showing that KG~Smart achieves 100\% success \emph{and} the highest
-output quality (physics score 0.933 vs.\ 0.853 for KG~Off,
- MPF 0.926 vs.\ 0.796), and that our \emph{KG Smart}
-integration, combining warm-start injection with lazy conditional
-retrieval, matches KG~Off reliability while maximising output fidelity;
-(iii) a novel-material experiment using three fictional materials
-whose properties exist only in the KG, where KG~Smart achieves
-near-perfect material property fidelity (MPF\,=\,1.00) versus 0.34 for the
-KG-free baseline; (iv) a failure analysis tracing KG~On's 3 systematic failures to budget
-exhaustion and timeout, establishing warm-start injection as the dominant
-factor in KG~Smart's reliability advantage;
-(v) an adaptive KG decision framework (Algorithm~1)
-that selects the optimal retrieval mode per task;
-(vi) production-scale agent quality
-metrics from 1{,}369 real simulation runs showing 97.8\% overall success
-and \revised{an 85.4\%} first-try rate; and (vii) a controlled 100-task KG growth experiment showing
-that accumulated run history yields a difficulty-dependent quality
-gain, with hard-task MPF improving by 8.8\% between passes while
-easy and novel tasks remain at ceiling.  All code, models, and evaluation artifacts
-are released openly.  Taken together, these results point to
-\emph{integration pattern}, rather than knowledge content, as what
-decides whether GraphRAG augmentation helps or hinders an LLM agent, and
-they yield concrete design principles for autonomous FEM simulation
-assistants.
+validation (V\&V) study confirming second-order spatial convergence
+(\(\mathcal{O}(h^2)\)) for two non-trivial benchmark cases and algebraic
+exactness for the linear case on the heat equation solver; (ii) a three-way
+ablation study across 50 benchmark tasks with a frozen knowledge graph (KG),
+comparing KG~On, KG~Off, and KG~Smart, showing that KG~Smart achieves
+100\% success \emph{and} the highest output quality (physics score 0.933
+vs.\ 0.853 for KG~Off, material property fidelity (MPF) 0.926 vs.\ 0.796),
+and that our \emph{KG~Smart} integration, combining warm-start injection
+with lazy conditional retrieval, matches KG~Off reliability while maximising
+output fidelity; (iii) a novel-material experiment using three fictional
+materials whose properties exist only in the KG, where KG~Smart achieves
+near-perfect MPF\,=\,1.00 versus 0.34 for the KG-free baseline; (iv) a
+failure analysis tracing KG~On's 3 systematic failures to budget exhaustion
+and timeout, establishing warm-start injection as the dominant factor in
+KG~Smart's reliability advantage; (v) an adaptive KG decision framework
+(Algorithm~1) that selects the optimal retrieval mode per task; (vi)
+production-scale agent quality metrics from 1{,}369 real simulation runs
+showing 97.8\% overall success and \revised{an 85.4\%} first-try rate; and
+(vii) a controlled 100-task KG growth experiment showing that accumulated
+run history yields a difficulty-dependent quality gain, with hard-task MPF
+improving by 8.8\% between passes while easy and novel tasks remain at
+ceiling.  All code, models, and evaluation artifacts are released openly.
+Taken together, these results point to \emph{integration pattern}, rather
+than knowledge content, as what decides whether GraphRAG augmentation helps
+or hinders an LLM agent, and they yield concrete design principles for
+autonomous FEM simulation assistants.
 \end{abstract}
 
 \begin{keyword}
-Large language model agents \sep finite element method \sep knowledge graph
-\sep GraphRAG \sep multi-agent systems \sep scientific computing automation
+large language model agents \sep finite element method \sep knowledge graph
+\sep graph-based retrieval-augmented generation \sep multi-agent systems
+\sep scientific computing automation
 \end{keyword}
 
 \end{frontmatter}
